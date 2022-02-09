@@ -1,0 +1,20 @@
+this is to store the code used for testing components and
+
+1) Keyword map Kmap 
+
+    keyMap* keywordTable = (keyMap*)malloc(sizeof(keyMap));
+    insert(keywordTable,"if","TK_IF");
+    insert(keywordTable,"else","TK_ELSE");
+    insert(keywordTable,"while","TK_WHILE");
+    printf("Tag associated for \"else\": %s\n",search(keywordTable,"else"));
+    printf("Tag associated for \"if\": %s\n",search(keywordTable,"if"));
+    printf("Tag associated for \"while\": %s\n",search(keywordTable,"while"));
+    if(search(keywordTable,"not") == NULL) {
+        printf("No keyword like \"not\" exists.\n");
+    }
+    delete(keywordTable,"else");
+    if(search(keywordTable,"else") == NULL) {
+        printf("No keyword like \"else\" exists.\n");
+    }
+
+
