@@ -1,4 +1,5 @@
 #include "keywordMap.h"
+#include "token.h"
 #include<string.h>
 #include<stdlib.h>
 #include<stdio.h>
@@ -11,7 +12,8 @@ int kmapHash(char *lexeme) {
     return hash;
 }
 
-char* search(keyMap* table, char* lexeme) {
+//-1: could not find the match
+tokenTag search(keyMap* table, char* lexeme) {
     int hashIndex = kmapHash(lexeme);
     mapEntry* pointer = table->map[hashIndex];
     while(pointer != NULL) {
@@ -20,17 +22,17 @@ char* search(keyMap* table, char* lexeme) {
         }
         pointer = pointer->next;
     }
-    return NULL;
+    return -1;
 }
 
 //1: item added in the hash table
 //0: item updated in the table
-int insert(keyMap* table, char* lexeme, char* tag) {
+int insert(keyMap* table, char* lexeme, tokenTag tag) {
     int hashIndex = kmapHash(lexeme);
     mapEntry* pointer = table->map[hashIndex];
     mapEntry* newptr = (mapEntry*)malloc(sizeof(mapEntry));
     strcpy(newptr->lexeme,lexeme);
-    strcpy(newptr->tag,tag);
+    newptr->tag = tag;
     newptr->next = NULL;
     if(pointer == NULL) {
         table->map[hashIndex] = newptr;
@@ -40,7 +42,7 @@ int insert(keyMap* table, char* lexeme, char* tag) {
     while(pointer->next != NULL) {
         if(strcmp(pointer->lexeme,lexeme) == 0) {
             //entry already exists, update tag
-            strcpy(pointer->tag,tag);
+            pointer->tag = tag;
             free(newptr);
             // printf("Lexeme:%s Tag:%s HashIndex:%d updated in map.\n",lexeme,tag,hashIndex);
             return 0;    
@@ -92,10 +94,11 @@ int loadKeyMap(keyMap* table, char* filename) {
         return -1;
     }
     char lexeme[21];
-    char tag[21];
-    while(fscanf(fptr,"%s%s",lexeme,tag) == 2) {
-        printf("Inserting lexeme: %s \t\t tag: %s\n",lexeme,tag);
-        insert(table,lexeme,tag);
+    tokenTag t = 0;
+    while(fscanf(fptr,"%s",lexeme) == 1) {
+        printf("Inserting lexeme: %s \t\t tag: %d\n",lexeme,t);
+        insert(table,lexeme,t);
+        t++;
     }
     return 1;
 }
