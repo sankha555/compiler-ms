@@ -40,6 +40,8 @@ token get_next_token()
                         linenumber++;
                         break;
                     }
+                    if (c == '\0')
+                        break;
                 }
                 break;
             case '\0':
