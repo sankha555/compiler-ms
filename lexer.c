@@ -312,6 +312,7 @@ token get_next_token()
                     exit(1);
                 }
             }
+            break;
         case 1:
             switch (c)
             {
