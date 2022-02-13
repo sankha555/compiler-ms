@@ -1,13 +1,22 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-// returns the next character from the buffer
-char getch();
-
-// places the input character back into the buffer returns the previous character from the buffer
-char ungetch(char c);
+typedef struct b {
+    char buffer[2][BUFFER_SIZE];
+    int forward = 0;
+    int lexemeBegin = 0; 
+    int currentBufferID = 0;
+    FILE* fp = NULL;
+} twinBuffer;
 
 // creates the twin buffer for the input file
-void init_buffer(FILE *fp);
+twinBuffer* init_buffer(FILE *fp);
+
+// returns the next character from the buffer
+char getch(twinBuffer* tBuffer);
+
+// places the input character back into the buffer returns the previous character from the buffer
+char ungetch(twinBuffer* tBuffer);
+
 
 #endif
