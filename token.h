@@ -1,14 +1,15 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-typedef struct t { 
-    char tag[20];
-    int intValue;
-    float realValue;
-    char lexeme[21];
+typedef struct token
+{
+    tokenTag type;
+    char *lexeme;
+    int linenumber;
 } token;
 
-typedef enum tokenTag {
+typedef enum tokenTag
+{
     TK_WITH,
     TK_PARAMETERS,
     TK_END,
@@ -35,8 +36,8 @@ typedef enum tokenTag {
     TK_CALL,
     TK_RECORD,
     TK_ENDRECORD,
-    TK_ELSE,  //till here all keywords tokens are mentioned first to 
-    TK_ASSIGNOP, //make loading of hasmap easier, keep this in mind while modifying keywords
+    TK_ELSE,     // till here all keywords tokens are mentioned first to
+    TK_ASSIGNOP, // make loading of hasmap easier, keep this in mind while modifying keywords
     TK_COMMENT,
     TK_FIELDID,
     TK_ID,
@@ -65,7 +66,8 @@ typedef enum tokenTag {
     TK_EQ,
     TK_GT,
     TK_GE,
-    TK_NE
+    TK_NE,
+    TK_EOF
 } tokenTag;
 
 #endif
