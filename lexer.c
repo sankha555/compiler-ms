@@ -2,6 +2,7 @@
 
 int linenumber;
 keyMap* table;
+twinBuffer* buffer;
 
 char *make_string(char *str)
 {
@@ -19,7 +20,7 @@ token get_next_token()
 
     while (1)
     {
-        c = getch();
+        c = getch(buffer);
         switch (state)
         {
         case 0:
@@ -34,7 +35,7 @@ token get_next_token()
             case '%':
                 while (1)
                 {
-                    c = getch();
+                    c = getch(buffer);
                     if (c == '\n')
                     {
                         linenumber++;
@@ -144,7 +145,7 @@ token get_next_token()
                     char *lexeme = malloc(sizeof(char) * 2);
                     lexeme[0] = c;
 
-                    while (c = getch(), isdigit(c))
+                    while (c = getch(buffer), isdigit(c))
                     {
                         strncat(lexeme, &c, 1);
                     }
@@ -154,20 +155,20 @@ token get_next_token()
                         t.type = TK_NUM;
                         t.lexeme = lexeme;
                         t.linenumber = linenumber;
-                        ungetch(c);
+                        ungetch(buffer);
                         return t;
                     }
 
                     char *fractional = malloc(sizeof(char) * 2);
                     fractional[0] = c;
 
-                    c = getch();
+                    c = getch(buffer);
 
                     // the case of (0-9)(0-9)*.(other) requires two retractions
                     if (!isdigit(c))
                     {
-                        c = ungetch(c);
-                        ungetch(c);
+                        c = ungetch(buffer);
+                        ungetch(buffer);
 
                         t.type = TK_NUM;
                         t.lexeme = lexeme;
@@ -176,14 +177,14 @@ token get_next_token()
                     }
 
                     strncat(fractional, &c, 1);
-                    c = getch();
+                    c = getch(buffer);
 
                     // the case of (0-9)(0-9)*.(0-9)(other) requires two retractions
                     if (!isdigit(c))
                     {
-                        c = ungetch(c);
-                        c = ungetch(c);
-                        ungetch(c);
+                        c = ungetch(buffer);
+                        c = ungetch(buffer);
+                        ungetch(buffer);
 
                         t.type = TK_NUM;
                         t.lexeme = lexeme;
@@ -194,33 +195,33 @@ token get_next_token()
                     strncat(fractional, &c, 1);
                     strncat(lexeme, fractional, strlen(fractional));
 
-                    c = getch();
+                    c = getch(buffer);
 
                     if (c != 'E')
                     {
                         t.type = TK_RNUM;
                         t.lexeme = lexeme;
                         t.linenumber = linenumber;
-                        ungetch(c);
+                        ungetch(buffer);
                         return t;
                     }
 
                     char *exponent = malloc(sizeof(char) * 2);
                     exponent[0] = c;
 
-                    c = getch();
+                    c = getch(buffer);
 
                     if (c == '+' || c == '-')
                     {
                         strncat(exponent, &c, 1);
-                        c = getch();
+                        c = getch(buffer);
                     }
 
                     if (!isdigit(c))
                     {
-                        c = ungetch(c);
+                        c = ungetch(buffer);
                         if (c != 'E')
-                            c = ungetch(c);
+                            c = ungetch(buffer);
 
                         t.type = TK_RNUM;
                         t.lexeme = lexeme;
@@ -230,14 +231,14 @@ token get_next_token()
 
                     strncat(exponent, &c, 1);
 
-                    c = getch();
+                    c = getch(buffer);
 
                     if (!isdigit(c))
                     {
-                        c = ungetch(c);
-                        c = ungetch(c);
+                        c = ungetch(buffer);
+                        c = ungetch(buffer);
                         if (c != 'E')
-                            c = ungetch(c);
+                            c = ungetch(buffer);
 
                         t.type = TK_RNUM;
                         t.lexeme = lexeme;
@@ -259,19 +260,19 @@ token get_next_token()
                     lexeme[0] = c;
 
                     if (c == 'b' || c == 'c' || c == 'd') {
-                        c = getch();
+                        c = getch(buffer);
 
                         if (isdigit(c) && c >= '2' && c <= '7') {
                             strncat(lexeme, &c, 1);
 
-                            while (c = getch(), isalpha(c) && c >= 'b' && c <= 'd') {
+                            while (c = getch(buffer), isalpha(c) && c >= 'b' && c <= 'd') {
                                 strncat(lexeme, &c, 1);
                             }
 
                             if (isdigit(c) && c >= '2' && c <= '7') {
                                 strncat(lexeme, &c, 1);
 
-                                while (c = getch(), isdigit(c) && c >= '2' && c <= '7') {
+                                while (c = getch(buffer), isdigit(c) && c >= '2' && c <= '7') {
                                     strncat(lexeme, &c, 1);
                                 }
                             }
@@ -284,12 +285,12 @@ token get_next_token()
                             t.type = TK_ID;
                             t.lexeme = lexeme;
                             t.linenumber = linenumber;
-                            ungetch(c);
+                            ungetch(buffer);
                             return t;
                         }
                     }
 
-                    while (c = getch(), isalpha(c) && islower(c))
+                    while (c = getch(buffer), isalpha(c) && islower(c))
                     {
                         strncat(lexeme, &c, 1);
                     }
@@ -303,7 +304,7 @@ token get_next_token()
                     
                     t.lexeme = lexeme;
                     t.linenumber = linenumber;
-                    ungetch(c);
+                    ungetch(buffer);
                     return t;
                 }
                 else
@@ -408,7 +409,7 @@ token get_next_token()
                 t.type = TK_LE;
                 t.lexeme = make_string("<");
                 t.linenumber = linenumber;
-                ungetch(c);
+                ungetch(buffer);
                 return t;
             }
             break;
@@ -419,8 +420,12 @@ token get_next_token()
                 state = 9;
                 break;
             default:
-                printf("Lexical error at line %d", linenumber);
-                exit(1);
+                ungetch(buffer);
+                ungetch(buffer);
+                t.type = TK_LT;
+                t.lexeme = make_string("<");
+                t.linenumber = linenumber;
+                return t;
             }
             break;
         case 9:
@@ -432,7 +437,13 @@ token get_next_token()
                 t.linenumber = linenumber;
                 return t;
             default:
-                break;
+                ungetch(buffer);
+                ungetch(buffer);
+                ungetch(buffer);
+                t.type = TK_LT;
+                t.lexeme = make_string("<");
+                t.linenumber = linenumber;
+                return t;
             }
             break;
         case 10:
@@ -447,7 +458,7 @@ token get_next_token()
                 t.type = TK_GT;
                 t.lexeme = make_string(">");
                 t.linenumber = linenumber;
-                ungetch(c);
+                ungetch(buffer);
                 return t;
             }
             break;
@@ -462,7 +473,7 @@ token get_next_token()
             }
             strncat(lexeme, &c, 1);
 
-            while (c = getch(), isalpha(c) && islower(c))
+            while (c = getch(buffer), isalpha(c) && islower(c))
             {
                 strncat(lexeme, &c, 1);
             }
@@ -470,7 +481,7 @@ token get_next_token()
             t.type = TK_RUID;
             t.lexeme = lexeme;
             t.linenumber = linenumber;
-            ungetch(c);
+            ungetch(buffer);
             return t;
         case 12:
             char* lexeme = malloc(sizeof(char) * 2);
@@ -483,14 +494,14 @@ token get_next_token()
             }
             strncat(lexeme, &c, 1);
 
-            while (c = getch(), isalpha(c))
+            while (c = getch(buffer), isalpha(c))
             {
                 strncat(lexeme, &c, 1);
             }
 
             if (isdigit(c)) {
                 strncat(lexeme, &c, 1);
-                while (c = getch(), isdigit(c)) {
+                while (c = getch(buffer), isdigit(c)) {
                     strncat(lexeme, &c, 1);
                 }                
             }
@@ -507,7 +518,7 @@ token get_next_token()
 
             t.lexeme = lexeme;
             t.linenumber = linenumber;
-            ungetch(c);
+            ungetch(buffer);
             return t;
         default:
             printf("The DFA entered an invalid state - Implementation error");
@@ -520,5 +531,5 @@ token get_next_token()
 void init_lexer(FILE *fp)
 {
     linenumber = 1;
-    initializeBuffer(fp);
+    buffer = init_buffer(fp);
 }
