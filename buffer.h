@@ -1,12 +1,14 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
+#define BUFFER_SIZE 4096    // buffer size
+
 typedef struct b {
     char buffer[2][BUFFER_SIZE];
-    int forward = 0;
-    int lexemeBegin = 0; 
-    int currentBufferID = 0;
-    FILE* fp = NULL;
+    int forward;
+    int lexemeBegin; 
+    int currentBufferID;
+    FILE* fp;
 } twinBuffer;
 
 // creates the twin buffer for the input file

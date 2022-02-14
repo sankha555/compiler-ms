@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER_SIZE 4096    // buffer size
-
 void reloadBuffer(twinBuffer* tBuffer, int bufferID){
     if(!feof(fp)){
         fread((tBuffer->buffer)[bufferID], 1, BUFFER_SIZE, fp);
@@ -12,14 +10,14 @@ void reloadBuffer(twinBuffer* tBuffer, int bufferID){
 
     tBuffer->forward = 0;
     tBuffer->lexemeBegin = 0;
-    tBuffer->currBufferID = bufferID;
+    tBuffer->currentBufferID = bufferID;
 }
 
 twinBuffer* init_buffer(FILE* fp){
     twinBuffer* tBuffer = (twinBuffer*) malloc(sizeof(twinBuffer));
-    twinBuffer->buffer[0][BUFFER-1] = '\0';
-    twinBuffer->buffer[1][BUFFER-1] = '\0';
-    twinBuffer->fp = fp;
+    tBuffer->buffer[0][BUFFER-1] = '\0';
+    tBuffer->buffer[1][BUFFER-1] = '\0';
+    tBuffer->fp = fp;
 
     return tBuffer;
 }
