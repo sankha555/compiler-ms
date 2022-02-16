@@ -24,10 +24,16 @@ int main(int argc, char *argv[]) {
 
     token t;
 
+    // Output file lex.yy.spl
+    FILE *output = fopen("tests/lex.yy.spl", "w");
+
     do  {
         t = get_next_token();
-        print_token(t);
+        print_token(output, t);
     } while (t.type != TK_EOF);
+
+    fclose(output);
+    fclose(fp);
 
     return 0;
 }

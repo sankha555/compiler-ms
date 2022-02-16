@@ -11,6 +11,6 @@
 
 token get_next_token();
 void init_lexer(FILE *fp);
-void print_token(token t);
+void print_token(FILE* out, token t);
 
 #endif
