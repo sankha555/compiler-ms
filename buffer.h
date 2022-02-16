@@ -1,6 +1,8 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
+#include <stdio.h>
+
 #define BUFFER_SIZE 4096    // buffer size
 
 typedef struct b {

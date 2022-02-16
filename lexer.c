@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include <stdio.h>
 
 int linenumber;
 keyMap* table;
@@ -532,4 +533,18 @@ void init_lexer(FILE *fp)
 {
     linenumber = 1;
     buffer = init_buffer(fp);
+
+    printf("Buffer initialized, forward pointer at %d", buffer->forward);
 }
+
+int main(){
+   
+   FILE* fin;
+   fin = fopen("code.txt", "r+");
+   init_lexer(fin);
+   
+   return 0;
+}
+
+
+
