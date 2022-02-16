@@ -1,4 +1,7 @@
 # CompilerConstructionProject
 Project for the course CS F363 Compiler Construction.
 
-Code to compile: gcc -o frontend.exe frontend.c keywordMap.h keywordMap.c
+Compile: 
+```bash
+gcc frontend.c keywordMap.h keywordMap.c lexer.c lexer.h buffer.c buffer.h token.h
+```

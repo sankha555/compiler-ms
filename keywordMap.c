@@ -96,7 +96,7 @@ int loadKeyMap(keyMap* table, char* filename) {
     char lexeme[21];
     tokenTag t = 0;
     while(fscanf(fptr,"%s",lexeme) == 1) {
-        printf("Inserting lexeme: %s \t\t tag: %d\n",lexeme,t);
+        // printf("Inserting lexeme: %s \t\t tag: %d\n",lexeme,t);
         insert(table,lexeme,t);
         t++;
     }

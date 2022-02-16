@@ -109,7 +109,7 @@ token get_next_token()
                 return t;
             case ',':
                 t.type = TK_COMMA;
-                t.lexeme = make_string(".");
+                t.lexeme = make_string(",");
                 t.linenumber = linenumber;
                 return t;
             case '[':
@@ -461,10 +461,11 @@ token get_next_token()
                 t.linenumber = linenumber;
                 ungetch(buffer);
                 return t;
-            }
+            }            
             break;
         case 11:
-            char* lexeme = malloc(sizeof(char) * 2);
+            ;
+            char *lexeme = malloc(sizeof(char) * 2);
             lexeme[0] = '#';
 
             if (!(isalpha(c) && islower(c)))
@@ -485,7 +486,8 @@ token get_next_token()
             ungetch(buffer);
             return t;
         case 12:
-            char* lexeme = malloc(sizeof(char) * 2);
+            ;
+            lexeme = malloc(sizeof(char) * 2);
             lexeme[0] = '_';
 
             if (!isalpha(c))
@@ -529,22 +531,20 @@ token get_next_token()
     }
 }
 
+void print_token(token t)
+{
+    printf("%d\t%s\t%d\n", t.type, t.lexeme, t.linenumber);
+}
+
 void init_lexer(FILE *fp)
 {
     linenumber = 1;
     buffer = init_buffer(fp);
 
-    printf("Buffer initialized, forward pointer at %d", buffer->forward);
+    printf("Buffer initialized, forward pointer at %d\n", buffer->forward);
+
+    // Initialize the keyword map
+    table = (keyMap*)malloc(sizeof(keyMap));
+    loadKeyMap(table,"keywords.txt");
+    printf("Keyword map load status: %d\n", search(table,"global") == TK_GLOBAL);
 }
-
-int main(){
-   
-   FILE* fin;
-   fin = fopen("code.txt", "r+");
-   init_lexer(fin);
-   
-   return 0;
-}
-
-
-

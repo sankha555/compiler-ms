@@ -1,13 +1,6 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-typedef struct token
-{
-    tokenTag type;
-    char *lexeme;
-    int linenumber;
-} token;
-
 typedef enum tokenTag
 {
     TK_WITH,
@@ -69,5 +62,12 @@ typedef enum tokenTag
     TK_NE,
     TK_EOF
 } tokenTag;
+
+typedef struct token
+{
+    tokenTag type;
+    char *lexeme;
+    int linenumber;
+} token;
 
 #endif

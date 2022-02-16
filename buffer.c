@@ -19,8 +19,9 @@ twinBuffer* init_buffer(FILE* fp){
     tBuffer->buffer[1][BUFFER_SIZE-1] = '\0';
     tBuffer->forward = 0;
     tBuffer->lexemeBegin = 0;
+    tBuffer->currentBufferID = 0;
     tBuffer->fp = fp;
-
+    reloadBuffer(tBuffer, tBuffer->currentBufferID);
     return tBuffer;
 }
 

@@ -10,5 +10,7 @@
 #include <ctype.h>
 
 token get_next_token();
+void init_lexer(FILE *fp);
+void print_token(token t);
 
 #endif

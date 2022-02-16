@@ -1,13 +1,33 @@
 #include<stdio.h>
 #include<stdlib.h>
-#include "keywordMap.h"
 #include "token.h"
+#include "lexer.h"
 
-int main() {
-    keyMap* keywordTable = (keyMap*)malloc(sizeof(keyMap));
-    loadKeyMap(keywordTable,"keywords.txt");
-    if(search(keywordTable,"global") == TK_GLOBAL) {
-        printf("TK_GLOBAL\n");
+int main(int argc, char *argv[]) {
+    // The first argument is the file name
+    if (argc != 2) {
+        printf("Usage: %s <filename>\n", argv[0]);
+        return 1;
     }
+
+    // Open the file
+    FILE *fp = fopen(argv[1], "r");
+
+    // Check if the file is open
+    if (fp == NULL) {
+        printf("Error: File %s could not be opened\n", argv[1]);
+        return 1;
+    }
+
+    // Initialize the lexer
+    init_lexer(fp);
+
+    token t;
+
+    do  {
+        t = get_next_token();
+        print_token(t);
+    } while (t.type != TK_EOF);
+
     return 0;
 }
