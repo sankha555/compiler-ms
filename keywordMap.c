@@ -1,5 +1,5 @@
 #include "keywordMap.h"
-#include "token.h"
+#include "lexerDef.h"
 #include<string.h>
 #include<stdlib.h>
 #include<stdio.h>

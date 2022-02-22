@@ -1,4 +1,4 @@
-#include "token.h"
+#include "lexerDef.h"
 #ifndef KEYWORD_MAP_H
 #define KEYWORD_MAP_H
 

@@ -1,10 +1,48 @@
-#include "lexer.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "lexerDef.h"
+#include "keywordMap.h"
+#include "buffer.h"
 
 int linenumber;
 keyMap *table;
-twinBuffer *buffer;
 
+/*
+ * Function: remove_comments
+ * --------------------
+ *  removes comments from the input file (buffer)
+ *
+ *  buffer: buffer to be processed
+ *
+ *  returns: void / prints ouptut to console
+ */
+void remove_comments(twinBuffer *buffer)
+{
+    while (1)
+    {
+        char c = getch(buffer);
+        if (c == '%')
+        {
+            while (c != '\n' && c != '\0')
+            {
+                c = getch(buffer);
+            }
+        }
+        else if (c == '\0')
+        {
+            break;
+        }
+        else
+        {
+            printf("%c", c);
+        }
+    }
+}
+
+// helper function to create a string for the lexemes
 char *make_string(char *str)
 {
     char *s = malloc(sizeof(char) * (strlen(str) + 1));
@@ -12,7 +50,7 @@ char *make_string(char *str)
     return s;
 }
 
-token get_next_token()
+token get_next_token(twinBuffer *buffer)
 {
     token t;
     char c;
@@ -467,7 +505,7 @@ token get_next_token()
                 t.linenumber = linenumber;
                 ungetch(buffer);
                 return t;
-            }            
+            }
             break;
         case 11:;
             char *lexeme = malloc(sizeof(char) * 2);
@@ -603,10 +641,10 @@ void print_token(FILE *out, token t)
     fprintf(out, "%-20s\t%-31s\t%d\n", tokenNames[t.type], t.lexeme, t.linenumber);
 }
 
-void init_lexer(FILE *fp)
+twinBuffer *init_lexer(FILE *fp)
 {
     linenumber = 1;
-    buffer = init_buffer(fp);
+    twinBuffer *buffer = init_buffer(fp);
 
     printf("Buffer initialized, forward pointer at %d\n", buffer->forward);
 
@@ -614,4 +652,6 @@ void init_lexer(FILE *fp)
     table = (keyMap *)malloc(sizeof(keyMap));
     loadKeyMap(table, "keywords.txt");
     printf("Keyword map load status: %d\n", search(table, "global") == TK_GLOBAL);
+
+    return buffer;
 }

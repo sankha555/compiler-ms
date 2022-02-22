@@ -1,8 +1,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "token.h"
-#include "keywordMap.h"
+#include "lexerDef.h"
 #include "buffer.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +9,8 @@
 #include <ctype.h>
 
 token get_next_token();
-void init_lexer(FILE *fp);
+twinBuffer* init_lexer(FILE *fp);
+void remove_comments(twinBuffer *buffer);
 void print_token(FILE* out, token t);
 
 #endif
