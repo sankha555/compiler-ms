@@ -1,0 +1,5 @@
+expr TK_OP TK_ID 
+exprPrime TK_PLUS epsilon 
+term TK_OP TK_ID 
+termPrime TK_MULT epsilon 
+factor TK_OP TK_ID 

@@ -1,0 +1,8 @@
+expr ===> term exprPrime
+exprPrime ===> TK_PLUS term exprPrime
+exprPrime ===> epsilon
+term ===> factor termPrime
+termPrime ===> TK_MULT factor termPrime
+termPrime ===> epsilon
+factor ===> TK_OP expr TK_CL
+factor ===> TK_ID
