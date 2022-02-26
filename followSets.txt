@@ -1,5 +1,0 @@
-expr $ TK_CL 
-exprPrime $ TK_CL 
-term TK_PLUS $ TK_CL 
-termPrime TK_PLUS $ TK_CL 
-factor TK_MULT TK_PLUS $ TK_CL 
