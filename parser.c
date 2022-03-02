@@ -60,7 +60,7 @@ void populateRules(){
         // get the current line from the file input stream
 		// dividing it into head and body
 		sscanf(currLine, "%s ===> %[^\n\t]", head, body);
-        printf("HEAD: %s ----> TAIL: %s\n",head,body);
+        //printf("HEAD: %s ----> TAIL: %s\n",head,body);
         grammarRules[grammarRulesIndex].head = whichNonTerminal(head);
         
         char *token = strtok(body," ");
@@ -68,13 +68,13 @@ void populateRules(){
         while(token != NULL) {
             //if it is a terminal
             int nonTermTailIndex = whichNonTerminal(token);
-            printf("nonTerminalIndex: %d string: %s\n",nonTermTailIndex,token);
+            //printf("nonTerminalIndex: %d string: %s\n",nonTermTailIndex,token);
             if(strcmp(epsilon,token) == 0) {
                 printf("epsilon pushed.\n");
                 
             }
             else if(nonTermTailIndex < 0) {
-                printf("Token number for string : %s\n",token);
+                // printf("Token number for string : %s\n",token);
                 grammarRules[grammarRulesIndex].body[tailLength].isTerminal = TRUE;
                 grammarRules[grammarRulesIndex].body[tailLength].terminal = tokstrToToken(token);
                 grammarRules[grammarRulesIndex].body[tailLength].nonTermIndex = -1;

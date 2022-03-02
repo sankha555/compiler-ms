@@ -10,6 +10,7 @@ typedef struct tnt {
     boolean isTerminal;
     tokenTag terminal;
     int nonTermIndex;
+    boolean isEpsilon;
 } tnt;
 
 typedef struct r {
