@@ -23,7 +23,7 @@ void printRule(FILE* fp, GrammarRule gRule){
 }
 
 void printParseTableToFile(){
-    FILE* fp = fopen(parseTableFile, "w+");
+    FILE* fp = fopen("parseTable.txt", "w+");
     for(int terminalIndex = 0; terminalIndex < NUMBER_OF_TOKENS; terminalIndex++){
         fprintf(fp, "\t\t\t%s\t\t\t", tokenNames[terminalIndex]);
     }

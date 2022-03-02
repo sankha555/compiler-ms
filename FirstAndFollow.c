@@ -148,12 +148,15 @@ void computeFirstFromRule(int headIndex, int ruleIndex, int start) {
 	}
 
 	// if epsilon in first non-terminal of the body
-	if (NonTerms[currIndex].nullable)
+	if (NonTerms[currIndex].nullable) {
 		// if current symbol is the last in body
-		if (start == Rules[ruleIndex].bodyLen - 1)
+		if (start == Rules[ruleIndex].bodyLen - 1) {
 			NonTerms[headIndex].nullable = TRUE;
-		else
+		}
+		else {
 			computeFirstFromRule(headIndex, ruleIndex, start + 1);
+		}
+	}
 }
 
 boolean presentInFirst(int index, char* token) {
@@ -258,9 +261,10 @@ boolean getFirstOfString(int ruleIndex, int start, char firstSet[][MAX_LEN], int
 	int ntIndex = whichNonTerminal(token);
 	
 	// string starts does not start with a non-terminal
-	if (ntIndex < 0)
-		if (strcmp(token, epsilon) == 0)
+	if (ntIndex < 0) {
+		if (strcmp(token, epsilon) == 0) {
 			return TRUE;
+		}
 		else {
 			// add the terminal to the first set
 			if (!presentInArr(firstSet, *firstSetLen, token)) {
@@ -269,6 +273,7 @@ boolean getFirstOfString(int ruleIndex, int start, char firstSet[][MAX_LEN], int
 			}
 			return FALSE;
 		}
+	}
 	
 	// adding the first set of non-terminal to first set of string
 	for (int i = 0; i < NonTerms[ntIndex].firstLen; i++)
