@@ -671,13 +671,13 @@ twinBuffer *init_lexer(FILE *fp)
     return buffer;
 }
 
-tokenTag tokstrToToken(char * str) {
+tokenTag tokstrToToken(char *str) {
     tokenTag i = 0;
     for(; i < NUMBER_OF_TOKENS; i++) {
-        if(strcpy(str,tokenNames[i]) == 0) {
+        if(strcmp(str,tokenNames[i]) == 0) {
+            printf("%d %s %s\n",i,tokenNames[i],str);
             return i;
         }
-        i++;
     }
     return -1;
 }

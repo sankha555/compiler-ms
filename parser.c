@@ -4,6 +4,7 @@
 #include "globalDef.h"
 #include "lexerDef.h"
 #include "lexer.h"
+#include "FirstAndFollow.h"
 
 char* parseTableFile = "parseTable.txt";
 
@@ -59,7 +60,7 @@ void populateRules(){
         // get the current line from the file input stream
 		// dividing it into head and body
 		sscanf(currLine, "%s ===> %[^\n\t]", head, body);
-
+        printf("HEAD: %s ----> TAIL: %s\n",head,body);
         grammarRules[grammarRulesIndex].head = whichNonTerminal(head);
         
         char *token = strtok(body," ");
@@ -67,7 +68,13 @@ void populateRules(){
         while(token != NULL) {
             //if it is a terminal
             int nonTermTailIndex = whichNonTerminal(token);
-            if(nonTermTailIndex < 0) {
+            printf("nonTerminalIndex: %d string: %s\n",nonTermTailIndex,token);
+            if(strcmp(epsilon,token) == 0) {
+                printf("epsilon pushed.\n");
+                
+            }
+            else if(nonTermTailIndex < 0) {
+                printf("Token number for string : %s\n",token);
                 grammarRules[grammarRulesIndex].body[tailLength].isTerminal = TRUE;
                 grammarRules[grammarRulesIndex].body[tailLength].terminal = tokstrToToken(token);
                 grammarRules[grammarRulesIndex].body[tailLength].nonTermIndex = -1;
@@ -76,6 +83,7 @@ void populateRules(){
                 grammarRules[grammarRulesIndex].body[tailLength].nonTermIndex = nonTermTailIndex;
                 grammarRules[grammarRulesIndex].body[tailLength].terminal = -1;
             }
+            token = strtok(NULL," ");
             tailLength++;
         }
         grammarRules[grammarRulesIndex].bodyLength = tailLength;
@@ -121,8 +129,12 @@ void createParseTable(){
 
 
 void writeParseTableToFile(){
+    computeFirstAndFollowSets(GRAMMAR_FILE);
+    printf("computed first follow sets.\n");
     populateRules();
+    printf("populated Rules\n");
     createParseTable();
+    printf("created parse table.\n");
     printParseTableToFile();
 }
 
