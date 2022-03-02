@@ -48,10 +48,10 @@ void populateGrammar(grammar G) {
 
 	numRules = numNonTerminals = 0;
 
-	char currLine[MAX_PRODLEN * MAX_LEN];
+	char currLine[MAX_PROD_LEN * MAX_LEN];
 	while (fgets(currLine, 500, fp) != NULL) {
 		char head[MAX_LEN];
-		char body[MAX_LEN * MAX_PRODLEN];
+		char body[MAX_LEN * MAX_PROD_LEN];
 
 		// get the current line from the file input stream
 		// dividing it into head and body
@@ -202,7 +202,7 @@ void computeFollowAll() {
 
 				// compute the first set of suffix of non-terminal in body
 				// case of A -> alpha B beta
-				char firstSet[MAX_TERM][MAX_LEN];
+				char firstSet[MAX_TERMINALS][MAX_LEN];
 				int firstSetLen = 0;
 				int *ptr = &firstSetLen;
 				boolean isNullable = getFirstOfString(j, symPos + 1, firstSet, ptr);
@@ -328,22 +328,37 @@ void printTest() {
 */
 
 void populateFirstAndFollow() {
-	for (int i = 0; i < numNonTerminals; i++) {
-		strcpy(FNF[i].symbol, NonTerms[i].symbol);
-		
+		for (int i = 0; i < numNonTerminals; i++) {
+		strcpy(FirstAndFollowList[i].symbol, NonTerms[i].symbol);
+
+		FirstAndFollowList[i].firstLen = NonTerms[i].firstLen;
+		FirstAndFollowList[i].followLen = NonTerms[i].followLen;
+
 		// copy the first set elements
 		int j;
 		for (j = 0; j < NonTerms[i].firstLen; j++)
-			strcpy(FNF[i].first[j], NonTerms[i].firsts[j]);
-		
-		// add epsilon if non-terminal is nullable
-		if (NonTerms[i].nullable)
-			strcpy(FNF[i].first[j], epsilon);
+			FirstAndFollowList[i].first[j] = searchTerminal(NonTerms[i].firsts[j]);
 
-		// copy the follow sets elements
-		for (j = 0; j < NonTerms[i].followLen; j++)
-			strcpy(FNF[i].follow[j], NonTerms[i].follows[j]);
+		FirstAndFollowList[i].nullable = NonTerms[i].nullable;
+		
+		FirstAndFollowList[i].dollarInFollow = FALSE;
+		for (j = 0; j < NonTerms[i].followLen; j++) {
+			if (strcmp(NonTerms[i].follows[j], "$") == 0) {
+				FirstAndFollowList[i].dollarInFollow = TRUE;
+				FirstAndFollowList[i].followLen--;
+			}
+			else
+				FirstAndFollowList[i].follow[j] = searchTerminal(NonTerms[i].follows[j]);
+		}
 	}
+}
+
+int searchTerminal(char *terminal) {
+	int n = sizeof(TerminalList) / sizeof(TerminalList[0]);
+	for (int i = 0; i < n; i++)
+		if (strcmp(terminal, TerminalList[i]) == 0)
+			return i;
+	return -1;
 }
 
 void writeFirstsToFile() {
@@ -380,6 +395,73 @@ void writeFollowsToFile() {
 			fprintf(fp, "%s ", NonTerms[i].follows[j]);
 		fprintf(fp, "\n");
 	}
-
 	fclose(fp);
+}
+
+void populateTerminals() {
+	char *tokenNames[] = {
+        "TK_WITH",
+        "TK_PARAMETERS",
+        "TK_END",
+        "TK_WHILE",
+        "TK_UNION",
+        "TK_ENDUNION",
+        "TK_DEFINETYPE",
+        "TK_AS",
+        "TK_TYPE",
+        "TK_GLOBAL",
+        "TK_PARAMETER",
+        "TK_LIST",
+        "TK_INPUT",
+        "TK_OUTPUT",
+        "TK_INT",
+        "TK_REAL",
+        "TK_ENDWHILE",
+        "TK_IF",
+        "TK_THEN",
+        "TK_ENDIF",
+        "TK_READ",
+        "TK_WRITE",
+        "TK_RETURN",
+        "TK_CALL",
+        "TK_RECORD",
+        "TK_ENDRECORD",
+        "TK_ELSE",
+		"TK_ASSIGNOP",
+		"TK_COMMENT",
+        "TK_FIELDID",
+        "TK_ID",
+        "TK_NUM",
+        "TK_RNUM",
+        "TK_FUNID",
+        "TK_RUID",
+        "TK_MAIN",
+        "TK_SQL",
+        "TK_SQR",
+        "TK_COMMA",
+        "TK_SEM",
+        "TK_COLON",
+        "TK_DOT",
+        "TK_OP",
+        "TK_CL",
+        "TK_PLUS",
+        "TK_MINUS",
+        "TK_MUL",
+        "TK_DIV",
+        "TK_AND",
+        "TK_OR",
+        "TK_NOT",
+        "TK_LT",
+        "TK_LE",
+        "TK_EQ",
+        "TK_GT",
+        "TK_GE",
+        "TK_NE",
+        "TK_EOF"
+	};
+
+	int n = sizeof(tokenNames) / sizeof(tokenNames[0]);
+		
+	for (int i = 0; i < n; i++)
+		strcpy(TerminalList[i], tokenNames[i]);
 }

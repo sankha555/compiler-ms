@@ -4,28 +4,7 @@
 # include <stdio.h>
 # include <string.h>
 # include <stdlib.h>
-
-// the maximum number of productions in grammar
-# define MAX_RULES 100
-
-// the maximum number of non-terminals and terminals
-# define MAX_NT 100
-# define MAX_TERM 100
-
-// the maximum length of a terminal or non-terminal string
-# define MAX_LEN 50
-
-// the maximum length of a production body
-// in terms of number of symbols
-# define MAX_PRODLEN 10
-
-// passes for follow set computation
-# define EPOCHS 2
-
-typedef enum {
-	FALSE = 0,
-	TRUE = 1
-} boolean;
+#include "globalDef.h"
 
 /* string used for denoting epsilon throughout the module */
 static char *epsilon = "epsilon";
@@ -39,7 +18,7 @@ static char *followFile = "./followSets.txt";
 /* to contain a single rule */
 struct Rule {
 	char head[MAX_LEN];
-	char body[MAX_PRODLEN][MAX_LEN];
+	char body[MAX_PROD_LEN][MAX_LEN];
 	int bodyLen;	// store the number of symbols in the production
 };
 
@@ -49,31 +28,35 @@ struct Rule Rules[MAX_RULES];
 /* to hold a nonterminal
  * and its first and follow sets
  */
-struct NonTerm {
+typedef struct NonTerm {
 	char symbol[MAX_LEN];
-	char firsts[MAX_TERM][MAX_LEN];
-	char follows[MAX_TERM][MAX_LEN];
+	char firsts[MAX_TERMINALS][MAX_LEN];
+	char follows[MAX_TERMINALS][MAX_LEN];
 	int firstLen;	// count of entities in first set
 	int followLen;	// count of entities in follow set
 	boolean firstComputed;	// has the first set been computed
 	boolean nullable;	// epsilon in first set
-};
+} NonTerm;
 
 /* a data structure to hold all nonterminals
  * along with their first and follow sets
  */
-struct NonTerm NonTerms[MAX_NT];
+NonTerm NonTerms[MAX_NT];
 
 /* data structure as per stage-1 interface specifications */
-struct FirstAndFollowElement {
+typedef struct FirstAndFollowElement {
 	char symbol[MAX_LEN];
-	char first[MAX_TERM][MAX_LEN];
-	char follow[MAX_TERM][MAX_LEN];
-};
+	int first[MAX_TERMINALS];
+	int follow[MAX_TERMINALS];
+	int firstLen;
+	int followLen;
+	boolean nullable;
+	boolean dollarInFollow;
+} FirstAndFollowElement;
 
 typedef struct FirstAndFollowElement FirstAndFollow[MAX_NT];
 
-FirstAndFollow FNF;
+FirstAndFollow FirstAndFollowList;
 
 // define the grammar file name as grammar type
 typedef char* grammar;
@@ -81,6 +64,8 @@ typedef char* grammar;
 /* total rules and nonterminals in the grammar */
 int numNonTerminals;
 int numRules;
+
+char TerminalList[MAX_TERMINALS][MAX_LEN];
 
 //invoke this function to use the module
 /* populates the rules of the grammar from a file
@@ -149,5 +134,9 @@ void writeFollowsToFile();
 
 // for testing and debugging
 void printTest();
+
+// populate array of Terminals
+void populateTerminals();
+int searchTerminal();
 
 # endif

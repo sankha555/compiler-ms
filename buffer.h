@@ -2,8 +2,7 @@
 #define BUFFER_H
 
 #include <stdio.h>
-
-#define BUFFER_SIZE 4096    // buffer size
+#include "globalDef.h"
 
 typedef struct b {
     char buffer[2][BUFFER_SIZE];

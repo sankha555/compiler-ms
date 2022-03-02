@@ -1,6 +1,8 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#include "globalDef.h"
+
 typedef enum tokenTag
 {
     TK_WITH,
@@ -60,8 +62,11 @@ typedef enum tokenTag
     TK_GT,
     TK_GE,
     TK_NE,
-    TK_EOF
+    TK_EOF,
+    TK_ERROR
 } tokenTag;
+
+extern char *tokenNames[NUMBER_OF_TOKENS];
 
 typedef struct token
 {

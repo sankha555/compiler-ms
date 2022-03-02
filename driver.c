@@ -2,6 +2,10 @@
 #include<stdlib.h>
 #include "lexer.h"
 #include "buffer.h"
+#include "FirstAndFollow.h"
+#include "parserDef.h"
+#include "parser.h"
+
 
 int main(int argc, char *argv[]) {
     // The first argument is the file name
@@ -55,14 +59,35 @@ int main(int argc, char *argv[]) {
             }
 
             buffer = init_lexer(fp);
-            token t = get_next_token(buffer);
-            while (t.type != TK_EOF) {
-                print_token(stdout, t);
+            token t;
+            do {
                 t = get_next_token(buffer);
-            }
+                print_token(stdout, t);
+            } while (t.type != TK_EOF);
 
             // Close the file
             fclose(fp);
+            break;
+        case 3:
+            //open the file
+            fp = fopen(argv[1],"r");
+
+            // Check if the file is open
+            if (fp == NULL) {
+                printf("Error: File %s could not be opened\n", argv[1]);
+                return 1;
+            }
+
+            //load key map, intiate twin buffer and wait for request of a token
+            buffer = init_lexer(fp);
+
+            //compute first and follow sets for each non terminal in the grammar and store the information in NonTerms[MAX_NT]
+            computeFirstAndFollowSets(GRAMMAR_FILE);
+
+            //populate the grammar rules from the file -> grammarRules 
+            populateRules();
+            
+
             break;
         default:
             break;

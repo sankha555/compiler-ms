@@ -1,5 +1,5 @@
-# include <stdio.h>
-# include "FirstAndFollow.h"
+#include <stdio.h>
+#include "FirstAndFollow.h"
 
 int main(int argc, char *argv[]) {
 	// exactly one input file required

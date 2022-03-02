@@ -2,7 +2,7 @@
 #ifndef KEYWORD_MAP_H
 #define KEYWORD_MAP_H
 
-#define K_MAP_SIZE 31
+#include "globalDef.h"
 
 typedef struct mapEntry {
     char lexeme[21];
