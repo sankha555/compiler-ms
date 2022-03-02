@@ -6,7 +6,7 @@
 #include "lexer.h"
 #include "FirstAndFollow.h"
 
-char* parseTableFile = "parseTable.txt";
+char* parseTableFile = "parseTable.csv";
 
 void printRule(FILE* fp, GrammarRule gRule){
     NonTerm A = NonTerms[gRule.head];
@@ -14,29 +14,32 @@ void printRule(FILE* fp, GrammarRule gRule){
 
     fprintf(fp, "%s ===> ", A.symbol);
     for(int i = 0; i < gRule.bodyLength; i++){
-        if(alpha[i].isTerminal){
+        if(alpha[i].isEpsilon){
+            fprintf(fp, " epsilon ");
+        }else if(alpha[i].isTerminal){
             fprintf(fp, " %s ", tokenNames[alpha[i].terminal]);
         } else {
             fprintf(fp, " %s ", FirstAndFollowList[alpha[i].nonTermIndex].symbol);   
         }    
     }
-    fprintf(fp, "\n");
+    fprintf(fp, ",");
 }
 
 void printParseTableToFile(){
-    FILE* fp = fopen("parseTable.txt", "w+");
+    FILE* fp = fopen(parseTableFile, "w+");
     for(int terminalIndex = 0; terminalIndex < NUMBER_OF_TOKENS; terminalIndex++){
-        fprintf(fp, "\t\t\t%s\t\t\t", tokenNames[terminalIndex]);
+        fprintf(fp, "%s,", tokenNames[terminalIndex]);
     }
     for(int nonTerminalIndex = 0; nonTerminalIndex < MAX_NT; nonTerminalIndex++){
-        fprintf(fp, "%s \t\t\t", FirstAndFollowList[nonTerminalIndex].symbol);
+        fprintf(fp, "%s,", FirstAndFollowList[nonTerminalIndex].symbol);
         for(int terminalIndex = 0; terminalIndex < MAX_TERMINALS; terminalIndex++){
             if(parseTable[nonTerminalIndex][terminalIndex] == -1){
-                fprintf(fp, "Error");
+                fprintf(fp, "Error,");
             } else {
                 printRule(fp, grammarRules[parseTable[nonTerminalIndex][terminalIndex]]);
             }
         }
+        fprintf(fp, "\n");
     }
 }
 
@@ -111,7 +114,7 @@ void createParseTable(){
             tnt var = alpha[j];
 
             if (var.isEpsilon) {
-                for(int terminalIndex = 0; terminalIndex < A.followLen; terminalIndex++){
+                for(int terminalIndex = 0; terminalIndex < fnf.followLen; terminalIndex++){
                     parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
                 }
 
@@ -127,7 +130,7 @@ void createParseTable(){
             } else {
                 if (fnf.nullable) {
                     // epsilon is present in first set of the non-terminal
-                    for(int terminalIndex = 0; terminalIndex < A.followLen; terminalIndex++){
+                    for(int terminalIndex = 0; terminalIndex < fnf.followLen; terminalIndex++){
                         parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
                     }        
 
