@@ -71,14 +71,19 @@ void populateRules(){
             //printf("nonTerminalIndex: %d string: %s\n",nonTermTailIndex,token);
             if(strcmp(epsilon,token) == 0) {
                 printf("epsilon pushed.\n");
-                
+                grammarRules[grammarRulesIndex].body[tailLength].isEpsilon = TRUE;
+                grammarRules[grammarRulesIndex].body[tailLength].isTerminal = FALSE;
+                grammarRules[grammarRulesIndex].body[tailLength].terminal = -1;
+                grammarRules[grammarRulesIndex].body[tailLength].nonTermIndex = -1;
             }
             else if(nonTermTailIndex < 0) {
                 // printf("Token number for string : %s\n",token);
+                grammarRules[grammarRulesIndex].body[tailLength].isEpsilon = FALSE;
                 grammarRules[grammarRulesIndex].body[tailLength].isTerminal = TRUE;
                 grammarRules[grammarRulesIndex].body[tailLength].terminal = tokstrToToken(token);
                 grammarRules[grammarRulesIndex].body[tailLength].nonTermIndex = -1;
             } else {
+                grammarRules[grammarRulesIndex].body[tailLength].isEpsilon = FALSE;
                 grammarRules[grammarRulesIndex].body[tailLength].isTerminal = FALSE;
                 grammarRules[grammarRulesIndex].body[tailLength].nonTermIndex = nonTermTailIndex;
                 grammarRules[grammarRulesIndex].body[tailLength].terminal = -1;
