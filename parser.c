@@ -97,20 +97,29 @@ void createParseTable(){
     for(int ruleIndex = 0; ruleIndex < numRules; ruleIndex++){
         GrammarRule* prodRule = &grammarRules[ruleIndex];
 
-        NonTerm A = NonTerms[prodRule->head];
-        tnt* alpha = prodRule->body;
+        int nonTerminalIndex = prodRule->head;
 
-        int nonTerminalIndex = whichNonTerminal(A.symbol);
+        FirstAndFollowElement fnf = FirstAndFollowList[nonTerminalIndex];
+        tnt* alpha = prodRule->body;
+        
         for(int j = 0; j < prodRule->bodyLength; j++){
             tnt var = alpha[j];
+
+            if (var.isEpsilon) {
+                for(int terminalIndex = 0; terminalIndex < A.followLen; terminalIndex++){
+                    parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
+                }
+
+                if (fnf.dollarInFollow){
+                    parseTable[nonTerminalIndex][TK_EOF] = ruleIndex;
+                }
+            }
+
             if(var.isTerminal){
                 // first of a terminal is the terminal itself 
                 int terminalIndex = var.terminal;
                 parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
             } else {
-                // fetch each 'a' in the follow set of the non terminal
-                FirstAndFollowElement fnf = FirstAndFollowList[var.nonTermIndex];
-                
                 if (fnf.nullable) {
                     // epsilon is present in first set of the non-terminal
                     for(int terminalIndex = 0; terminalIndex < A.followLen; terminalIndex++){
@@ -121,7 +130,6 @@ void createParseTable(){
                         parseTable[nonTerminalIndex][TK_EOF] = ruleIndex;
                     }
                 }
-            
             }
         }
     }
