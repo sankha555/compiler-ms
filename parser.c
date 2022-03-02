@@ -27,9 +27,11 @@ void printRule(FILE* fp, GrammarRule gRule){
 
 void printParseTableToFile(){
     FILE* fp = fopen(parseTableFile, "w+");
-    for(int terminalIndex = 0; terminalIndex < NUMBER_OF_TOKENS; terminalIndex++){
+    fprintf(fp, ",");
+    for(int terminalIndex = 0; terminalIndex < 58; terminalIndex++){
         fprintf(fp, "%s,", tokenNames[terminalIndex]);
     }
+    fprintf(fp, "\n");
     for(int nonTerminalIndex = 0; nonTerminalIndex < numNonTerminals; nonTerminalIndex++){
         fprintf(fp, "%s,", FirstAndFollowList[nonTerminalIndex].symbol);
         for(int terminalIndex = 0; terminalIndex < NUMBER_OF_TOKENS; terminalIndex++){
