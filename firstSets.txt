@@ -9,9 +9,9 @@
 <primitiveDatatype> TK_INT TK_REAL 
 <constructedDatatype> TK_RECORD TK_UNION TK_RUID 
 <remaining_list> TK_COMMA epsilon 
-<stmts> TK_RECORD TK_UNION <definetypestmt> TK_TYPE TK_ID TK_WHILE TK_IF TK_READ TK_WRITE TK_SQL TK_CALL TK_RETURN 
-<typeDefinitions> TK_RECORD TK_UNION <definetypestmt> epsilon 
-<actualOrRedefined> TK_RECORD TK_UNION <definetypestmt> 
+<stmts> TK_RECORD TK_UNION TK_DEFINETYPE TK_TYPE TK_ID TK_WHILE TK_IF TK_READ TK_WRITE TK_SQL TK_CALL TK_RETURN 
+<typeDefinitions> TK_RECORD TK_UNION TK_DEFINETYPE epsilon 
+<actualOrRedefined> TK_RECORD TK_UNION TK_DEFINETYPE 
 <typeDefinition> TK_RECORD TK_UNION 
 <fieldDefinitions> TK_TYPE 
 <fieldDefinition> TK_TYPE 
@@ -37,9 +37,9 @@
 <arithmeticExpression> TK_OP TK_ID TK_NUM TK_RNUM 
 <expPrime> TK_PLUS TK_MINUS epsilon 
 <term> TK_OP TK_ID TK_NUM TK_RNUM 
-<termPrime> <highPrecedenceOperators> epsilon 
+<termPrime> TK_MUL TK_DIV epsilon 
 <factor> TK_OP TK_ID TK_NUM TK_RNUM 
-<highPrecedenceOperator> TK_MUL TK_DIV 
+<highPrecedenceOperators> TK_MUL TK_DIV 
 <lowPrecedenceOperators> TK_PLUS TK_MINUS 
 <booleanExpression> TK_OP TK_ID TK_NUM TK_RNUM TK_NOT 
 <var> TK_ID TK_NUM TK_RNUM 
@@ -49,3 +49,5 @@
 <optionalReturn> TK_SQL epsilon 
 <idList> TK_ID 
 <more_ids> TK_COMMA epsilon 
+<definetypestmt> TK_DEFINETYPE 
+<A> TK_RECORD TK_UNION 
