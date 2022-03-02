@@ -92,4 +92,4 @@
 <more_ids> ===> epsilon
 <definetypestmt> ===> TK_DEFINETYPE <A> TK_RUID TK_AS TK_RUID
 <A> ===> TK_RECORD
-<A> ===> TK_UNION 
+<A> ===> TK_UNION
