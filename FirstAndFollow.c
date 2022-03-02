@@ -1,4 +1,6 @@
 # include "FirstAndFollow.h"
+#include "lexerDef.h"
+#include "lexer.h"
 
 /* 
 int main(int argc, char *argv[]) {
@@ -344,7 +346,7 @@ void populateFirstAndFollow() {
 		// copy the first set elements
 		int j;
 		for (j = 0; j < NonTerms[i].firstLen; j++)
-			FirstAndFollowList[i].first[j] = searchTerminal(NonTerms[i].firsts[j]);
+			FirstAndFollowList[i].first[j] = tokstrToToken(NonTerms[i].firsts[j]);
 
 		FirstAndFollowList[i].nullable = NonTerms[i].nullable;
 		
@@ -355,18 +357,11 @@ void populateFirstAndFollow() {
 				FirstAndFollowList[i].followLen--;
 			}
 			else
-				FirstAndFollowList[i].follow[j] = searchTerminal(NonTerms[i].follows[j]);
+				FirstAndFollowList[i].follow[j] = tokstrToToken(NonTerms[i].follows[j]);
 		}
 	}
 }
 
-int searchTerminal(char *terminal) {
-	int n = sizeof(TerminalList) / sizeof(TerminalList[0]);
-	for (int i = 0; i < n; i++)
-		if (strcmp(terminal, TerminalList[i]) == 0)
-			return i;
-	return -1;
-}
 
 void writeFirstsToFile() {
 	FILE *fp = fopen(firstFile, "w");
@@ -403,72 +398,4 @@ void writeFollowsToFile() {
 		fprintf(fp, "\n");
 	}
 	fclose(fp);
-}
-
-void populateTerminals() {
-	char *tokenNames[] = {
-        "TK_WITH",
-        "TK_PARAMETERS",
-        "TK_END",
-        "TK_WHILE",
-        "TK_UNION",
-        "TK_ENDUNION",
-        "TK_DEFINETYPE",
-        "TK_AS",
-        "TK_TYPE",
-        "TK_GLOBAL",
-        "TK_PARAMETER",
-        "TK_LIST",
-        "TK_INPUT",
-        "TK_OUTPUT",
-        "TK_INT",
-        "TK_REAL",
-        "TK_ENDWHILE",
-        "TK_IF",
-        "TK_THEN",
-        "TK_ENDIF",
-        "TK_READ",
-        "TK_WRITE",
-        "TK_RETURN",
-        "TK_CALL",
-        "TK_RECORD",
-        "TK_ENDRECORD",
-        "TK_ELSE",
-		"TK_ASSIGNOP",
-		"TK_COMMENT",
-        "TK_FIELDID",
-        "TK_ID",
-        "TK_NUM",
-        "TK_RNUM",
-        "TK_FUNID",
-        "TK_RUID",
-        "TK_MAIN",
-        "TK_SQL",
-        "TK_SQR",
-        "TK_COMMA",
-        "TK_SEM",
-        "TK_COLON",
-        "TK_DOT",
-        "TK_OP",
-        "TK_CL",
-        "TK_PLUS",
-        "TK_MINUS",
-        "TK_MUL",
-        "TK_DIV",
-        "TK_AND",
-        "TK_OR",
-        "TK_NOT",
-        "TK_LT",
-        "TK_LE",
-        "TK_EQ",
-        "TK_GT",
-        "TK_GE",
-        "TK_NE",
-        "TK_EOF"
-	};
-
-	int n = sizeof(tokenNames) / sizeof(tokenNames[0]);
-		
-	for (int i = 0; i < n; i++)
-		strcpy(TerminalList[i], tokenNames[i]);
 }

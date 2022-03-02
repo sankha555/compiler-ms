@@ -137,8 +137,9 @@ void createParseTable(){
                 parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
             } else {
                 // var is a non-terminal
-                printf("%s ", FirstAndFollowList[var.nonTermIndex].symbol);
                 FirstAndFollowElement nonTerm = FirstAndFollowList[var.nonTermIndex];
+                printf("%s ", nonTerm.symbol);
+
                 for(int k = 0; k < nonTerm.firstLen; k++){
                     int terminalIndex = nonTerm.first[k];
                     printf("%d; ", terminalIndex);
@@ -166,6 +167,22 @@ void createParseTable(){
 void writeParseTableToFile(){
     computeFirstAndFollowSets(GRAMMAR_FILE);
     printf("computed first follow sets.\n");
+
+    for(int i = 0; i < numNonTerminals; i++){
+        FirstAndFollowElement fnf = FirstAndFollowList[i];
+        printf("First Set: [");
+        for(int j = 0; j < fnf.firstLen; j++){
+            printf("%d, ", fnf.first[j]);
+        }
+        printf("]\n");
+
+        printf("Follow Set: [");
+        for(int j = 0; j < fnf.followLen; j++){
+            printf("%d, ", fnf.follow[j]);
+        }
+        printf("]\n");
+    }
+
     populateRules();
     printf("populated Rules\n");
     createParseTable();
