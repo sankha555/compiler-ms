@@ -107,41 +107,58 @@ void createParseTable(){
     for(int ruleIndex = 0; ruleIndex < numRules; ruleIndex++){
         GrammarRule* prodRule = &grammarRules[ruleIndex];
 
+        printf("Body Length: %d\n", prodRule->bodyLength);
+
         int nonTerminalIndex = prodRule->head;
+        printf("%d. ", nonTerminalIndex);
 
         FirstAndFollowElement fnf = FirstAndFollowList[nonTerminalIndex];
+        printf("%s ===> ", fnf.symbol);
+
         tnt* alpha = prodRule->body;
         
         for(int j = 0; j < prodRule->bodyLength; j++){
             tnt var = alpha[j];
-
+            
             if (var.isEpsilon) {
-                for(int terminalIndex = 0; terminalIndex < fnf.followLen; terminalIndex++){
+                printf("epsilon");
+                for(int k = 0; k < fnf.followLen; k++){
+                    int terminalIndex = fnf.follow[k];
                     parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
                 }
 
                 if (fnf.dollarInFollow){
                     parseTable[nonTerminalIndex][TK_EOF] = ruleIndex;
                 }
-            }
-
-            if(var.isTerminal){
+            }else if(var.isTerminal){
+                printf("%s ", tokenNames[var.terminal]);
                 // first of a terminal is the terminal itself 
                 int terminalIndex = var.terminal;
                 parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
             } else {
-                if (fnf.nullable) {
-                    // epsilon is present in first set of the non-terminal
-                    for(int terminalIndex = 0; terminalIndex < fnf.followLen; terminalIndex++){
+                // var is a non-terminal
+                printf("%s ", FirstAndFollowList[var.nonTermIndex].symbol);
+                FirstAndFollowElement nonTerm = FirstAndFollowList[var.nonTermIndex];
+                for(int k = 0; k < nonTerm.firstLen; k++){
+                    int terminalIndex = nonTerm.first[k];
+                    printf("%d; ", terminalIndex);
+                    parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
+                }
+
+                if (nonTerm.nullable) {
+                    // if the first set of the non-terminal contains epsilon
+                    for(int k = 0; k < fnf.followLen; k++){
+                        int terminalIndex = fnf.follow[k];
                         parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
-                    }        
+                    }     
 
                     if (fnf.dollarInFollow){
                         parseTable[nonTerminalIndex][TK_EOF] = ruleIndex;
                     }
                 }
-            }
+            } 
         }
+        printf("\n");
     }
 }
 
