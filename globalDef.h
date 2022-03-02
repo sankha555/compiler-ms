@@ -2,10 +2,9 @@
 #define GLOBAL_DEF_H
 
 /* total rules and nonterminals in the grammar */
+#define NUMBER_OF_TOKENS 58
 int numNonTerminals;
 int numRules;
-
-#define NUMBER_OF_TOKENS 59
 
 //size of keyword map used in loading keywords 
 #define K_MAP_SIZE 31

@@ -65,6 +65,7 @@ void populateGrammar(grammar G) {
 			NonTerms[numNonTerminals].firstComputed = FALSE;
 			NonTerms[numNonTerminals].nullable = FALSE;
 			numNonTerminals++;
+			printf("Symbol: %s, num NTs: %d\n", NonTerms[numNonTerminals-1].symbol, numNonTerminals);
 		}
 
 		// store the rule
@@ -80,6 +81,7 @@ void populateGrammar(grammar G) {
 
 		numRules++;
 	}
+    printf("num of nts: %d", numNonTerminals);
 
 	fclose(fp);
 }

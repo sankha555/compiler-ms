@@ -30,9 +30,9 @@ void printParseTableToFile(){
     for(int terminalIndex = 0; terminalIndex < NUMBER_OF_TOKENS; terminalIndex++){
         fprintf(fp, "%s,", tokenNames[terminalIndex]);
     }
-    for(int nonTerminalIndex = 0; nonTerminalIndex < MAX_NT; nonTerminalIndex++){
+    for(int nonTerminalIndex = 0; nonTerminalIndex < numNonTerminals; nonTerminalIndex++){
         fprintf(fp, "%s,", FirstAndFollowList[nonTerminalIndex].symbol);
-        for(int terminalIndex = 0; terminalIndex < MAX_TERMINALS; terminalIndex++){
+        for(int terminalIndex = 0; terminalIndex < NUMBER_OF_TOKENS; terminalIndex++){
             if(parseTable[nonTerminalIndex][terminalIndex] == -1){
                 fprintf(fp, "Error,");
             } else {
@@ -63,7 +63,7 @@ void populateRules(){
         // get the current line from the file input stream
 		// dividing it into head and body
 		sscanf(currLine, "%s ===> %[^\n\t]", head, body);
-        printf("HEAD: %s ----> TAIL: %s\n",head,body);
+        // printf("HEAD: %s ----> TAIL: %s\n",head,body);
         grammarRules[grammarRulesIndex].head = whichNonTerminal(head);
         
         char *token = strtok(body," ");
@@ -71,16 +71,16 @@ void populateRules(){
         while(token != NULL) {
             //if it is a terminal
             int nonTermTailIndex = whichNonTerminal(token);
-            printf("\t\tnonTerminalIndex: %d string: %s\n",nonTermTailIndex,token);
+            // printf("\t\tnonTerminalIndex: %d string: %s\n",nonTermTailIndex,token);
             if(strcmp(epsilon,token) == 0) {
-                printf("\t\tepsilon pushed.\n");
+                //printf("\t\tepsilon pushed.\n");
                 grammarRules[grammarRulesIndex].body[tailLength].isEpsilon = TRUE;
                 grammarRules[grammarRulesIndex].body[tailLength].isTerminal = FALSE;
                 grammarRules[grammarRulesIndex].body[tailLength].terminal = -1;
                 grammarRules[grammarRulesIndex].body[tailLength].nonTermIndex = -1;
             }
             else if(nonTermTailIndex < 0) {
-                printf("\t\tToken number for string : %s\n",token);
+                //printf("\t\tToken number for string : %s\n",token);
                 grammarRules[grammarRulesIndex].body[tailLength].isEpsilon = FALSE;
                 grammarRules[grammarRulesIndex].body[tailLength].isTerminal = TRUE;
                 grammarRules[grammarRulesIndex].body[tailLength].terminal = tokstrToToken(token);

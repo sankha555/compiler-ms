@@ -87,6 +87,8 @@ int main(int argc, char *argv[]) {
             //populate the grammar rules from the file -> grammarRules 
             populateRules();
             
+            numNonTerminals = sizeof(FirstAndFollowList)/sizeof(FirstAndFollowElement);
+            printf("Number of nts: %d", numNonTerminals);
 
             break;
         default:
