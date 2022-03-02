@@ -675,7 +675,7 @@ tokenTag tokstrToToken(char *str) {
     tokenTag i = 0;
     for(; i < NUMBER_OF_TOKENS; i++) {
         if(strcmp(str,tokenNames[i]) == 0) {
-            printf("%d %s %s\n",i,tokenNames[i],str);
+            // printf("%d %s %s\n",i,tokenNames[i],str);
             return i;
         }
     }

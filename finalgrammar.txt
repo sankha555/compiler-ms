@@ -24,7 +24,7 @@
 <typeDefinition> ===> TK_RECORD TK_RUID <fieldDefinitions> TK_ENDRECORD
 <typeDefinition> ===> TK_UNION TK_RUID <fieldDefinitions> TK_ENDUNION
 <fieldDefinitions> ===> <fieldDefinition> <fieldDefinition> <moreFields>
-<fieldDefinition> ===> TK_TYPE <fieldType > TK_COLON TK_FIELDID TK_SEM
+<fieldDefinition> ===> TK_TYPE <fieldType> TK_COLON TK_FIELDID TK_SEM
 <fieldType> ===> <primitiveDatatype>
 <fieldType> ===> TK_RUID
 <moreFields> ===> <fieldDefinition> <moreFields>
@@ -66,8 +66,8 @@
 <termPrime> ===> epsilon
 <factor> ===> TK_OP <arithmeticExpression> TK_CL
 <factor> ===> <var>
-<highPrecedenceOperator> ===> TK_MUL
-<highPrecedenceOperator> ===> TK_DIV
+<highPrecedenceOperators> ===> TK_MUL
+<highPrecedenceOperators> ===> TK_DIV
 <lowPrecedenceOperators> ===> TK_PLUS
 <lowPrecedenceOperators> ===> TK_MINUS
 <booleanExpression> ===> TK_OP <booleanExpression> TK_CL <logicalOp> TK_OP <booleanExpression> TK_CL
@@ -90,3 +90,6 @@
 <idList> ===> TK_ID <more_ids>
 <more_ids> ===> TK_COMMA <idList>
 <more_ids> ===> epsilon
+<definetypestmt> ===> TK_DEFINETYPE <A> TK_RUID TK_AS TK_RUID
+<A> ===> TK_RECORD
+<A> ===> TK_UNION 
