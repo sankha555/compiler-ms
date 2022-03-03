@@ -196,6 +196,10 @@ void push(Stack* inputStack, tnt* var){
     inputStack->stackElements[inputStack->stackPointer] = var;
 }
 
+tnt* top(Stack* inputStack){
+    return inputStack->stackElements[inputStack->stackPointer];
+}
+
 void insertRuleBodyIntoStack(Stack* inputStack, GrammarRule gRule){
     tnt* alpha = gRule.body;
     for(int i = gRule.bodyLength - 1; i >= 0; i--){
@@ -225,6 +229,24 @@ int inorderTraversalParseTree (FILE* fp, ParseTreeNode *root) {
     return result;
 }
 
+ParseTreeNode* newParseTreeNode() {
+    ParseTreeNode* newNode = (ParseTreeNode*)malloc(sizeof(ParseTreeNode));
+    newNode->parent = NULL;
+    newNode->isLeafNode = FALSE;
+    token temp;
+    temp.linenumber = 0;
+    strcpy(temp.lexeme,"");
+    temp.type = -1;
+    newNode->numberStatus = 0;
+    newNode->terminal = temp;
+    newNode->nonTermIndex = -1;
+    newNode->integerValue = 69;
+    newNode->floatValue = 69.69;
+    memset(newNode->children,NULL,MAX_PROD_LEN);
+    newNode->nextSibling = NULL;
+    newNode->numberOfChildren = 0;
+    return newNode;
+}
 
 int printParseTree(ParseTreeNode* root, char* filename) {
 
@@ -237,3 +259,49 @@ int printParseTree(ParseTreeNode* root, char* filename) {
 
     return inorderTraversalParseTree(fp,root);
 }
+
+tnt* createStackElement(token t){
+    tnt* termOrNonTerm = (tnt*) malloc(sizeof(tnt));
+
+    termOrNonTerm->isTerminal = TRUE;
+    termOrNonTerm->isEpsilon = FALSE;
+    termOrNonTerm->terminal = t.type;
+    termOrNonTerm->nonTermIndex = -1;
+
+    return termOrNonTerm;
+}
+
+
+ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
+    // initialize stack
+    Stack* inputStack = initiateStack();
+
+    // pushing '$' to stack
+    tnt* stackBottom = (tnt*) malloc(sizeof(tnt));
+    stackBottom->isTerminal = TRUE;
+    stackBottom->type = TK_EOF;
+    stackBottom->isEpsilon = FALSE;
+    stackBottom->nonTermIndex = -1;
+    push(inputStack, stackBottom);
+
+    // pushing <program> to stack
+    stackBottom = (tnt*) malloc(sizeof(tnt));
+    stackBottom->isTerminal = FALSE;
+    stackBottom->type = -1;
+    stackBottom->isEpsilon = FALSE;
+    stackBottom->nonTermIndex = 0;
+    push(inputStack, stackBottom);
+
+    // initialize parseTree
+    ParseTreeNode* root = newParseTreeNode();
+    ParseTreeNode* current = root;
+    
+    tnt* topOfStack;
+
+    while(TRUE){
+        tnt* stackElement = createStackElement(get_next_token(buffer));
+
+        topOfStack = top(inputStack);
+    }
+
+    

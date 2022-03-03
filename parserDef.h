@@ -17,6 +17,7 @@ typedef struct ParseTreeNode {
     float floatValue; 
     struct ParseTreeNode* children[MAX_PROD_LEN];
     int numberOfChildren;
+    struct ParseTreeNode* nextSibling;
 } ParseTreeNode;
 
 
