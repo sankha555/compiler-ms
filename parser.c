@@ -314,6 +314,10 @@ tnt* createStackElement(token t){
     return termOrNonTerm;
 }
 
+ParseTreeNode* findNextSibling(ParseTreeNode* current) {
+    
+}
+
 ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     // initialize stack
     Stack* inputStack = initiateStack();
@@ -346,7 +350,7 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
         currentInputToken = get_next_token(buffer);
     } while(currentInputToken.type == TK_ERROR);
 
-    while(TRUE){
+    while(!topOfStack->isTerminal || (topOfStack->terminal != TK_EOF)){
         // tnt* stackElement = createStackElement(get_next_token(buffer));
 
         topOfStack = top(inputStack);
@@ -387,9 +391,15 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
                 
                 current = createTreeNodesFromRule(grammarRules[parseTableEntry], current);
 
-                /* !!! CHECK FOR EPSILON CASE !!! */
-                if()
             }
+        }
+
+        //updating the current pointer in the tree, next sibling in the case of terminal/epsilon 
+        //and first child in the case of a non terminal
+        if(topOfStack->isTerminal || topOfStack->isEpsilon) {
+            current = findNextSibling(current);
+        } else {
+            current = current->children[0];
         }
     }
 }
