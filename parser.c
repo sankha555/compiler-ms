@@ -5,6 +5,7 @@
 #include "lexerDef.h"
 #include "lexer.h"
 #include "FirstAndFollow.h"
+#include "stack.h"
 
 char* parseTableFile = "parseTable.csv";
 
@@ -16,6 +17,16 @@ tokenTag syncTokens[] = {
     TK_ENDRECORD,
     TK_SEM
 };
+
+
+void printTnt(tnt* term){
+    printf("isEpsilon:%d isTerminal:%d", term->isEpsilon, term->isTerminal);
+    if (term->isTerminal){
+        printf(", terminal %s\n", tokenNames[term->terminal]);
+    } else {
+        printf(", non-terminal %s\n", FirstAndFollowList[term->nonTermIndex].symbol);
+    }   
+}
 
 int numSyncTokens = 6;
 
@@ -58,6 +69,19 @@ void printParseTableToFile(){
         fprintf(fp, "\n");
     }
 }
+
+// void printRule(GrammarRule* gRule){
+//     tnt* alpha = gRule->body;
+//     printf("%s ===>", FirstAndFollowList[gRule->head]);
+//     for(int i = 0; i < gRule->bodyLength; i++){
+//         tnt var = gRule[i];
+//         if(var.isTerminal){
+//             printf("%s ", tokenNames[var.terminal]);
+//         }else{
+//             printf("%s ", FirstAndFollowList[var.nonTermIndex]);
+//         }
+//     }
+// }
 
 void populateRules(){
     // open the grammar file
@@ -165,6 +189,7 @@ void createParseTable(FirstAndFollow FirstAndFollowList){
                     int terminalIndex = nonTerm.first[k];
                     // printf("%d; ", terminalIndex);
                     parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
+                    
                 }
 
                 if (nonTerm.nullable) {
@@ -184,47 +209,18 @@ void createParseTable(FirstAndFollow FirstAndFollowList){
     }
 }
 
-Stack* initiateStack(){
-    Stack* inputStack = (Stack*) malloc(sizeof(Stack));
-    inputStack->stackPointer = 0;
-    
-    tnt* bottomOfStack = (tnt*) malloc(sizeof(tnt));
-    bottomOfStack->isTerminal = TRUE;
-    bottomOfStack->terminal = TK_EOF;
-    bottomOfStack->nonTermIndex = -1;
-    bottomOfStack->isEpsilon = FALSE;
-
-    inputStack->stackElements[inputStack->stackPointer] = bottomOfStack;
-
-    return inputStack;
-}
-
-void pop(Stack* inputStack){
-    if(inputStack->stackPointer == -1){
-        return;
-    }
-
-    inputStack->stackElements[inputStack->stackPointer] = NULL;
-    (inputStack->stackPointer)--;
-}
-
-void push(Stack* inputStack, tnt* var){
-    if(inputStack->stackPointer == (STACK_SIZE - 1)){
-        return;
-    }
-
-    (inputStack->stackPointer)++;
-    inputStack->stackElements[inputStack->stackPointer] = var;
-}
-
-tnt* top(Stack* inputStack){
-    return inputStack->stackElements[inputStack->stackPointer];
-}
 
 void insertRuleBodyIntoStack(Stack* inputStack, GrammarRule gRule){
-    tnt* alpha = gRule.body;
+    // printf("starting to insert rule body into stack\n");
     for(int i = gRule.bodyLength - 1; i >= 0; i--){
-        push(inputStack, &alpha[i]);
+        tnt* alpha = (tnt*)malloc(sizeof(tnt));
+        alpha->isEpsilon = gRule.body[i].isEpsilon;
+        alpha->isTerminal = gRule.body[i].isTerminal;
+        alpha->nonTermIndex = gRule.body[i].nonTermIndex;
+        alpha->terminal = gRule.body[i].terminal;
+        // printf("Inserting new symbol in the stack.\n");
+        // printTnt(alpha);
+        push(inputStack, alpha);
     }
 }
 
@@ -313,14 +309,14 @@ ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentN
     for(int i = gRule.bodyLength - 1; i >= 0; i--){
         tnt var = alpha[i];
         
-        ParseTreeNode* treeNode;
+        ParseTreeNode* treeNode = newParseTreeNode();;
         if(var.isEpsilon){
-            treeNode = newParseTreeNode();
             treeNode->isEpsilon = TRUE;
+            treeNode->isLeafNode = TRUE;
         } else if (var.isTerminal){
-            treeNode = createTreeNodeForToken(&var);
+            treeNode->isLeafNode = TRUE;
+            treeNode->terminal.type = var.terminal;
         } else {
-            treeNode = newParseTreeNode();
             treeNode->nonTermIndex = var.nonTermIndex;
         }
         treeNode->parent = parentNode; 
@@ -336,29 +332,19 @@ ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentN
     return parentNode;
 }  
 
-tnt* createStackElement(token t){
-    tnt* termOrNonTerm = (tnt*) malloc(sizeof(tnt));
-
-    termOrNonTerm->isTerminal = TRUE;
-    termOrNonTerm->isEpsilon = FALSE;
-    termOrNonTerm->terminal = t.type;
-    termOrNonTerm->nonTermIndex = -1;
-
-    return termOrNonTerm;
-}
 
 void printTreeNode(ParseTreeNode* treeNode){
     printf("Node details:: Is a terminal? %d; ", treeNode->isLeafNode);
     if(treeNode->isLeafNode){
-        printf("Terminal ID: %d\n", (treeNode->terminal).type);
+        printf("Terminal ID: %s\n", tokenNames[(treeNode->terminal).type]);
     } else {
-        printf("Non terminal ID: %d\n", treeNode->nonTermIndex);
+        printf("Non terminal ID: %s\n", FirstAndFollowList[treeNode->nonTermIndex].symbol);
     }
 }
 
 ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     // initialize stack
-    Stack* inputStack = initiateStack();
+    Stack* inputStack = newStack();
 
     // pushing '$' to stack
     tnt* stackBottom = (tnt*) malloc(sizeof(tnt));
@@ -375,6 +361,8 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     stackBottom->isEpsilon = FALSE;
     stackBottom->nonTermIndex = 0;
     push(inputStack, stackBottom);
+
+    printStack(inputStack);
 
     printf("Stack utils pushed.\n");
 
@@ -409,55 +397,68 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
 
     printf("CurrentToken: %s\n.",currentInputToken.lexeme);
 
-    while(!topOfStack->isTerminal || (topOfStack->terminal != TK_EOF)){
+    while(topOfStack->terminal != TK_EOF){
+        printStack(inputStack);
+        print_token(stdout,currentInputToken);
         topOfStack = top(inputStack);
 
         if(topOfStack->isEpsilon){
+            printf("TOS is epsilon\n");
             pop(inputStack);
+            current = findNextSibling(current);
+            printStack(inputStack);
             continue;
         }
         
         //checking if present token is terminal and same as top of the stack
-        if(topOfStack->isTerminal) {
+        else if(topOfStack->isTerminal) {
+            printf("There is a terminal on top.\n");
+            printf("%s\n", tokenNames[currentInputToken.type]);
             if (topOfStack->terminal == currentInputToken.type) {
                 current->terminal = currentInputToken;
                 pop(inputStack);
+                topOfStack = top(inputStack);
                 do {
                     currentInputToken = get_next_token(buffer);
                 } while(currentInputToken.type == TK_ERROR);
+                current = findNextSibling(current);
             } else {
                 // input token and token in top of stack do not match
-                printf("line %d : Expected %s but got %s", linenumber, tokenNames[topOfStack->terminal], currentInputToken.lexeme);
+                printf("line %d : Expected %s but got %s.\n", linenumber, tokenNames[topOfStack->terminal], currentInputToken.lexeme);
+                exit(1);
             }
+
+            
         }
 
-        if(!(topOfStack->isTerminal)){
+        else if(!(topOfStack->isTerminal)){
             // if top of stack is a non-terminal
 
             int parseTableEntry = parseTable[topOfStack->nonTermIndex][currentInputToken.type];
-            if(parseTableEntry == -1){
+            if(parseTableEntry < 0){
                 // error condition. Pop the top of stack non-terminal and continue.
                 pop(inputStack);
                 continue;
             }else{
                 // there is a rule match between the non-terminal and input token
-
                 // pop current top of stack symbol
                 pop(inputStack);
 
                 // push the children of the current stack symbol into the stack
                 insertRuleBodyIntoStack(inputStack, grammarRules[parseTableEntry]);
+
+                topOfStack = top(inputStack);
+                // printTnt(topOfStack);
                 
                 current = createTreeNodesFromRule(grammarRules[parseTableEntry], current);
-            }
-
-            //updating the current pointer in the tree
-            if(topOfStack->isTerminal || topOfStack->isEpsilon) {
-                current = findNextSibling(current);
-            } else {
                 current = current->children[0];
+                printf("Stack after nodes were created.\n");
+                printStack(inputStack);
             }
         }
+        // printf("Enter to continue");
+        // scanf("%c");
+
     }
     while(currentInputToken.type != TK_EOF) {
         printf("%d: Unexpected character %s.\n",currentInputToken.linenumber,currentInputToken.lexeme);

@@ -42,10 +42,4 @@ GrammarRule grammarRules[MAX_RULES];
 
 int parseTable [MAX_NT][MAX_TERMINALS];
 
-/* Stack for parser */
-typedef struct stack {
-    tnt* stackElements[STACK_SIZE];
-    int stackPointer;
-} Stack;
-
 #endif

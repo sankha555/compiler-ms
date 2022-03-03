@@ -420,6 +420,8 @@ token get_next_token(twinBuffer *buffer)
                             t.linenumber = linenumber;
                             ungetch(buffer);
                             return t;
+                        } else {
+                            strncat(lexeme, &c, 1);
                         }
                     }
 
