@@ -15,6 +15,9 @@ void reloadBuffer(twinBuffer* tBuffer, int bufferID){
 
 twinBuffer* init_buffer(FILE* fp){
     twinBuffer* tBuffer = (twinBuffer*) malloc(sizeof(twinBuffer));
+    if(tBuffer == NULL) {
+        return tBuffer;
+    }
     tBuffer->buffer[0][BUFFER_SIZE-1] = '\0';
     tBuffer->buffer[1][BUFFER_SIZE-1] = '\0';
     tBuffer->forward = 0;

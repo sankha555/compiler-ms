@@ -74,7 +74,7 @@ char TerminalList[MAX_TERMINALS][MAX_LEN];
  * populates the prescribed FirstAndFollow data structure
  * writes the results to appropriate files
  */
-void computeFirstAndFollowSets(grammar G);
+FirstAndFollowElement* computeFirstAndFollowSets(grammar G);
 
 /* creates rules from the grammar file G
  * also creates a list of non-terminals
