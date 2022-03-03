@@ -102,8 +102,8 @@ void populateRules(){
     return;
 }
 
-void createParseTable(FirstAndFollow FirstAndFollowList){
-    memset(parseTable, -1, sizeof(parseTable));
+void createParseTable(FirstAndFollow FirstAndFollowList, int** parseTable){
+    memset(parseTable, -1, (numNonTerminals * NUMBER_OF_TOKENS));
     for(int ruleIndex = 0; ruleIndex < numRules; ruleIndex++){
         GrammarRule* prodRule = &grammarRules[ruleIndex];
 
@@ -207,7 +207,6 @@ void insertRuleBodyIntoStack(Stack* inputStack, GrammarRule gRule){
     }
 }
 
-
 //1: correctly displayed this subtree, -1: could not display this subtree
 int inorderTraversalParseTree (FILE* fp, ParseTreeNode *root) {
     
@@ -260,37 +259,18 @@ int printParseTree(ParseTreeNode* root, char* filename) {
     return inorderTraversalParseTree(fp,root);
 }
 
-
-ParseTreeNode* createTreeNodeForToken(tnt* var){
-    if(!(var->isTerminal)){
-        printf("Bruh, this thing not a terminal\n");
-        return NULL;
-    }
-
-    ParseTreeNode* treeNode = newParseTreeNode();
-    treeNode->isLeafNode = TRUE;
-    treeNode->terminal = var->terminal;
-
-    return treeNode;
-}
-
-ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentNode){
+tnt* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentNode){
     tnt* alpha = gRule.body;
 
     ParseTreeNode* next = NULL;
     for(int i = gRule.bodyLength - 1; i >= 0; i--){
         tnt var = alpha[i];
         
-        ParseTreeNode* treeNode;
-        if(var.isEpsilon){
-
-        } else if (var.isTerminal){
-            treeNode = createTreeNodeForToken(&var, parentNode);
-        } else {
-            treeNode = newParseTreeNode();
-            treeNode->nonTermIndex = var.nonTermIndex;
+        ParseTreeNode* treeNode = newParseTreeNode();
+        treeNode->parent = parentNode;
+        if(var.isTerminal){
+            treeNode->isLeafNode = TRUE;
         }
-        treeNode->parent = parentNode; 
         treeNode->nextSibling = next;
         
         // insert this new node as child of parent
@@ -299,9 +279,18 @@ ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentN
         next = treeNode;
     }    
     parentNode->numberOfChildren = gRule.bodyLength;
-
-    return parentNode;
 }  
+
+tnt* createTreeNodeForToken(tnt* var, ParseTreeNode* p){
+    if(!(var->isTerminal)){
+        printf("Bruh, this thing not a terminal\n");
+        return NULL;
+    }
+
+    // for(int i = 0; i < n; i++){
+
+    // }
+}
 
 tnt* createStackElement(token t){
     tnt* termOrNonTerm = (tnt*) malloc(sizeof(tnt));
@@ -340,39 +329,15 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     
     tnt* topOfStack;
 
-    token currentInputToken;
-
-    do {
-        currentInputToken = get_next_token(buffer);
-    } while(currentInputToken.type == TK_ERROR);
-
     while(TRUE){
         // tnt* stackElement = createStackElement(get_next_token(buffer));
+        token nextInputToken = get_next_token(buffer);
 
         topOfStack = top(inputStack);
-
-        if(topOfStack->isEpsilon){
-            pop(inputStack);
-            continue;
-        }
-        
-        //checking if present token is terminal and same as top of the stack
-        if(topOfStack->isTerminal && (topOfStack->terminal == currentInputToken.type)) {
-            pop(inputStack);
-            do {
-                currentInputToken = get_next_token(buffer);
-            } while(currentInputToken == TK_ERROR);
-        }
-
-        //checking if the stack top is a token not matching with currentToken
-        if(topOfStack->isTerminal && (topOfStack->terminal != currentInputToken.type)) {
-            //handle error
-        }
-
         if(!(topOfStack->isTerminal)){
             // if top of stack is a non-terminal
 
-            int parseTableEntry = parseTable[topOfStack->nonTermIndex][currentInputToken.type];
+            int parseTableEntry = parseTable[topOfStack->nonTermIndex][nextInputToken.type];
             if(parseTableEntry == -1){
                 // error condition
                 printf("Error detected on line %d\n", linenumber);
@@ -385,11 +350,10 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
                 // push the children of the current stack symbol into the stack
                 insertRuleBodyIntoStack(inputStack, grammarRules[parseTableEntry]);
                 
-                current = createTreeNodesFromRule(grammarRules[parseTableEntry], current);
-
-                /* !!! CHECK FOR EPSILON CASE !!! */
-                if()
+            
             }
+        }else{
+            // if top of stack is a terminal (token)
         }
     }
 }
