@@ -101,6 +101,7 @@ int removeComments(char* testfilename, char* destfilename)
         return -1;
     }
 
+    int lc = 0;
     while (1)
     {
         char c = getch(buffer);
@@ -112,6 +113,14 @@ int removeComments(char* testfilename, char* destfilename)
                 c = getch(buffer);
                 printf(" ");
             }
+            if(c == '\n') {
+                putc(c,stdout);
+                lc++;
+                printf("%d:",lc);
+            }
+            if(c == '\0') {
+                break;
+            }
         }
         else if (c == '\0')
         {
@@ -120,9 +129,14 @@ int removeComments(char* testfilename, char* destfilename)
         else
         {
             putc(c,stdout);
+            if(c == '\n') {
+                lc++;
+                printf("%d:",lc);
+            }
         }
     }
 
+    printf("\n\n\n");
     return 0;
 }
 

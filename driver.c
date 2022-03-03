@@ -84,14 +84,16 @@ int main(int argc, char *argv[]) {
             populateRules();
             printf("Rules populated\n");
 
-            printf("numNonTerminals: %d",numNonTerminals);
+            printf("numNonTerminals: %d\n",numNonTerminals);
             //fill up the parse table 
             createParseTable(FirstAndFollowAll, parseTable);
 
+            printf("Parse table generated.\n");
             //print and store the parse table in a .csv file
             printParseTableToFile();
 
-            ParseTreeNode* root =  parseInputSourceCode();
+            ParseTreeNode* root =  parseInputSourceCode(buffer);
+            printf("Parse tree generated.\n");
 
             if(printParseTree(root,treeFile) == -1) {
                 printf("Could not print the parse tree.\n");
