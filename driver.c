@@ -91,13 +91,13 @@ int main(int argc, char *argv[]) {
             //print and store the parse table in a .csv file
             printParseTableToFile();
 
-            // ParseTreeNode* root =  parseInputSourceCode();
+            ParseTreeNode* root =  parseInputSourceCode();
 
-            // if(printParseTree(root,treeFile) == -1) {
-            //     printf("Could not print the parse tree.\n");
-            // } else {
-            //     printf("Successfully printed the parse tree in %s.\n",treeFile);
-            // }
+            if(printParseTree(root,treeFile) == -1) {
+                printf("Could not print the parse tree.\n");
+            } else {
+                printf("Successfully printed the parse tree in %s.\n",treeFile);
+            }
 
             break;
         default:
