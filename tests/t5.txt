@@ -1,7 +1,7 @@
 %Test Case 5: The following source code is expected to be syntactically correct as per the modified grammar.
 %If any line has syntax error, please inform me as that error needs to be fixed in this test case.
 
-_unionfunction  input parameter list [record #two d5cc34, #point p]  
+_unionfunction  input parameter list [record #two d5cc34, #point b5c6]  
 output parameter list[real d3];
 
 	record #two
@@ -10,7 +10,7 @@ output parameter list[real d3];
 	endrecord
 
 
-	type record #two : b5b567, c6;
+	type record #two : b5b567;
 	type record #one : b3;
 	type #point: d5;
 	b5b567 <--- c6*2;
@@ -35,7 +35,7 @@ _main
 		type #line : ln; 
 		type #point: pt; 
 		type #traingle:tr;
-	endunion;
+	endunion
         definetype record #three as #triangle  
 	record #three 
 		type #line: base;
