@@ -66,6 +66,7 @@ typedef enum tokenTag
     TK_ERROR
 } tokenTag;
 
+
 extern char *tokenNames[NUMBER_OF_TOKENS];
 
 typedef struct token

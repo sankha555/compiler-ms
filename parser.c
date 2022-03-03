@@ -8,6 +8,17 @@
 
 char* parseTableFile = "parseTable.csv";
 
+tokenTag syncTokens[] = {
+    TK_END,
+    TK_ENDWHILE,
+    TK_ENDIF,
+    TK_ENDUNION,
+    TK_ENDRECORD,
+    TK_SEM
+};
+
+int numSyncTokens = 6;
+
 void printRule(FILE* fp, GrammarRule gRule){
     NonTerm A = NonTerms[gRule.head];
     tnt* alpha = gRule.body;
@@ -37,7 +48,10 @@ void printParseTableToFile(){
         for(int terminalIndex = 0; terminalIndex < NUMBER_OF_TOKENS; terminalIndex++){
             if(parseTable[nonTerminalIndex][terminalIndex] == -1){
                 fprintf(fp, "Error,");
-            } else {
+            } else if(parseTable[nonTerminalIndex][terminalIndex] == -2) {
+                fprintf(fp, "Synch,");
+            }
+            else {
                 printRule(fp, grammarRules[parseTable[nonTerminalIndex][terminalIndex]]);
             }
         }
@@ -102,8 +116,15 @@ void populateRules(){
     return;
 }
 
-void createParseTable(FirstAndFollow FirstAndFollowList, int** parseTable){
-    memset(parseTable, -1, (numNonTerminals * NUMBER_OF_TOKENS));
+void createParseTable(FirstAndFollow FirstAndFollowList){
+    memset(parseTable, -1, sizeof(parseTable));
+
+    for(int i = 0; i < numSyncTokens; i++) {
+        for(int j = 0; j < numNonTerminals; j++) {
+            parseTable[j][syncTokens[i]] = -2;
+        }
+    }
+
     for(int ruleIndex = 0; ruleIndex < numRules; ruleIndex++){
         GrammarRule* prodRule = &grammarRules[ruleIndex];
 
@@ -279,7 +300,7 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     // pushing '$' to stack
     tnt* stackBottom = (tnt*) malloc(sizeof(tnt));
     stackBottom->isTerminal = TRUE;
-    stackBottom->type = TK_EOF;
+    stackBottom->terminal = TK_EOF;
     stackBottom->isEpsilon = FALSE;
     stackBottom->nonTermIndex = -1;
     push(inputStack, stackBottom);
@@ -287,7 +308,7 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     // pushing <program> to stack
     stackBottom = (tnt*) malloc(sizeof(tnt));
     stackBottom->isTerminal = FALSE;
-    stackBottom->type = -1;
+    stackBottom->terminal = -1;
     stackBottom->isEpsilon = FALSE;
     stackBottom->nonTermIndex = 0;
     push(inputStack, stackBottom);
@@ -304,4 +325,4 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
         topOfStack = top(inputStack);
     }
 
-    
+}
