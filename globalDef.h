@@ -15,6 +15,10 @@ int numRules;
 //name of the file in which grammar is written
 #define GRAMMAR_FILE "finalgrammar.txt"
 
+#define TREE_FILE "parsetree.txt"
+
+#define CLEAN_FILE "cleanedcode.spl"
+
 // the maximum number of productions in grammar
 # define MAX_RULES 100
 
@@ -32,11 +36,15 @@ int numRules;
 // passes for follow set computation
 # define EPOCHS 2
 
+
+
 //to denote false an true anywhere required
 typedef enum {
 	FALSE = 0,
 	TRUE = 1
 } boolean;
+
+#define STACK_SIZE 100
 
 //updated by lexical analyser whenever \n is encountered
 static int linenumber = 0;

@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 }
 */
 
-void computeFirstAndFollowSets(grammar G) {
+FirstAndFollowElement* computeFirstAndFollowSets(grammar G) {
 	/* populate the rules data structure with the grammar */
 	populateGrammar(G);
 
@@ -37,6 +37,8 @@ void computeFirstAndFollowSets(grammar G) {
 	/* save results in respective files */
 	writeFirstsToFile();
 	writeFollowsToFile();
+
+	return FirstAndFollowList;
 }
 
 void populateGrammar(grammar G) {

@@ -10,8 +10,8 @@
 #include <ctype.h>
 
 token get_next_token();
-twinBuffer* init_lexer(FILE *fp);
-void remove_comments(twinBuffer *buffer);
+twinBuffer* init_lexer(char* filename);
+int removeComments(char* src, char* dest);
 void print_token(FILE* out, token t);
 
 //converts "TK_IF" to TK_IF

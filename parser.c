@@ -102,8 +102,8 @@ void populateRules(){
     return;
 }
 
-void createParseTable(){
-    memset(parseTable, -1, sizeof(parseTable));
+void createParseTable(FirstAndFollow FirstAndFollowList, int** parseTable){
+    memset(parseTable, -1, (numNonTerminals * NUMBER_OF_TOKENS));
     for(int ruleIndex = 0; ruleIndex < numRules; ruleIndex++){
         GrammarRule* prodRule = &grammarRules[ruleIndex];
 
@@ -163,35 +163,77 @@ void createParseTable(){
     }
 }
 
+Stack* initiateStack(){
+    Stack* inputStack = (Stack*) malloc(sizeof(Stack));
+    inputStack->stackPointer = 0;
+    
+    tnt* bottomOfStack = (tnt*) malloc(sizeof(tnt));
+    bottomOfStack->isTerminal = TRUE;
+    bottomOfStack->terminal = TK_EOF;
+    bottomOfStack->nonTermIndex = -1;
+    bottomOfStack->isEpsilon = FALSE;
 
-void writeParseTableToFile(){
-    computeFirstAndFollowSets(GRAMMAR_FILE);
-    printf("computed first follow sets.\n");
+    inputStack->stackElements[inputStack->stackPointer] = bottomOfStack;
 
-    for(int i = 0; i < numNonTerminals; i++){
-        FirstAndFollowElement fnf = FirstAndFollowList[i];
-        printf("First Set: [");
-        for(int j = 0; j < fnf.firstLen; j++){
-            printf("%d, ", fnf.first[j]);
-        }
-        printf("]\n");
-
-        printf("Follow Set: [");
-        for(int j = 0; j < fnf.followLen; j++){
-            printf("%d, ", fnf.follow[j]);
-        }
-        printf("]\n");
-    }
-
-    populateRules();
-    printf("populated Rules\n");
-    createParseTable();
-    printf("created parse table.\n");
-    printParseTableToFile();
+    return inputStack;
 }
 
-int main(){
-    writeParseTableToFile();
+void pop(Stack* inputStack){
+    if(inputStack->stackPointer == -1){
+        return;
+    }
 
-    return 0;
+    inputStack->stackElements[inputStack->stackPointer] = NULL;
+    (inputStack->stackPointer)--;
+}
+
+void push(Stack* inputStack, tnt* var){
+    if(inputStack->stackPointer == (STACK_SIZE - 1)){
+        return;
+    }
+
+    (inputStack->stackPointer)++;
+    inputStack->stackElements[inputStack->stackPointer] = var;
+}
+
+void insertRuleBodyIntoStack(Stack* inputStack, GrammarRule gRule){
+    tnt* alpha = gRule.body;
+    for(int i = gRule.bodyLength - 1; i >= 0; i--){
+        push(inputStack, &alpha[i]);
+    }
+}
+
+
+//1: correctly displayed this subtree, -1: could not display this subtree
+int inorderTraversalParseTree (FILE* fp, ParseTreeNode *root) {
+    
+    if(root->isLeafNode) {
+        return fprintf(fp,"%s\t\t%d\t\t%s\t\t----\t\t%s\t\tYes\t\t----",root->terminal.lexeme,root->terminal.linenumber,tokenNames[root->terminal.type]
+        ,FirstAndFollowList[root->parent->nonTermIndex].symbol);
+    }
+
+    int i;
+    int result = 1;
+    for(i = 0; i < ( root->numberOfChildren - 1 ); i++) {
+        result *= inorderTraversalParseTree(fp,root->children[i]);
+    }
+
+    fprintf(fp,"----\t\t----\t\t----\t\t----\t\t%s\t\tNo\t\t%s",FirstAndFollowList[root->parent->nonTermIndex].symbol, FirstAndFollowList[root->nonTermIndex].symbol);
+
+    result *= inorderTraversalParseTree(fp,root->children[i]);
+
+    return result;
+}
+
+
+int printParseTree(ParseTreeNode* root, char* filename) {
+
+    FILE* fp = fopen(filename,"w");
+
+    if(!fp) {
+        printf("Could not open file for printing tree.\n");
+        return -1;
+    }
+
+    return inorderTraversalParseTree(fp,root);
 }

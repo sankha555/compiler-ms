@@ -13,7 +13,9 @@ void populateRules();
 
 void createParseTable();
 
-void writeParseTableToFile();
+ParseTreeNode* parseInputSourceCode();
+
+int printParseTree(ParseTreeNode* root, char* filename);
 
 #endif
 

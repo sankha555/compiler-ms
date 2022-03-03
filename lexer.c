@@ -72,16 +72,35 @@ char* tokenNames[] = {
 };
 
 /*
- * Function: remove_comments
+ * Function: removeComments
  * --------------------
  *  removes comments from the input file (buffer)
  *
- *  buffer: buffer to be processed
- *
- *  returns: void / prints ouptut to console
+ *  testfilename --> source file name
+ *  destfilename --> where cleaned code should be stored
+ * 
+ *  returns: int (0: success / -1:error) / prints ouptut to destfile
  */
-void remove_comments(twinBuffer *buffer)
+int removeComments(char* testfilename, char* destfilename)
 {
+    FILE* fp = fopen(testfilename,"r");
+    if(!fp) {
+        printf("Could not open file \"%s\".\n",testfilename);
+        return -1;
+    }
+
+    FILE* fout = fopen(destfilename,"w");
+    if(!fout) {
+        printf("Could not open file \"%s\".\n",destfilename);
+        return -1;
+    }
+
+    twinBuffer* buffer = init_buffer(fp);
+    if(buffer == NULL) {
+        printf("Twin buffer did not initiate: Insufficient memory available (malloc).\n");
+        return -1;
+    }
+
     while (1)
     {
         char c = getch(buffer);
@@ -98,9 +117,11 @@ void remove_comments(twinBuffer *buffer)
         }
         else
         {
-            printf("%c", c);
+            fputc(c,fout);
         }
     }
+
+    return 0;
 }
 
 token get_next_token(twinBuffer *buffer)
@@ -656,8 +677,17 @@ void print_token(FILE *out, token t)
         fprintf(out, "Line no. %d\t Lexeme %-31s\t Token %-20s\n", t.linenumber, t.lexeme, tokenNames[t.type]);
 }
 
-twinBuffer *init_lexer(FILE *fp)
+twinBuffer *init_lexer(char* filename)
 {
+    // Open the file
+    FILE *fp = fopen(filename, "r");
+
+    // Check if the file is open
+    if (fp == NULL) {
+        printf("Error: File %s could not be opened\n", filename);
+        return NULL;
+    }
+    
     linenumber = 1;
     twinBuffer *buffer = init_buffer(fp);
 
