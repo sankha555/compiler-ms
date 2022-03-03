@@ -335,6 +335,10 @@ tnt* createStackElement(token t){
     return termOrNonTerm;
 }
 
+ParseTreeNode* findNextSibling(ParseTreeNode* current) {
+    return current;
+}
+
 ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     // initialize stack
     Stack* inputStack = initiateStack();
@@ -358,7 +362,14 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     // initialize parseTree
     ParseTreeNode* root = newParseTreeNode();
     ParseTreeNode* current = root;
-    
+
+    //a root node for <program> and a root node for <$> needs to be made
+    current->nonTermIndex = 0; //corresponding to <program> 
+    current->nextSibling = newParseTreeNode(); //node for $ symbol in stack 
+    current->nextSibling->isLeafNode = TRUE;
+    strcpy(current->nextSibling->terminal.lexeme,"$");
+    current->nextSibling->terminal.type = TK_EOF;
+
     tnt* topOfStack;
 
     token currentInputToken;
@@ -367,7 +378,7 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
         currentInputToken = get_next_token(buffer);
     } while(currentInputToken.type == TK_ERROR);
 
-    while(TRUE){
+    while(!topOfStack->isTerminal || (topOfStack->terminal != TK_EOF)){
         // tnt* stackElement = createStackElement(get_next_token(buffer));
 
         topOfStack = top(inputStack);
@@ -382,7 +393,7 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
             pop(inputStack);
             do {
                 currentInputToken = get_next_token(buffer);
-            } while(currentInputToken == TK_ERROR);
+            } while(currentInputToken.type == TK_ERROR);
         }
 
         //checking if the stack top is a token not matching with currentToken
@@ -407,9 +418,13 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
                 insertRuleBodyIntoStack(inputStack, grammarRules[parseTableEntry]);
                 
                 current = createTreeNodesFromRule(grammarRules[parseTableEntry], current);
+            }
 
-                /* !!! CHECK FOR EPSILON CASE !!! */
-                if()
+            //updating the current pointer in the tree
+            if(topOfStack->isTerminal || topOfStack->isEpsilon) {
+                current = findNextSibling(current);
+            } else {
+                current = current->children[0];
             }
         }
     }
