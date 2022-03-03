@@ -344,13 +344,6 @@ tnt* createStackElement(token t){
     return termOrNonTerm;
 }
 
-ParseTreeNode* findNextSibling(ParseTreeNode* current) {
-    while(current->nextSibling == NULL){
-        current = current->parent;
-    }
-    return current->nextSibling;
-}
-
 ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     // initialize stack
     Stack* inputStack = initiateStack();
