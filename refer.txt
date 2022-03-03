@@ -1,0 +1,206 @@
+parseTree parseInputSourceCode(char* testcaseFile) {
+
+    printf("In source code\n");
+    FILE* fp = startLexer(testcaseFile);
+    initTable();
+
+    //init stack, push SENTINEL, push start symbol
+    Stack* stack = initStack();
+    push(stack, SENTINEL);
+   // printf("Bruh\n");
+    //printToken(top(stack));
+    //printf("\n");
+     push(stack, program);
+     printf("Top of the stack: %d\n", top(stack));
+    
+    parseTree ptree = initTree(program, 1);
+    //printf("Check");
+    parseTree curr = ptree;
+
+    tokenInfo look = getNextToken();
+    if(look.tid==SENTINEL)
+        return ptree;
+
+    // if(look.tid>=eps)
+    //  printToken(look.tid);
+    // else 
+    //     printNonTerminal(look.tid);
+    // printf("\n");
+    g_RHS* rule;
+
+     while(look.tid == TK_COMMENT) {
+        look = getNextToken(); //ignore the comments until a newline
+    }
+    if(look.tid==SENTINEL)
+        return ptree;
+
+    // while(1)
+    //     {
+    //         look = getNextToken();
+    //         if(look.tid==SENTINEL)
+    //             break;
+    //         if(look.tid>=eps)
+    //             printToken(look.tid);
+    //         else 
+    //             printNonTerminal(look.tid);
+    //         printf("\n");
+    //     }
+    //printToken(look.tid);
+
+    while(1){
+        g_Term topStack = top(stack);
+        pop(stack);
+        if(topStack>=eps)
+            printToken(topStack);
+        else
+            printNonTerminal(topStack);
+        
+        printf("check\n\n");
+        if(topStack == -1) {
+            break;
+        }
+
+        while(topStack>=eps) {
+            printf("Inner While loop\n");
+            if(topStack==eps){
+                topStack = top(stack);
+                pop(stack);
+                printf("after eps pop, %d\n",topStack);
+                if(topStack == -1) {
+                    break;
+                }
+                curr->lineNo = look.lineNo;
+                if(curr->nextSibling){
+                    curr= curr->nextSibling;
+                }
+                else if(getNearestUncle(curr)){
+                    curr = getNearestUncle(curr);
+                }
+
+                continue;
+            }
+
+
+            if(topStack!=look.tid){
+                
+                //input is consumed, stack not empty
+                if(look.tid == SENTINEL){
+                    printf("Syntax error: Expected ");
+                    printToken(topStack);
+                    printf(" at line %d \n",look.lineNo);
+                    return ptree;
+                }
+                //stack may or may not be empty, input still coming in
+                else{
+
+                    printf("Syntax error\n");
+                    topStack = top(stack);
+                    pop(stack);
+                    //if topStack is SENTINEL then it is an error, will be handled later in code
+                    curr->lineNo = look.lineNo;
+                    
+                    //update curr to sibling if it has one else to nearest uncle
+                    if(curr->nextSibling){
+                        curr= curr->nextSibling;
+                    }
+                    else if(getNearestUncle(curr)){
+                        curr = getNearestUncle(curr);
+                    }
+
+                    if(!isTerm(topStack) && !parseTable[topStack][look.tid]) break; //go to part of code where we expand the non-terminal
+
+                    //top of the stack is not the same as token so we get next token
+                    //top of the stack is terminal or non terminal which does not match with look
+                    if(topStack != look.tid) {
+                        look = getNextToken();
+                        if(look.tid==SENTINEL)
+                            return ptree;
+                            
+                        while(look.tid == TK_COMMENT) look = getNextToken();
+                        //remove the comments and check if lookahead token is now equal to top of the stack
+                        if(topStack != look.tid) {
+                            //if token still not equal then syntax error
+                            printf("Syntax error, expected %d token but got %d", topStack, look.tid);
+                            while(look.tid != SENTINEL) 
+                            look = getNextToken();
+
+                            printf("Syntax Error: Input is consumed but stack not empty\n");
+                            fclose(fp);
+                            return ptree;
+                        }
+                        continue;
+                    }
+                }
+            }
+
+            //the top of the stack is a terminal and matches the input
+            //pop the stack and move the pointer ahead
+            else {
+                //code is consumed along with the stack
+
+                topStack = top(stack);
+                pop(stack);
+                printf("Top of stack before final cond %d\n",topStack);
+                curr->lineNo = look.lineNo;
+                look = getNextToken();
+                printf("Look.tid prints this: %d\n",look.tid);
+                if(topStack == SENTINEL && look.tid==SENTINEL){
+                    printf("Input consumed and stack clear\n");
+                    fclose(fp);
+                    return ptree;
+                }
+                //printToken(look.tid);
+                if(curr->nextSibling) {
+                    curr = curr->nextSibling;
+                }
+                else if(getNearestUncle(curr)) {
+                    curr = getNearestUncle(curr);
+                }
+                else continue;
+
+                
+            }
+        }
+
+        //get the corresponidng rule from the parse table
+        rule = parseTable[topStack][look.tid-offset];
+        printRule(rule);
+        //error handling, rule 
+        if(!rule) {
+            printf("Syntax error: unexpected token\n");
+
+            topStack = top(stack);
+            pop(stack);
+
+            if(curr->nextSibling){
+                curr = curr->nextSibling;
+            }
+            else if(getNearestUncle(curr)){
+                curr = getNearestUncle(curr);
+            }
+
+            if(isTerm(topStack) && !parseTable[topStack][look.tid]) continue;
+
+            if(topStack != look.tid){
+                look = getNextToken();
+                while(look.tid == TK_COMMENT) look = getNextToken();
+
+                if(topStack != look.tid) {
+                    while(look.tid != SENTINEL) look = getNextToken();
+                    printf("Syntax Error: Input is consumed but stack not empty\n");
+                    fclose(fp);
+                    return ptree;
+                }
+                continue;
+            }
+
+        }
+        printRule(rule);
+        printf("\nPushing into Stack\n");
+        pushRuleIntoStack(rule, stack);
+        printf("Look.tid is %d\n", look.tid);
+        curr = addChildren(rule,curr);
+        printf("check2");
+    }
+    return NULL;
+}

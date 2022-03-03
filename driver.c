@@ -10,24 +10,15 @@
 
 int main(int argc, char *argv[]) {
     // The first argument is the file name
-    if (argc < 2) {
-        printf("TOO FEW ARGUMENTS. Usage: %s <filename> OR %s <filename> <parseOutputFileName>\n", argv[0], argv[0]);
-        return 1;
-    }
-
-    if (argc > 3) {
-        printf("TOO MANY ARGUMENTS. Usage: %s <filename> OR  %s <filename> <parseOutputFileName>\n", argv[0], argv[0]);
+    if (argc !=3 ) {
+        printf("Incorrect num of ARGUMENTS. Usage: %s <filename> <parseOutputFileName>\n", argv[0]);
         return 1;
     }
 
     char* treeFile;
 
     //user gives custom name for parsetree file
-    if(argc == 2) {
-        treeFile = argv[1];
-    } else {
-        strcpy(treeFile,TREE_FILE);
-    }
+    treeFile = argv[2];
 
     twinBuffer *buffer;
     FILE *fp;
@@ -93,6 +84,7 @@ int main(int argc, char *argv[]) {
             populateRules();
             printf("Rules populated\n");
 
+            printf("numNonTerminals: %d",numNonTerminals);
             //fill up the parse table 
             createParseTable(FirstAndFollowAll, parseTable);
 

@@ -8,6 +8,17 @@
 
 char* parseTableFile = "parseTable.csv";
 
+tokenTag syncTokens[] = {
+    TK_END,
+    TK_ENDWHILE,
+    TK_ENDIF,
+    TK_ENDUNION,
+    TK_ENDRECORD,
+    TK_SEM
+};
+
+int numSyncTokens = 6;
+
 void printRule(FILE* fp, GrammarRule gRule){
     NonTerm A = NonTerms[gRule.head];
     tnt* alpha = gRule.body;
@@ -37,7 +48,10 @@ void printParseTableToFile(){
         for(int terminalIndex = 0; terminalIndex < NUMBER_OF_TOKENS; terminalIndex++){
             if(parseTable[nonTerminalIndex][terminalIndex] == -1){
                 fprintf(fp, "Error,");
-            } else {
+            } else if(parseTable[nonTerminalIndex][terminalIndex] == -2) {
+                fprintf(fp, "Synch,");
+            }
+            else {
                 printRule(fp, grammarRules[parseTable[nonTerminalIndex][terminalIndex]]);
             }
         }
@@ -104,6 +118,13 @@ void populateRules(){
 
 void createParseTable(FirstAndFollow FirstAndFollowList){
     memset(parseTable, -1, sizeof(parseTable));
+
+    for(int i = 0; i < numSyncTokens; i++) {
+        for(int j = 0; j < numNonTerminals; j++) {
+            parseTable[j][syncTokens[i]] = -2;
+        }
+    }
+
     for(int ruleIndex = 0; ruleIndex < numRules; ruleIndex++){
         GrammarRule* prodRule = &grammarRules[ruleIndex];
 
@@ -315,7 +336,10 @@ tnt* createStackElement(token t){
 }
 
 ParseTreeNode* findNextSibling(ParseTreeNode* current) {
-    
+    while(current->nextSibling == NULL){
+        current = current->parent;
+    }
+    return current->nextSibling;
 }
 
 ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
@@ -341,7 +365,14 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     // initialize parseTree
     ParseTreeNode* root = newParseTreeNode();
     ParseTreeNode* current = root;
-    
+
+    //a root node for <program> and a root node for <$> needs to be made
+    current->nonTermIndex = 0; //corresponding to <program> 
+    current->nextSibling = newParseTreeNode(); //node for $ symbol in stack 
+    current->nextSibling->isLeafNode = TRUE;
+    strcpy(current->nextSibling->terminal.lexeme,"$");
+    current->nextSibling->terminal.type = TK_EOF;
+
     tnt* topOfStack;
 
     token currentInputToken;
@@ -365,7 +396,7 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
             pop(inputStack);
             do {
                 currentInputToken = get_next_token(buffer);
-            } while(currentInputToken == TK_ERROR);
+            } while(currentInputToken.type == TK_ERROR);
         }
 
         //checking if the stack top is a token not matching with currentToken
@@ -390,7 +421,13 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
                 insertRuleBodyIntoStack(inputStack, grammarRules[parseTableEntry]);
                 
                 current = createTreeNodesFromRule(grammarRules[parseTableEntry], current);
+            }
 
+            //updating the current pointer in the tree
+            if(topOfStack->isTerminal || topOfStack->isEpsilon) {
+                current = findNextSibling(current);
+            } else {
+                current = current->children[0];
             }
         }
 
