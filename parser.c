@@ -254,6 +254,7 @@ ParseTreeNode* newParseTreeNode() {
     ParseTreeNode* newNode = (ParseTreeNode*)malloc(sizeof(ParseTreeNode));
     newNode->parent = NULL;
     newNode->isLeafNode = FALSE;
+    newNode->isEpsilon = FALSE;
     token temp;
     temp.linenumber = 0;
     strcpy(temp.lexeme,"");
@@ -281,6 +282,13 @@ int printParseTree(ParseTreeNode* root, char* filename) {
     return inorderTraversalParseTree(fp,root);
 }
 
+ParseTreeNode* findNextSibling(ParseTreeNode* current){
+    while(current->nextSibling == NULL){
+        current = current->parent;
+    }
+    return current->nextSibling;
+}
+
 
 ParseTreeNode* createTreeNodeForToken(tnt* var){
     if(!(var->isTerminal)){
@@ -290,7 +298,7 @@ ParseTreeNode* createTreeNodeForToken(tnt* var){
 
     ParseTreeNode* treeNode = newParseTreeNode();
     treeNode->isLeafNode = TRUE;
-    treeNode->terminal = var->terminal;
+    treeNode->terminal.type = var->terminal;
 
     return treeNode;
 }
@@ -304,9 +312,10 @@ ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentN
         
         ParseTreeNode* treeNode;
         if(var.isEpsilon){
-
+            treeNode = newParseTreeNode();
+            treeNode->isEpsilon = TRUE;
         } else if (var.isTerminal){
-            treeNode = createTreeNodeForToken(&var, parentNode);
+            treeNode = createTreeNodeForToken(&var);
         } else {
             treeNode = newParseTreeNode();
             treeNode->nonTermIndex = var.nonTermIndex;
@@ -333,10 +342,6 @@ tnt* createStackElement(token t){
     termOrNonTerm->nonTermIndex = -1;
 
     return termOrNonTerm;
-}
-
-ParseTreeNode* findNextSibling(ParseTreeNode* current) {
-    return current;
 }
 
 ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
@@ -367,20 +372,21 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     current->nonTermIndex = 0; //corresponding to <program> 
     current->nextSibling = newParseTreeNode(); //node for $ symbol in stack 
     current->nextSibling->isLeafNode = TRUE;
-    strcpy(current->nextSibling->terminal.lexeme,"$");
     current->nextSibling->terminal.type = TK_EOF;
+
+    printf("$ and <program> pushed in stack, nodes for both created.\n");
 
     tnt* topOfStack;
 
     token currentInputToken;
 
+    // skipping the tokens in input buffer while they are errors
     do {
         currentInputToken = get_next_token(buffer);
     } while(currentInputToken.type == TK_ERROR);
 
-    while(!topOfStack->isTerminal || (topOfStack->terminal != TK_EOF)){
-        // tnt* stackElement = createStackElement(get_next_token(buffer));
 
+    while(!topOfStack->isTerminal || (topOfStack->terminal != TK_EOF)){
         topOfStack = top(inputStack);
 
         if(topOfStack->isEpsilon){
@@ -389,11 +395,16 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
         }
         
         //checking if present token is terminal and same as top of the stack
-        if(topOfStack->isTerminal && (topOfStack->terminal == currentInputToken.type)) {
-            pop(inputStack);
-            do {
-                currentInputToken = get_next_token(buffer);
-            } while(currentInputToken.type == TK_ERROR);
+        if(topOfStack->isTerminal) {
+            if (topOfStack->terminal == currentInputToken.type) {
+                current->terminal = currentInputToken;
+                pop(inputStack);
+                do {
+                    currentInputToken = get_next_token(buffer);
+                } while(currentInputToken.type == TK_ERROR);
+            } else {
+                printf("line %d : Expected %s but got %s", linenumber, tokenNames[topOfStack->terminal], currentInputToken.lexeme);
+            }
         }
 
         //checking if the stack top is a token not matching with currentToken
@@ -407,7 +418,7 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
             int parseTableEntry = parseTable[topOfStack->nonTermIndex][currentInputToken.type];
             if(parseTableEntry == -1){
                 // error condition
-                printf("Error detected on line %d\n", linenumber);
+                // printf("Error detected on line %d\n", linenumber);
             }else{
                 // there is a rule match between the non-terminal and input token
 
@@ -428,5 +439,11 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
             }
         }
     }
+    while(currentInputToken.type != TK_EOF) {
+        printf("%d: Unexpected character %s.\n",currentInputToken.linenumber,currentInputToken.lexeme);
+        currentInputToken = get_next_token(buffer);
+    }
+
+    return root;
 }
     

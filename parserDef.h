@@ -10,7 +10,8 @@
 typedef struct ParseTreeNode {
     struct ParseTreeNode* parent;
     boolean isLeafNode;   //TRUE -> it is a terminal, FALSE -> it is a non terminal
-    
+    boolean isEpsilon;
+
     int nonTermIndex;
 
     token terminal; 

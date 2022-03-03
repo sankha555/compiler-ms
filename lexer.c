@@ -106,9 +106,11 @@ int removeComments(char* testfilename, char* destfilename)
         char c = getch(buffer);
         if (c == '%')
         {
+            printf(" ");
             while (c != '\n' && c != '\0')
             {
                 c = getch(buffer);
+                printf(" ");
             }
         }
         else if (c == '\0')
@@ -117,7 +119,7 @@ int removeComments(char* testfilename, char* destfilename)
         }
         else
         {
-            fputc(c,fout);
+            putc(c,stdout);
         }
     }
 
