@@ -273,6 +273,7 @@ token get_next_token(twinBuffer *buffer)
                 {
                     char *lexeme = malloc(sizeof(char) * 2);
                     lexeme[0] = c;
+                    lexeme[1] = '\0';
 
                     while (c = getch(buffer), isdigit(c))
                     {
@@ -380,8 +381,9 @@ token get_next_token(twinBuffer *buffer)
                 }
                 else if (isalpha(c) && islower(c)) // keywords, identifiers and field names
                 {
-                    char *lexeme = malloc(sizeof(char) * 100);
+                    char *lexeme = malloc(sizeof(char) * 2);
                     lexeme[0] = c;
+                    lexeme[1] = '\0';
 
                     if (c == 'b' || c == 'c' || c == 'd')
                     {
@@ -612,6 +614,7 @@ token get_next_token(twinBuffer *buffer)
         case 11:;
             char *lexeme = malloc(sizeof(char) * 2);
             lexeme[0] = '#';
+            lexeme[1] = '\0';
 
             if (!(isalpha(c) && islower(c)))
             {
@@ -636,6 +639,7 @@ token get_next_token(twinBuffer *buffer)
         case 12:;
             lexeme = malloc(sizeof(char) * 2);
             lexeme[0] = '_';
+            lexeme[1] = '\0';
 
             if (!isalpha(c))
             {
@@ -690,9 +694,9 @@ token get_next_token(twinBuffer *buffer)
 void print_token(FILE *out, token t)
 {
     if (t.type == TK_ERROR)
-        fprintf(out, "Line no. %d: Error : %s\n", t.linenumber, t.lexeme);
+        fprintf(out, "Line %d: Error : %s\n", t.linenumber, t.lexeme);
     else
-        fprintf(out, "Line no. %d\t Lexeme %-31s\t Token %-20s\n", t.linenumber, t.lexeme, tokenNames[t.type]);
+        fprintf(out, "Line %d\t Lexeme %-31s\t Token %-20s\n", t.linenumber, t.lexeme, tokenNames[t.type]);
 }
 
 twinBuffer *init_lexer(char* filename)
