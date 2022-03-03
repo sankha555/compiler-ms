@@ -70,19 +70,6 @@ void printParseTableToFile(){
     }
 }
 
-// void printRule(GrammarRule* gRule){
-//     tnt* alpha = gRule->body;
-//     printf("%s ===>", FirstAndFollowList[gRule->head]);
-//     for(int i = 0; i < gRule->bodyLength; i++){
-//         tnt var = gRule[i];
-//         if(var.isTerminal){
-//             printf("%s ", tokenNames[var.terminal]);
-//         }else{
-//             printf("%s ", FirstAndFollowList[var.nonTermIndex]);
-//         }
-//     }
-// }
-
 void populateRules(){
     // open the grammar file
     FILE *fp = fopen(GRAMMAR_FILE,"r");
@@ -224,14 +211,32 @@ void insertRuleBodyIntoStack(Stack* inputStack, GrammarRule gRule){
     }
 }
 
+void printTreeNode(FILE* fp, ParseTreeNode* treeNode){
+    if (treeNode == NULL) return;   
+    fprintf(fp, "Node details:: Is a terminal? %d; ", treeNode->isLeafNode);
+    if(treeNode->isLeafNode){
+        fprintf(fp, "Terminal ID: %s\n", tokenNames[(treeNode->terminal).type]);
+    } else {
+        fprintf(fp, "Non terminal ID: %s\n", FirstAndFollowList[treeNode->nonTermIndex].symbol);
+    }
+}
 
 //1: correctly displayed this subtree, -1: could not display this subtree
 int inorderTraversalParseTree (FILE* fp, ParseTreeNode *root) {
     
-    if(root->isLeafNode) {
-        return fprintf(fp,"%s\t\t%d\t\t%s\t\t----\t\t%s\t\tYes\t\t----",root->terminal.lexeme,root->terminal.linenumber,tokenNames[root->terminal.type]
-        ,FirstAndFollowList[root->parent->nonTermIndex].symbol);
+    if(root == NULL) {
+        return 1;
     }
+    
+    // printf("Inorder traversal called\n.");
+    // if(root->isEpsilon) {
+    //     return fprintf(fp,"\n\n\nepsilon\n\n\n");
+    // } 
+
+    // if(root->isLeafNode) { 
+    //     return fprintf(fp,"%s\t%d\t%s\t----\t%s\tYes\n",root->terminal.lexeme,root->terminal.linenumber,tokenNames[root->terminal.type]
+    //     ,FirstAndFollowList[root->parent->nonTermIndex].symbol);
+    // }
 
     int i;
     int result = 1;
@@ -239,7 +244,20 @@ int inorderTraversalParseTree (FILE* fp, ParseTreeNode *root) {
         result *= inorderTraversalParseTree(fp,root->children[i]);
     }
 
-    fprintf(fp,"----\t\t----\t\t----\t\t----\t\t%s\t\tNo\t\t%s",FirstAndFollowList[root->parent->nonTermIndex].symbol, FirstAndFollowList[root->nonTermIndex].symbol);
+    if (root->parent)
+        printf("parent %s", FirstAndFollowList[root->parent->nonTermIndex].symbol);
+    else
+        printf("ROOT");
+
+    if (root->isEpsilon)
+        printf(", epsilon");
+    else if (root->isLeafNode){
+        printf(", terminal %s\n", tokenNames[root->terminal.type]);
+    } else {
+        printf(", non-terminal %s\n", FirstAndFollowList[root->nonTermIndex].symbol);
+    } 
+
+    // fprintf(fp,"----\t\t----\t\t----\t\t----\t\t%s\t\tNo\t\t%s\n",FirstAndFollowList[root->parent->nonTermIndex].symbol, FirstAndFollowList[root->nonTermIndex].symbol);
 
     result *= inorderTraversalParseTree(fp,root->children[i]);
 
@@ -278,7 +296,7 @@ int printParseTree(ParseTreeNode* root, char* filename) {
         return -1;
     }
 
-    return inorderTraversalParseTree(fp,root);
+    return inorderTraversalParseTree(stdout,root);
 }
 
 ParseTreeNode* findNextSibling(ParseTreeNode* current){
@@ -331,16 +349,6 @@ ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentN
 
     return parentNode;
 }  
-
-
-void printTreeNode(ParseTreeNode* treeNode){
-    printf("Node details:: Is a terminal? %d; ", treeNode->isLeafNode);
-    if(treeNode->isLeafNode){
-        printf("Terminal ID: %s\n", tokenNames[(treeNode->terminal).type]);
-    } else {
-        printf("Non terminal ID: %s\n", FirstAndFollowList[treeNode->nonTermIndex].symbol);
-    }
-}
 
 ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     // initialize stack
