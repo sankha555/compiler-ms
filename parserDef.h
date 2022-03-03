@@ -10,13 +10,16 @@
 typedef struct ParseTreeNode {
     struct ParseTreeNode* parent;
     boolean isLeafNode;   //TRUE -> it is a terminal, FALSE -> it is a non terminal
-    int numberStatus; //0: not a number, 1: integer, 2: decimal
-    token terminal; 
+    
     int nonTermIndex;
+
+    token terminal; 
+    int numberStatus; //0: not a number, 1: integer, 2: decimal
     int integerValue; 
     float floatValue; 
-    struct ParseTreeNode* children[MAX_PROD_LEN];
+
     int numberOfChildren;
+    struct ParseTreeNode* children[MAX_PROD_LEN];
     struct ParseTreeNode* nextSibling;
 } ParseTreeNode;
 
