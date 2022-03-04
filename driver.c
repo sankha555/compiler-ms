@@ -144,16 +144,7 @@ int main(int argc, char *argv[]) {
             //fill up the parse table 
             createParseTable(FirstAndFollowAll, parseTable);
 
-            //print and store the parse table in a .csv file
-            printParseTableToFile();
-
             root =  parseInputSourceCode(buffer);
-
-            if(printParseTree(root,treeFile) == -1) {
-                printf("\nCould not print the parse tree.\n");
-            } else {
-                printf("\nSuccessfully printed the parse tree in %s.\n\n\n",treeFile);
-            }
 
             endTime = clock();
 
@@ -161,7 +152,7 @@ int main(int argc, char *argv[]) {
 
             total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
 
-            printf("Total time taken for parsing the file = %f.\n\n",total_CPU_time_in_seconds);
+            printf("Total time taken for parsing the file = %f seconds.\n\n",total_CPU_time_in_seconds);
 
             break;
         }

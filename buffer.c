@@ -5,6 +5,7 @@
 
 void reloadBuffer(twinBuffer* tBuffer, int bufferID){
     if(!feof(tBuffer->fp)){
+        memset(tBuffer->buffer[bufferID], '\0', BUFFER_SIZE);
         fread((tBuffer->buffer)[bufferID], 1, BUFFER_SIZE, tBuffer->fp);
     }
 

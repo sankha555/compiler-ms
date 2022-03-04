@@ -85,9 +85,6 @@ void populateGrammar(grammar G) {
 
 		numRules++;
 	}
-    //printf("num of nts: %d", numNonTerminals);
-
-	fclose(fp);
 }
 
 int whichNonTerminal(char *symbol) {
@@ -381,8 +378,6 @@ void writeFirstsToFile() {
 			fprintf(fp, "%s ", epsilon); // add epsilon to end of line, if applicable
 		fprintf(fp, "\n");
 	}
-
-	fclose(fp);
 }
 
 void writeFollowsToFile() {
@@ -399,5 +394,4 @@ void writeFollowsToFile() {
 			fprintf(fp, "%s ", NonTerms[i].follows[j]);
 		fprintf(fp, "\n");
 	}
-	fclose(fp);
 }
