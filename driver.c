@@ -111,11 +111,12 @@ int main(int argc, char *argv[]) {
             } else {
                 printf("\nSuccessfully printed the parse tree in %s.\n\n\n",treeFile);
             }
+            break;
         case 4: 
         {
             clock_t startTime, endTime;
 
-            double total_CPU_time, total_CPU_time_in_seconds;
+            dou0ble total_CPU_time, total_CPU_time_in_seconds;
 
             startTime = clock();
 
