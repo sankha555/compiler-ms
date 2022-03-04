@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
         {
             clock_t startTime, endTime;
 
-            dou0ble total_CPU_time, total_CPU_time_in_seconds;
+            double total_CPU_time, total_CPU_time_in_seconds;
 
             startTime = clock();
 
