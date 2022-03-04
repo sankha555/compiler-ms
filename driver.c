@@ -7,7 +7,7 @@
 #include "parserDef.h"
 #include "parser.h"
 #include "globalDef.h"
-#include<time.h>
+#include <sys/time.h>
 
 #define CLOCKS_PER_SEC 1000000
 
