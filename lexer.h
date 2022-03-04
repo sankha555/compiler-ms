@@ -11,7 +11,7 @@
 
 token get_next_token();
 twinBuffer* init_lexer(char* filename);
-int removeComments(char* src, char* dest);
+int removeComments(char* src);
 void print_token(FILE* out, token t);
 
 //converts "TK_IF" to TK_IF

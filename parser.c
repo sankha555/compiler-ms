@@ -392,14 +392,9 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     stackBottom->nonTermIndex = 0;
     push(inputStack, stackBottom);
 
-    // printStack(inputStack);
-
-    printf("Stack utils pushed.\n");
-
     // initialize parseTree
     ParseTreeNode* root = newParseTreeNode();
 
-    printf("node created.\n");
     ParseTreeNode* current = root;
 
     //a root node for <program> and a root node for <$> needs to be made
@@ -408,15 +403,9 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     current->nextSibling->isLeafNode = TRUE;
     current->nextSibling->terminal.type = TK_EOF;
 
-    printf("$ and <program> pushed in stack, nodes for both created.\n");
-
     tnt* topOfStack = top(inputStack);
 
-    printf("Top stack made. \n");
-
     token currentInputToken;
-
-    printf("currentInputToken initialised.\n");
 
     // skipping the tokens in input buffer while they are errors
     do {
@@ -428,27 +417,17 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     } while(currentInputToken.type == TK_ERROR);
 
 
-    // printf("CurrentToken: %s\n.",currentInputToken.lexeme);
-
     while(topOfStack->terminal != TK_EOF && currentInputToken.type != TK_EOF){
-                        // printStack(inputStack);
-
-        // printStack(inputStack);
-        // print_token(stdout,currentInputToken);
         topOfStack = top(inputStack);
 
         if(topOfStack->isEpsilon){
-            // printf("TOS is epsilon\n");
             pop(inputStack);
             current = findNextSibling(current);
-            // printStack(inputStack);
             continue;
         }
         
         //checking if present token is terminal and same as top of the stack
         else if(topOfStack->isTerminal) {
-            // printf("There is a terminal on top.\n");
-            // printf("%s\n", tokenNames[currentInputToken.type]);
             if (topOfStack->terminal == currentInputToken.type) {
                 current->terminal = currentInputToken;
                 pop(inputStack);
@@ -482,13 +461,11 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
                 do {
                     for(int i = 0; (i < FirstAndFollowList[topOfStack->nonTermIndex].firstLen) && (flag == 0); i++) {
                         if(FirstAndFollowList[topOfStack->nonTermIndex].first[i] == currentInputToken.type) {
-                            // printf("token %s in First set of %s.\n",tokenNames[currentInputToken.type],FirstAndFollowList[topOfStack->nonTermIndex].symbol);
                             flag = 1;
                         }
                     }
                     for(int i = 0; (i < FirstAndFollowList[topOfStack->nonTermIndex].followLen) && (flag == 0); i++) {
                         if(FirstAndFollowList[topOfStack->nonTermIndex].follow[i] == currentInputToken.type) {
-                            // printf("token %s in Follow set of %s.\n",tokenNames[currentInputToken.type],FirstAndFollowList[topOfStack->nonTermIndex].symbol);
                             flag = 2;
                             pop(inputStack);
                             topOfStack = top(inputStack);
@@ -513,17 +490,11 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
                 insertRuleBodyIntoStack(inputStack, grammarRules[parseTableEntry]);
 
                 topOfStack = top(inputStack);
-                // printTnt(topOfStack);
                 
                 current = createTreeNodesFromRule(grammarRules[parseTableEntry], current);
                 current = current->children[0];
-                // printf("Stack after nodes were created.\n");
-                // printStack(inputStack);
             }
         }
-        // printf("Enter to continue");
-        // scanf("%c");
-
     }
     if(currentInputToken.type == TK_EOF && topOfStack->terminal == TK_EOF) {
         printf("\nSource code is syntactically correct.\n");

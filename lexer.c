@@ -81,17 +81,11 @@ char* tokenNames[] = {
  * 
  *  returns: int (0: success / -1:error) / prints ouptut to destfile
  */
-int removeComments(char* testfilename, char* destfilename)
+int removeComments(char* testfilename)
 {
     FILE* fp = fopen(testfilename,"r");
     if(!fp) {
         printf("Could not open file \"%s\".\n",testfilename);
-        return -1;
-    }
-
-    FILE* fout = fopen(destfilename,"w");
-    if(!fout) {
-        printf("Could not open file \"%s\".\n",destfilename);
         return -1;
     }
 
@@ -101,24 +95,23 @@ int removeComments(char* testfilename, char* destfilename)
         return -1;
     }
 
-    int lc = 0;
+    printf("\n\n\n----------- Comment Free Code -----------\n\n");
+
+    int lc = 1;
+    printf("%d:\t",lc);
     while (1)
     {
         char c = getch(buffer);
         if (c == '%')
         {
-            printf(" ");
+            printf("\n%d:\t", ++lc);
             while (c != '\n' && c != '\0')
             {
                 c = getch(buffer);
-                printf(" ");
             }
-            if(c == '\n') {
-                putc(c,stdout);
-                lc++;
-                printf("%d:",lc);
-            }
-            if(c == '\0') {
+
+            if (c == '\0')
+            {
                 break;
             }
         }
@@ -128,14 +121,14 @@ int removeComments(char* testfilename, char* destfilename)
         }
         else
         {
-            putc(c,stdout);
             if(c == '\n') {
-                lc++;
-                printf("%d:",lc);
+                printf("\n%d:\t",++lc);
             }
+            else
+                putc(c,stdout);
         }
     }
-
+    printf("\n\n\n------------------------------------\n\n");
     printf("\n\n\n");
     return 0;
 }
@@ -695,7 +688,7 @@ token get_next_token(twinBuffer *buffer)
 void print_token(FILE *out, token t)
 {
     if (t.type == TK_ERROR)
-        fprintf(out, "Line %4d Error : %s\n", t.linenumber, t.lexeme);
+        fprintf(out, "Line %d\t Error : %s\n", t.linenumber, t.lexeme);
     else
         fprintf(out, "Line %d\t Lexeme %-31s\t Token %-20s\n", t.linenumber, t.lexeme, tokenNames[t.type]);
 }
@@ -714,12 +707,9 @@ twinBuffer *init_lexer(char* filename)
     linenumber = 1;
     twinBuffer *buffer = init_buffer(fp);
 
-    printf("\nBuffer initialized, forward pointer at %d\n", buffer->forward);
-
     // Initialize the keyword map
     table = (keyMap *)malloc(sizeof(keyMap));
-    loadKeyMap(table, "keywords.txt");
-    printf("\nKeyword map load status: %d\n", search(table, "global") == TK_GLOBAL);
+    loadKeyMap(table, KEYWORD_FILE);
 
     return buffer;
 }
@@ -728,7 +718,6 @@ tokenTag tokstrToToken(char *str) {
     tokenTag i = 0;
     for(; i < NUMBER_OF_TOKENS; i++) {
         if(strcmp(str,tokenNames[i]) == 0) {
-            // printf("%d %s %s\n",i,tokenNames[i],str);
             return i;
         }
     }

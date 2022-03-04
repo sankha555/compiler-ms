@@ -21,6 +21,8 @@ int numRules;
 
 #define PARSE_TABLE_FILE "parseTable.csv"
 
+#define KEYWORD_FILE "keywords.txt"
+
 // the maximum number of productions in grammar
 # define MAX_RULES 100
 
