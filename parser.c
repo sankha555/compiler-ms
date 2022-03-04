@@ -248,22 +248,27 @@ int inorderTraversalParseTree (FILE* fp, ParseTreeNode *root) {
     if (root->isEpsilon) {
         if(root->parent == NULL) {
             // printf("----\t\t----\t\tEpsilon\t\t----\t\t<NOPARENT>\t\tYes\t\t----\n");
-            fprintf(fp,"%20s%10s%15s%15s%30s%5s%30s\n",dash,dash,epsilon,dash,noParent,yes,dash);
+            fprintf(fp,"%20s%10s%15s%15s%30s%20s%30s\n",dash,dash,epsilon,dash,noParent,yes,dash);
         } else {
             // printf("----\t\t----\t\tEpsilon\t\t----\t\t%s\t\tYes\t\t----\n",FirstAndFollowList[root->parent->nonTermIndex].symbol);
-            fprintf(fp,"%20s%10s%15s%15s%30s%5s%30s\n",dash,dash,epsilon,dash,FirstAndFollowList[root->parent->nonTermIndex].symbol,yes,dash);
+            fprintf(fp,"%20s%10s%15s%15s%30s%20s%30s\n",dash,dash,epsilon,dash,FirstAndFollowList[root->parent->nonTermIndex].symbol,yes,dash);
         }
     }
     else if (root->isLeafNode){
+        if(root->terminal.type == TK_NUM || root->terminal.type == TK_RNUM) {
+            fprintf(fp,"%20s%10d%15s%15s%30s%20s%30s\n",root->terminal.lexeme, root->terminal.linenumber, tokenNames[root->terminal.type],root->terminal.lexeme,FirstAndFollowList[root->parent->nonTermIndex].symbol,yes,dash);
+        }
         // printf("%s\t\t%d:\t\t%s\t\t----\t\tYes\t\t----\n",root->terminal.lexeme, root->terminal.linenumber, tokenNames[root->terminal.type]);
-        fprintf(fp,"%20s%10d%15s%15s%30s%5s%30s\n",root->terminal.lexeme, root->terminal.linenumber, tokenNames[root->terminal.type],dash,FirstAndFollowList[root->parent->nonTermIndex].symbol,yes,dash);
+        else { 
+            fprintf(fp,"%20s%10d%15s%15s%30s%20s%30s\n",root->terminal.lexeme, root->terminal.linenumber, tokenNames[root->terminal.type],dash,FirstAndFollowList[root->parent->nonTermIndex].symbol,yes,dash);
+        }
     } else {
         if(root->parent == NULL) {
             // printf("----\t\t----\t\t----\t\t----\t\t<NOPARENT>\t\tNo\t\t%s\n",FirstAndFollowList[root->nonTermIndex].symbol);
-            fprintf(fp,"%20s%10s%15s%15s%30s%5s%30s\n",dash,dash,dash,dash,noParent,no,FirstAndFollowList[root->nonTermIndex].symbol);
+            fprintf(fp,"%20s%10s%15s%15s%30s%20s%30s\n",dash,dash,dash,dash,noParent,no,FirstAndFollowList[root->nonTermIndex].symbol);
         } else {
             // printf("----\t\t----\t\t----\t\t----\t\t%s\t\tNo\t\t%s\n",FirstAndFollowList[root->parent->nonTermIndex].symbol, FirstAndFollowList[root->nonTermIndex].symbol);
-            fprintf(fp,"%20s%10s%15s%15s%30s%5s%30s\n",dash,dash,dash,dash,FirstAndFollowList[root->parent->nonTermIndex].symbol,no,FirstAndFollowList[root->nonTermIndex].symbol);
+            fprintf(fp,"%20s%10s%15s%15s%30s%20s%30s\n",dash,dash,dash,dash,FirstAndFollowList[root->parent->nonTermIndex].symbol,no,FirstAndFollowList[root->nonTermIndex].symbol);
         }
     } 
 
@@ -307,6 +312,8 @@ int printParseTree(ParseTreeNode* root, char* filename) {
         printf("Could not open file for printing tree.\n");
         return -1;
     }
+
+    fprintf(fp,"%20s%10s%15s%15s%30s%20s%30s\n\n\n","Lexeme","Line no.","TOKEN_NAME","valueIfNum","ParentSymbol","isLeafNode","NodeSymbol");
 
     int result = inorderTraversalParseTree(fp,root);
 
