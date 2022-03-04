@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "FirstAndFollow.h"
 #include "stack.h"
+#include <sys/time.h>
 
 char* parseTableFile = PARSE_TABLE_FILE;
 
