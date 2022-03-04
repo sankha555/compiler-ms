@@ -3,54 +3,65 @@
 #include <stdlib.h>
 #include <string.h>
 
-void reloadBuffer(twinBuffer* tBuffer, int bufferID){
-    if(!feof(tBuffer->fp)){
-        memset(tBuffer->buffer[bufferID], '\0', BUFFER_SIZE);
-        fread((tBuffer->buffer)[bufferID], 1, BUFFER_SIZE, tBuffer->fp);
+void reloadBuffer(twinBuffer *tBuffer, int bufferID)
+{
+    printf("trying reload buffer\n");
+    if (!feof(tBuffer->fp))
+    {
+        memset(tBuffer->buffer[bufferID], EOF, BUFFER_SIZE);
+        fread((tBuffer->buffer)[bufferID], sizeof(char), BUFFER_SIZE, tBuffer->fp);
     }
 
     tBuffer->forward = 0;
-    tBuffer->lexemeBegin = 0;
     tBuffer->currentBufferID = bufferID;
+    printf("reloaded buffer\n");
 }
 
-twinBuffer* init_buffer(FILE* fp){
-    twinBuffer* tBuffer = (twinBuffer*) malloc(sizeof(twinBuffer));
-    if(tBuffer == NULL) {
+twinBuffer *init_buffer(FILE *fp)
+{
+    twinBuffer *tBuffer = (twinBuffer *)malloc(sizeof(twinBuffer));
+    if (tBuffer == NULL)
+    {
         return tBuffer;
     }
-    tBuffer->buffer[0][BUFFER_SIZE-1] = '\0';
-    tBuffer->buffer[1][BUFFER_SIZE-1] = '\0';
     tBuffer->forward = 0;
-    tBuffer->lexemeBegin = 0;
     tBuffer->currentBufferID = 0;
     tBuffer->fp = fp;
     reloadBuffer(tBuffer, tBuffer->currentBufferID);
     return tBuffer;
 }
 
-char getch(twinBuffer* tBuffer){
-    int currForward = tBuffer->forward;
+char getch(twinBuffer *tBuffer)
+{
     int currBufferID = tBuffer->currentBufferID;
 
-    if(currForward == BUFFER_SIZE-1){
-        // if forward pointer is at end of this buffer, reload the other buffer 
-        reloadBuffer(tBuffer, !(currBufferID));
+    if (tBuffer->forward == BUFFER_SIZE - 1)
+    {
+        if (currBufferID == 0)
+            reloadBuffer(tBuffer, 1);
+        else
+            reloadBuffer(tBuffer, 0);
     }
-    
-    currForward = tBuffer->forward;
+
     currBufferID = tBuffer->currentBufferID;
-    if((tBuffer->buffer)[currBufferID][currForward] == '\0'){
+    if ((tBuffer->buffer)[currBufferID][tBuffer->forward] == EOF)
+    {
         // end of source program
         return '\0';
-    } 
+    }
 
-    // return normal character
-    (tBuffer->forward)++;
-    return (tBuffer->buffer)[currBufferID][currForward];
+    return (tBuffer->buffer)[currBufferID][tBuffer->forward++];
 }
 
-char ungetch(twinBuffer* tBuffer){
-    (tBuffer->forward)--;
-    return (tBuffer->buffer)[tBuffer->currentBufferID][tBuffer->forward];
+void ungetch(twinBuffer *tBuffer)
+{
+    if(tBuffer->forward == 0)
+    {
+        tBuffer->currentBufferID = 1 - tBuffer->currentBufferID;
+        tBuffer->forward = BUFFER_SIZE - 1;
+    }
+    else
+    {
+        (tBuffer->forward)--;
+    }
 }
