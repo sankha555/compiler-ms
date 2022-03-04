@@ -5,8 +5,10 @@
 #include "lexerDef.h"
 #include "lexer.h"
 #include "FirstAndFollow.h"
+#include "stack.h"
+#include <sys/time.h>
 
-char* parseTableFile = "parseTable.csv";
+char* parseTableFile = PARSE_TABLE_FILE;
 
 tokenTag syncTokens[] = {
     TK_END,
@@ -16,6 +18,16 @@ tokenTag syncTokens[] = {
     TK_ENDRECORD,
     TK_SEM
 };
+
+
+void printTnt(tnt* term){
+    printf("isEpsilon:%d isTerminal:%d", term->isEpsilon, term->isTerminal);
+    if (term->isTerminal){
+        printf(", terminal %s\n", tokenNames[term->terminal]);
+    } else {
+        printf(", non-terminal %s\n", FirstAndFollowList[term->nonTermIndex].symbol);
+    }   
+}
 
 int numSyncTokens = 6;
 
@@ -126,23 +138,23 @@ void createParseTable(FirstAndFollow FirstAndFollowList){
     }
 
     for(int ruleIndex = 0; ruleIndex < numRules; ruleIndex++){
-        GrammarRule* prodRule = &grammarRules[ruleIndex];
+        // GrammarRule* prodRule = &grammarRules[ruleIndex];
 
-        printf("Body Length: %d\n", prodRule->bodyLength);
+        //printf("Body Length: %d\n", prodRule->bodyLength);
 
-        int nonTerminalIndex = prodRule->head;
-        printf("%d. ", nonTerminalIndex);
+        int nonTerminalIndex = grammarRules[ruleIndex].head;
+        //printf("%d. ", nonTerminalIndex);
 
         FirstAndFollowElement fnf = FirstAndFollowList[nonTerminalIndex];
-        printf("%s ===> ", fnf.symbol);
+        //printf("%s ===> ", fnf.symbol);
 
-        tnt* alpha = prodRule->body;
+        // tnt* alpha = prodRule->body;
         
-        for(int j = 0; j < prodRule->bodyLength; j++){
-            tnt var = alpha[j];
+        for(int j = 0; j < grammarRules[ruleIndex].bodyLength; j++){
+            tnt var = grammarRules[ruleIndex].body[j];
             
             if (var.isEpsilon) {
-                printf("epsilon");
+                // printf("epsilon");
                 for(int k = 0; k < fnf.followLen; k++){
                     int terminalIndex = fnf.follow[k];
                     parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
@@ -151,23 +163,30 @@ void createParseTable(FirstAndFollow FirstAndFollowList){
                 if (fnf.dollarInFollow){
                     parseTable[nonTerminalIndex][TK_EOF] = ruleIndex;
                 }
+                break;
             }else if(var.isTerminal){
-                printf("%s ", tokenNames[var.terminal]);
+                // printf("%s ", tokenNames[var.terminal]);
                 // first of a terminal is the terminal itself 
                 int terminalIndex = var.terminal;
                 parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
+                break;
             } else {
                 // var is a non-terminal
                 FirstAndFollowElement nonTerm = FirstAndFollowList[var.nonTermIndex];
-                printf("%s ", nonTerm.symbol);
+                // printf("%s ", nonTerm.symbol);
 
                 for(int k = 0; k < nonTerm.firstLen; k++){
                     int terminalIndex = nonTerm.first[k];
-                    printf("%d; ", terminalIndex);
+                    // printf("%d; ", terminalIndex);
                     parseTable[nonTerminalIndex][terminalIndex] = ruleIndex;
+                    
                 }
 
-                if (nonTerm.nullable) {
+                if(!nonTerm.nullable) {
+                    break;
+                }
+
+                if (nonTerm.nullable && j == grammarRules[ruleIndex].bodyLength-1) {
                     // if the first set of the non-terminal contains epsilon
                     for(int k = 0; k < fnf.followLen; k++){
                         int terminalIndex = fnf.follow[k];
@@ -180,91 +199,101 @@ void createParseTable(FirstAndFollow FirstAndFollowList){
                 }
             } 
         }
-        printf("\n");
+        // printf("\n");
     }
 }
 
-Stack* initiateStack(){
-    Stack* inputStack = (Stack*) malloc(sizeof(Stack));
-    inputStack->stackPointer = 0;
-    
-    tnt* bottomOfStack = (tnt*) malloc(sizeof(tnt));
-    bottomOfStack->isTerminal = TRUE;
-    bottomOfStack->terminal = TK_EOF;
-    bottomOfStack->nonTermIndex = -1;
-    bottomOfStack->isEpsilon = FALSE;
-
-    inputStack->stackElements[inputStack->stackPointer] = bottomOfStack;
-
-    return inputStack;
-}
-
-void pop(Stack* inputStack){
-    if(inputStack->stackPointer == -1){
-        return;
-    }
-
-    inputStack->stackElements[inputStack->stackPointer] = NULL;
-    (inputStack->stackPointer)--;
-}
-
-void push(Stack* inputStack, tnt* var){
-    if(inputStack->stackPointer == (STACK_SIZE - 1)){
-        return;
-    }
-
-    (inputStack->stackPointer)++;
-    inputStack->stackElements[inputStack->stackPointer] = var;
-}
-
-tnt* top(Stack* inputStack){
-    return inputStack->stackElements[inputStack->stackPointer];
-}
 
 void insertRuleBodyIntoStack(Stack* inputStack, GrammarRule gRule){
-    tnt* alpha = gRule.body;
+    // printf("starting to insert rule body into stack\n");
     for(int i = gRule.bodyLength - 1; i >= 0; i--){
-        push(inputStack, &alpha[i]);
+        tnt* alpha = (tnt*)malloc(sizeof(tnt));
+        alpha->isEpsilon = gRule.body[i].isEpsilon;
+        alpha->isTerminal = gRule.body[i].isTerminal;
+        alpha->nonTermIndex = gRule.body[i].nonTermIndex;
+        alpha->terminal = gRule.body[i].terminal;
+        // printf("Inserting new symbol in the stack.\n");
+        // printTnt(alpha);
+        push(inputStack, alpha);
     }
 }
 
+void printTreeNode(FILE* fp, ParseTreeNode* treeNode){
+    if (treeNode == NULL) return;   
+    fprintf(fp, "Node details:: Is a terminal? %d; ", treeNode->isLeafNode);
+    if(treeNode->isLeafNode){
+        fprintf(fp, "Terminal ID: %s\n", tokenNames[(treeNode->terminal).type]);
+    } else {
+        fprintf(fp, "Non terminal ID: %s\n", FirstAndFollowList[treeNode->nonTermIndex].symbol);
+    }
+}
 
 //1: correctly displayed this subtree, -1: could not display this subtree
 int inorderTraversalParseTree (FILE* fp, ParseTreeNode *root) {
     
-    if(root->isLeafNode) {
-        return fprintf(fp,"%s\t\t%d\t\t%s\t\t----\t\t%s\t\tYes\t\t----",root->terminal.lexeme,root->terminal.linenumber,tokenNames[root->terminal.type]
-        ,FirstAndFollowList[root->parent->nonTermIndex].symbol);
+    if(root == NULL) {
+        return 1;
     }
 
-    int i;
+    int i = 0;
     int result = 1;
-    for(i = 0; i < ( root->numberOfChildren - 1 ); i++) {
+    char* dash = "----";
+    char* epsilon = "Epsilon";
+    char* noParent = "<NOPARENT>";
+    char* yes = "Yes";
+    char* no = "No";
+    
+    result *= inorderTraversalParseTree(fp,root->children[0]);
+
+    if (root->isEpsilon) {
+        if(root->parent == NULL) {
+            // printf("----\t\t----\t\tEpsilon\t\t----\t\t<NOPARENT>\t\tYes\t\t----\n");
+            fprintf(fp,"%20s%10s%15s%15s%30s%5s%30s\n",dash,dash,epsilon,dash,noParent,yes,dash);
+        } else {
+            // printf("----\t\t----\t\tEpsilon\t\t----\t\t%s\t\tYes\t\t----\n",FirstAndFollowList[root->parent->nonTermIndex].symbol);
+            fprintf(fp,"%20s%10s%15s%15s%30s%5s%30s\n",dash,dash,epsilon,dash,FirstAndFollowList[root->parent->nonTermIndex].symbol,yes,dash);
+        }
+    }
+    else if (root->isLeafNode){
+        // printf("%s\t\t%d:\t\t%s\t\t----\t\tYes\t\t----\n",root->terminal.lexeme, root->terminal.linenumber, tokenNames[root->terminal.type]);
+        fprintf(fp,"%20s%10d%15s%15s%30s%5s%30s\n",root->terminal.lexeme, root->terminal.linenumber, tokenNames[root->terminal.type],dash,FirstAndFollowList[root->parent->nonTermIndex].symbol,yes,dash);
+    } else {
+        if(root->parent == NULL) {
+            // printf("----\t\t----\t\t----\t\t----\t\t<NOPARENT>\t\tNo\t\t%s\n",FirstAndFollowList[root->nonTermIndex].symbol);
+            fprintf(fp,"%20s%10s%15s%15s%30s%5s%30s\n",dash,dash,dash,dash,noParent,no,FirstAndFollowList[root->nonTermIndex].symbol);
+        } else {
+            // printf("----\t\t----\t\t----\t\t----\t\t%s\t\tNo\t\t%s\n",FirstAndFollowList[root->parent->nonTermIndex].symbol, FirstAndFollowList[root->nonTermIndex].symbol);
+            fprintf(fp,"%20s%10s%15s%15s%30s%5s%30s\n",dash,dash,dash,dash,FirstAndFollowList[root->parent->nonTermIndex].symbol,no,FirstAndFollowList[root->nonTermIndex].symbol);
+        }
+    } 
+
+    // fprintf(fp,"----\t\t----\t\t----\t\t----\t\t%s\t\tNo\t\t%s\n",FirstAndFollowList[root->parent->nonTermIndex].symbol, FirstAndFollowList[root->nonTermIndex].symbol);
+
+    for(i = 1; i < ( root->numberOfChildren ); i++) {
         result *= inorderTraversalParseTree(fp,root->children[i]);
     }
-
-    fprintf(fp,"----\t\t----\t\t----\t\t----\t\t%s\t\tNo\t\t%s",FirstAndFollowList[root->parent->nonTermIndex].symbol, FirstAndFollowList[root->nonTermIndex].symbol);
-
-    result *= inorderTraversalParseTree(fp,root->children[i]);
 
     return result;
 }
 
 ParseTreeNode* newParseTreeNode() {
     ParseTreeNode* newNode = (ParseTreeNode*)malloc(sizeof(ParseTreeNode));
+    // printf("okay\n");
     newNode->parent = NULL;
     newNode->isLeafNode = FALSE;
     newNode->isEpsilon = FALSE;
     token temp;
     temp.linenumber = 0;
-    strcpy(temp.lexeme,"");
+    temp.lexeme = "";
     temp.type = -1;
     newNode->numberStatus = 0;
     newNode->terminal = temp;
     newNode->nonTermIndex = -1;
     newNode->integerValue = 69;
     newNode->floatValue = 69.69;
-    memset(newNode->children,NULL,MAX_PROD_LEN);
+    for(int i = 0; i < MAX_PROD_LEN; i++) {
+        newNode->children[i] = NULL;
+    }
     newNode->nextSibling = NULL;
     newNode->numberOfChildren = 0;
     return newNode;
@@ -279,7 +308,10 @@ int printParseTree(ParseTreeNode* root, char* filename) {
         return -1;
     }
 
-    return inorderTraversalParseTree(fp,root);
+    int result = inorderTraversalParseTree(fp,root);
+
+    fclose(fp);
+    return result;
 }
 
 ParseTreeNode* findNextSibling(ParseTreeNode* current){
@@ -310,14 +342,14 @@ ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentN
     for(int i = gRule.bodyLength - 1; i >= 0; i--){
         tnt var = alpha[i];
         
-        ParseTreeNode* treeNode;
+        ParseTreeNode* treeNode = newParseTreeNode();;
         if(var.isEpsilon){
-            treeNode = newParseTreeNode();
             treeNode->isEpsilon = TRUE;
+            treeNode->isLeafNode = TRUE;
         } else if (var.isTerminal){
-            treeNode = createTreeNodeForToken(&var);
+            treeNode->isLeafNode = TRUE;
+            treeNode->terminal.type = var.terminal;
         } else {
-            treeNode = newParseTreeNode();
             treeNode->nonTermIndex = var.nonTermIndex;
         }
         treeNode->parent = parentNode; 
@@ -333,20 +365,9 @@ ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentN
     return parentNode;
 }  
 
-tnt* createStackElement(token t){
-    tnt* termOrNonTerm = (tnt*) malloc(sizeof(tnt));
-
-    termOrNonTerm->isTerminal = TRUE;
-    termOrNonTerm->isEpsilon = FALSE;
-    termOrNonTerm->terminal = t.type;
-    termOrNonTerm->nonTermIndex = -1;
-
-    return termOrNonTerm;
-}
-
 ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     // initialize stack
-    Stack* inputStack = initiateStack();
+    Stack* inputStack = newStack();
 
     // pushing '$' to stack
     tnt* stackBottom = (tnt*) malloc(sizeof(tnt));
@@ -364,8 +385,14 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
     stackBottom->nonTermIndex = 0;
     push(inputStack, stackBottom);
 
+    // printStack(inputStack);
+
+    printf("Stack utils pushed.\n");
+
     // initialize parseTree
     ParseTreeNode* root = newParseTreeNode();
+
+    printf("node created.\n");
     ParseTreeNode* current = root;
 
     //a root node for <program> and a root node for <$> needs to be made
@@ -376,76 +403,91 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
 
     printf("$ and <program> pushed in stack, nodes for both created.\n");
 
-    tnt* topOfStack;
+    tnt* topOfStack = top(inputStack);
+
+    printf("Top stack made. \n");
 
     token currentInputToken;
+
+    printf("currentInputToken initialised.\n");
 
     // skipping the tokens in input buffer while they are errors
     do {
         currentInputToken = get_next_token(buffer);
+        // print_token(stdout,currentInputToken);  
+        if(currentInputToken.type == TK_ERROR) {
+            printf("\nLine Number:%d Lexical error: Could not tokenise %s.\n",currentInputToken.linenumber,currentInputToken.lexeme);
+        }  
     } while(currentInputToken.type == TK_ERROR);
 
 
-    while(!topOfStack->isTerminal || (topOfStack->terminal != TK_EOF)){
+    // printf("CurrentToken: %s\n.",currentInputToken.lexeme);
+
+    while(topOfStack->terminal != TK_EOF){
+        // printStack(inputStack);
+        // print_token(stdout,currentInputToken);
         topOfStack = top(inputStack);
 
         if(topOfStack->isEpsilon){
+            // printf("TOS is epsilon\n");
             pop(inputStack);
+            current = findNextSibling(current);
+            // printStack(inputStack);
             continue;
         }
         
         //checking if present token is terminal and same as top of the stack
-        if(topOfStack->isTerminal) {
+        else if(topOfStack->isTerminal) {
+            // printf("There is a terminal on top.\n");
+            // printf("%s\n", tokenNames[currentInputToken.type]);
             if (topOfStack->terminal == currentInputToken.type) {
                 current->terminal = currentInputToken;
                 pop(inputStack);
+                topOfStack = top(inputStack);
                 do {
                     currentInputToken = get_next_token(buffer);
+                    if(currentInputToken.type == TK_ERROR) {
+                        printf("\nLine Number:%d Lexical error: Could not tokenise %s.\n",currentInputToken.linenumber,currentInputToken.lexeme);
+                    }  
                 } while(currentInputToken.type == TK_ERROR);
+                current = findNextSibling(current);
             } else {
-                printf("line %d : Expected %s but got %s", linenumber, tokenNames[topOfStack->terminal], currentInputToken.lexeme);
+                // input token and token in top of stack do not match
+                printf("line %d : Expected %s but got %s.\n", linenumber, tokenNames[topOfStack->terminal], currentInputToken.lexeme);
+                exit(1);
             }
+
+            
         }
 
-        //checking if the stack top is a token not matching with currentToken
-        if(topOfStack->isTerminal && (topOfStack->terminal != currentInputToken.type)) {
-            //handle error
-        }
-
-        if(!(topOfStack->isTerminal)){
+        else if(!(topOfStack->isTerminal)){
             // if top of stack is a non-terminal
 
             int parseTableEntry = parseTable[topOfStack->nonTermIndex][currentInputToken.type];
-            if(parseTableEntry == -1){
-                // error condition
-                // printf("Error detected on line %d\n", linenumber);
+            if(parseTableEntry < 0){
+                // error condition. Pop the top of stack non-terminal and continue.
+                pop(inputStack);
+                continue;
             }else{
                 // there is a rule match between the non-terminal and input token
-
                 // pop current top of stack symbol
                 pop(inputStack);
 
                 // push the children of the current stack symbol into the stack
                 insertRuleBodyIntoStack(inputStack, grammarRules[parseTableEntry]);
+
+                topOfStack = top(inputStack);
+                // printTnt(topOfStack);
                 
                 current = createTreeNodesFromRule(grammarRules[parseTableEntry], current);
-            }
-
-            //updating the current pointer in the tree
-            if(topOfStack->isTerminal || topOfStack->isEpsilon) {
-                current = findNextSibling(current);
-            } else {
                 current = current->children[0];
+                // printf("Stack after nodes were created.\n");
+                // printStack(inputStack);
             }
         }
+        // printf("Enter to continue");
+        // scanf("%c");
 
-        //updating the current pointer in the tree, next sibling in the case of terminal/epsilon 
-        //and first child in the case of a non terminal
-        if(topOfStack->isTerminal || topOfStack->isEpsilon) {
-            current = findNextSibling(current);
-        } else {
-            current = current->children[0];
-        }
     }
     while(currentInputToken.type != TK_EOF) {
         printf("%d: Unexpected character %s.\n",currentInputToken.linenumber,currentInputToken.lexeme);

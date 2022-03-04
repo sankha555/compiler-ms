@@ -70,10 +70,10 @@
 <highPrecedenceOperators> ===> TK_DIV
 <lowPrecedenceOperators> ===> TK_PLUS
 <lowPrecedenceOperators> ===> TK_MINUS
+<booleanExpression> ===> TK_NOT TK_OP <booleanExpression> TK_CL
 <booleanExpression> ===> TK_OP <booleanExpression> TK_CL <logicalOp> TK_OP <booleanExpression> TK_CL
 <booleanExpression> ===> <var> <relationalOp> <var>
-<booleanExpression> ===> TK_NOT TK_OP <booleanExpression> TK_CL
-<var> ===> TK_ID
+<var> ===> <singleOrRecId>
 <var> ===> TK_NUM
 <var> ===> TK_RNUM
 <logicalOp> ===> TK_AND

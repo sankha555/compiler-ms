@@ -41,7 +41,7 @@
 <factor> TK_OP TK_ID TK_NUM TK_RNUM 
 <highPrecedenceOperators> TK_MUL TK_DIV 
 <lowPrecedenceOperators> TK_PLUS TK_MINUS 
-<booleanExpression> TK_OP TK_ID TK_NUM TK_RNUM TK_NOT 
+<booleanExpression> TK_NOT TK_OP TK_ID TK_NUM TK_RNUM 
 <var> TK_ID TK_NUM TK_RNUM 
 <logicalOp> TK_AND TK_OR 
 <relationalOp> TK_LT TK_LE TK_EQ TK_GT TK_GE TK_NE 

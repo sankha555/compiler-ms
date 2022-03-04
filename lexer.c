@@ -101,6 +101,7 @@ int removeComments(char* testfilename, char* destfilename)
         return -1;
     }
 
+    int lc = 0;
     while (1)
     {
         char c = getch(buffer);
@@ -112,6 +113,14 @@ int removeComments(char* testfilename, char* destfilename)
                 c = getch(buffer);
                 printf(" ");
             }
+            if(c == '\n') {
+                putc(c,stdout);
+                lc++;
+                printf("%d:",lc);
+            }
+            if(c == '\0') {
+                break;
+            }
         }
         else if (c == '\0')
         {
@@ -120,9 +129,14 @@ int removeComments(char* testfilename, char* destfilename)
         else
         {
             putc(c,stdout);
+            if(c == '\n') {
+                lc++;
+                printf("%d:",lc);
+            }
         }
     }
 
+    printf("\n\n\n");
     return 0;
 }
 
@@ -259,6 +273,7 @@ token get_next_token(twinBuffer *buffer)
                 {
                     char *lexeme = malloc(sizeof(char) * 2);
                     lexeme[0] = c;
+                    lexeme[1] = '\0';
 
                     while (c = getch(buffer), isdigit(c))
                     {
@@ -366,8 +381,9 @@ token get_next_token(twinBuffer *buffer)
                 }
                 else if (isalpha(c) && islower(c)) // keywords, identifiers and field names
                 {
-                    char *lexeme = malloc(sizeof(char) * 100);
+                    char *lexeme = malloc(sizeof(char) * 2);
                     lexeme[0] = c;
+                    lexeme[1] = '\0';
 
                     if (c == 'b' || c == 'c' || c == 'd')
                     {
@@ -406,6 +422,8 @@ token get_next_token(twinBuffer *buffer)
                             t.linenumber = linenumber;
                             ungetch(buffer);
                             return t;
+                        } else {
+                            strncat(lexeme, &c, 1);
                         }
                     }
 
@@ -596,6 +614,7 @@ token get_next_token(twinBuffer *buffer)
         case 11:;
             char *lexeme = malloc(sizeof(char) * 2);
             lexeme[0] = '#';
+            lexeme[1] = '\0';
 
             if (!(isalpha(c) && islower(c)))
             {
@@ -620,6 +639,7 @@ token get_next_token(twinBuffer *buffer)
         case 12:;
             lexeme = malloc(sizeof(char) * 2);
             lexeme[0] = '_';
+            lexeme[1] = '\0';
 
             if (!isalpha(c))
             {
@@ -674,9 +694,9 @@ token get_next_token(twinBuffer *buffer)
 void print_token(FILE *out, token t)
 {
     if (t.type == TK_ERROR)
-        fprintf(out, "Line no. %d: Error : %s\n", t.linenumber, t.lexeme);
+        fprintf(out, "Line %d: Error : %s\n", t.linenumber, t.lexeme);
     else
-        fprintf(out, "Line no. %d\t Lexeme %-31s\t Token %-20s\n", t.linenumber, t.lexeme, tokenNames[t.type]);
+        fprintf(out, "Line %d\t Lexeme %-31s\t Token %-20s\n", t.linenumber, t.lexeme, tokenNames[t.type]);
 }
 
 twinBuffer *init_lexer(char* filename)
@@ -693,12 +713,12 @@ twinBuffer *init_lexer(char* filename)
     linenumber = 1;
     twinBuffer *buffer = init_buffer(fp);
 
-    printf("Buffer initialized, forward pointer at %d\n", buffer->forward);
+    printf("\nBuffer initialized, forward pointer at %d\n", buffer->forward);
 
     // Initialize the keyword map
     table = (keyMap *)malloc(sizeof(keyMap));
     loadKeyMap(table, "keywords.txt");
-    printf("Keyword map load status: %d\n", search(table, "global") == TK_GLOBAL);
+    printf("\nKeyword map load status: %d\n", search(table, "global") == TK_GLOBAL);
 
     return buffer;
 }
