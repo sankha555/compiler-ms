@@ -5,6 +5,9 @@
 #include "parserDef.h"
 #include "globalDef.h"
 
+int findinFirstSet(token currentInputToken, tnt *topOfStack);
+int findinFollowSet(token currentInputToken, tnt *topOfStack);
+
 void printRule(FILE* fp, GrammarRule gRule);
 
 void printParseTableToFile();

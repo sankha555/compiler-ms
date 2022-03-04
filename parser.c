@@ -6,7 +6,6 @@
 #include "lexer.h"
 #include "FirstAndFollow.h"
 #include "stack.h"
-#include <sys/time.h>
 
 char* parseTableFile = PARSE_TABLE_FILE;
 
@@ -18,6 +17,21 @@ tokenTag syncTokens[] = {
     TK_ENDRECORD,
     TK_SEM
 };
+
+
+int findInFirstSet(token currentInputToken, tnt *topOfStack){
+    for(int i=0;i<FirstAndFollowList[topOfStack->nonTermIndex].firstLen;i++){
+        if(currentInputToken.type== FirstAndFollowList[topOfStack->nonTermIndex].first[i])return 1;
+    }
+    return 0;
+}
+
+int findInFollowSet(token currentInputToken, tnt *topOfStack){
+    for(int i=0;i<FirstAndFollowList[topOfStack->nonTermIndex].followLen;i++){
+        if(currentInputToken.type== FirstAndFollowList[topOfStack->nonTermIndex].follow[i])return 1;
+    }
+    return 0;
+}
 
 
 void printTnt(tnt* term){
@@ -453,8 +467,10 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
                 current = findNextSibling(current);
             } else {
                 // input token and token in top of stack do not match
-                printf("line %d : Expected %s but got %s.\n", linenumber, tokenNames[topOfStack->terminal], currentInputToken.lexeme);
-                exit(1);
+                printf("line %d : Expected %s but got %s ->%s inserted and Parsing continues\n", linenumber, tokenNames[topOfStack->terminal], currentInputToken.lexeme,tokenNames[topOfStack->terminal]);
+                pop(inputStack);
+                topOfStack = top(inputStack);
+                //exit(1);
             }
 
             
@@ -462,12 +478,33 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
 
         else if(!(topOfStack->isTerminal)){
             // if top of stack is a non-terminal
-
+            
             int parseTableEntry = parseTable[topOfStack->nonTermIndex][currentInputToken.type];
             if(parseTableEntry < 0){
-                // error condition. Pop the top of stack non-terminal and continue.
-                pop(inputStack);
-                continue;
+                // error condition. Panic Mode error recovery will be implemented.
+                printf("\n Line Number : %d Unexpected Token : %s : %s encountered . Token ignored and Parsing resumed.\n",currentInputToken.linenumber, tokenNames[currentInputToken.type]
+                , currentInputToken.lexeme);
+                while(currentInputToken.type!= TK_EOF){
+                    do {
+                        currentInputToken = get_next_token(buffer);
+                        if(currentInputToken.type == TK_ERROR) {
+                            printf("\nLine Number:%d Lexical error: Could not tokenise %s.\n",currentInputToken.linenumber,currentInputToken.lexeme);
+                        }  
+                    } while(currentInputToken.type == TK_ERROR);
+                    
+                    if(findInFirstSet(currentInputToken, topOfStack)) break;
+                    else if(findInFollowSet(currentInputToken, topOfStack)){
+                        printf("Non-Terminal %s ignored. Parsing resumed.\n", FirstAndFollowList[topOfStack->nonTermIndex].symbol);
+                        pop(inputStack);
+                        topOfStack= top(inputStack);
+                        break;
+                    } 
+                }
+                if(currentInputToken.type== TK_EOF){
+                    printf("Syntax Error encountered as %s could not be parsed. End of File reached\n", FirstAndFollowList[topOfStack->nonTermIndex].symbol);
+                    break;
+                }
+                else continue;
             }else{
                 // there is a rule match between the non-terminal and input token
                 // pop current top of stack symbol
