@@ -679,6 +679,7 @@ token get_next_token(twinBuffer *buffer)
             else
                 t.type = TK_FUNID;
 
+            // lexeme[strlen(lexeme)] = '\0';
             t.lexeme = lexeme;
             t.linenumber = linenumber;
             ungetch(buffer);
@@ -694,7 +695,7 @@ token get_next_token(twinBuffer *buffer)
 void print_token(FILE *out, token t)
 {
     if (t.type == TK_ERROR)
-        fprintf(out, "Line %d: Error : %s\n", t.linenumber, t.lexeme);
+        fprintf(out, "Line %4d Error : %s\n", t.linenumber, t.lexeme);
     else
         fprintf(out, "Line %d\t Lexeme %-31s\t Token %-20s\n", t.linenumber, t.lexeme, tokenNames[t.type]);
 }

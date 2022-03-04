@@ -290,7 +290,7 @@ ParseTreeNode* newParseTreeNode() {
     token temp;
     temp.linenumber = 0;
     temp.lexeme = "";
-    temp.type = -1;
+    temp.type = TK_ERROR;
     newNode->numberStatus = 0;
     newNode->terminal = temp;
     newNode->nonTermIndex = -1;
@@ -423,14 +423,16 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
         currentInputToken = get_next_token(buffer);
         // print_token(stdout,currentInputToken);  
         if(currentInputToken.type == TK_ERROR) {
-            printf("\nLine Number:%d Lexical error: Could not tokenise %s.\n",currentInputToken.linenumber,currentInputToken.lexeme);
+            print_token(stdout,currentInputToken);
         }  
     } while(currentInputToken.type == TK_ERROR);
 
 
     // printf("CurrentToken: %s\n.",currentInputToken.lexeme);
 
-    while(topOfStack->terminal != TK_EOF){
+    while(topOfStack->terminal != TK_EOF && currentInputToken.type != TK_EOF){
+                        // printStack(inputStack);
+
         // printStack(inputStack);
         // print_token(stdout,currentInputToken);
         topOfStack = top(inputStack);
@@ -454,17 +456,18 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
                 do {
                     currentInputToken = get_next_token(buffer);
                     if(currentInputToken.type == TK_ERROR) {
-                        printf("\nLine Number:%d Lexical error: Could not tokenise %s.\n",currentInputToken.linenumber,currentInputToken.lexeme);
+                        print_token(stdout,currentInputToken);
                     }  
                 } while(currentInputToken.type == TK_ERROR);
                 current = findNextSibling(current);
             } else {
                 // input token and token in top of stack do not match
-                printf("line %d : Expected %s but got %s.\n", linenumber, tokenNames[topOfStack->terminal], currentInputToken.lexeme);
-                exit(1);
-            }
-
-            
+                printf("Line %4d Error: The token %s for lexeme \"%s\" does not match with the expected token %s\n",currentInputToken.linenumber,tokenNames[currentInputToken.type],currentInputToken.lexeme,tokenNames[topOfStack->terminal]);
+                current->terminal.linenumber = currentInputToken.linenumber;
+                pop(inputStack);
+                topOfStack = top(inputStack);
+                current = findNextSibling(current);
+            } 
         }
 
         else if(!(topOfStack->isTerminal)){
@@ -473,8 +476,34 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
             int parseTableEntry = parseTable[topOfStack->nonTermIndex][currentInputToken.type];
             if(parseTableEntry < 0){
                 // error condition. Pop the top of stack non-terminal and continue.
-                pop(inputStack);
-                continue;
+                printf("Line %4d Error: Invalid token %s encountered with value \"%s\", stack top -> %s\n",currentInputToken.linenumber,tokenNames[currentInputToken.type],currentInputToken.lexeme,FirstAndFollowList[topOfStack->nonTermIndex].symbol);
+                // getchar();
+                int flag = 0;
+                do {
+                    for(int i = 0; (i < FirstAndFollowList[topOfStack->nonTermIndex].firstLen) && (flag == 0); i++) {
+                        if(FirstAndFollowList[topOfStack->nonTermIndex].first[i] == currentInputToken.type) {
+                            // printf("token %s in First set of %s.\n",tokenNames[currentInputToken.type],FirstAndFollowList[topOfStack->nonTermIndex].symbol);
+                            flag = 1;
+                        }
+                    }
+                    for(int i = 0; (i < FirstAndFollowList[topOfStack->nonTermIndex].followLen) && (flag == 0); i++) {
+                        if(FirstAndFollowList[topOfStack->nonTermIndex].follow[i] == currentInputToken.type) {
+                            // printf("token %s in Follow set of %s.\n",tokenNames[currentInputToken.type],FirstAndFollowList[topOfStack->nonTermIndex].symbol);
+                            flag = 2;
+                            pop(inputStack);
+                            topOfStack = top(inputStack);
+                            current = findNextSibling(current);
+                        }
+                    }
+                    if(flag == 0) {
+                        do {
+                            currentInputToken = get_next_token(buffer);
+                            if(currentInputToken.type == TK_ERROR) {
+                                print_token(stdout,currentInputToken);
+                            }  
+                        } while(currentInputToken.type == TK_ERROR);
+                    }
+                } while(flag == 0 && currentInputToken.type != TK_EOF);
             }else{
                 // there is a rule match between the non-terminal and input token
                 // pop current top of stack symbol
@@ -496,11 +525,13 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
         // scanf("%c");
 
     }
-    while(currentInputToken.type != TK_EOF) {
-        printf("%d: Unexpected character %s.\n",currentInputToken.linenumber,currentInputToken.lexeme);
-        currentInputToken = get_next_token(buffer);
+    if(currentInputToken.type == TK_EOF && topOfStack->terminal == TK_EOF) {
+        printf("\nSource code is syntactically correct.\n");
+    } else if(currentInputToken.type != TK_EOF) {
+        printf("Line %4d Error: Invalid token %s encountered with value \"%s\", stack top -> $\n",currentInputToken.linenumber,tokenNames[currentInputToken.type],currentInputToken.lexeme);
+    } else {
+        printf("Line %4d Error: Invalid token %s encountered with value \"%s\", stack top -> %s\n",currentInputToken.linenumber,tokenNames[currentInputToken.type],currentInputToken.lexeme,FirstAndFollowList[topOfStack->nonTermIndex].symbol);
     }
-
     return root;
 }
     
