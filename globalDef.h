@@ -19,6 +19,8 @@ int numRules;
 
 #define CLEAN_FILE "cleanedcode.spl"
 
+#define PARSE_TABLE_FILE "parseTable.csv"
+
 // the maximum number of productions in grammar
 # define MAX_RULES 100
 

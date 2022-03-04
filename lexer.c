@@ -713,12 +713,12 @@ twinBuffer *init_lexer(char* filename)
     linenumber = 1;
     twinBuffer *buffer = init_buffer(fp);
 
-    printf("Buffer initialized, forward pointer at %d\n", buffer->forward);
+    printf("\nBuffer initialized, forward pointer at %d\n", buffer->forward);
 
     // Initialize the keyword map
     table = (keyMap *)malloc(sizeof(keyMap));
     loadKeyMap(table, "keywords.txt");
-    printf("Keyword map load status: %d\n", search(table, "global") == TK_GLOBAL);
+    printf("\nKeyword map load status: %d\n", search(table, "global") == TK_GLOBAL);
 
     return buffer;
 }
