@@ -1,6 +1,7 @@
 #ifndef PARSER_DEF_H
 #define PARSER_DEF_H
 
+#include "astDef.h"
 #include "lexer.h"
 #include "lexerDef.h"
 #include "FirstAndFollow.h"
@@ -13,11 +14,15 @@ typedef struct ParseTreeNode {
     boolean isEpsilon;
 
     int nonTermIndex;
+    int ruleIndex;
 
     token terminal; 
     int numberStatus; //0: not a number, 1: integer, 2: decimal
     int integerValue; 
     float floatValue; 
+
+    astNode* ptr;
+    astNode* inhptr;
 
     int numberOfChildren;
     struct ParseTreeNode* children[MAX_PROD_LEN];

@@ -299,8 +299,11 @@ ParseTreeNode* newParseTreeNode() {
     for(int i = 0; i < MAX_PROD_LEN; i++) {
         newNode->children[i] = NULL;
     }
+    newNode->ptr = NULL;
+    newNode->inhptr = NULL;
     newNode->nextSibling = NULL;
     newNode->numberOfChildren = 0;
+    newNode->ruleIndex = -1;
     return newNode;
 }
 
@@ -342,7 +345,7 @@ ParseTreeNode* createTreeNodeForToken(tnt* var){
     return treeNode;
 }
 
-ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentNode){
+ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentNode, int parseTableEntry){
     tnt* alpha = gRule.body;
 
     ParseTreeNode* next = NULL;
@@ -364,7 +367,7 @@ ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentN
         
         // insert this new node as child of parent
         parentNode->children[i] = treeNode;
-
+        parentNode->ruleIndex = parseTableEntry;
         next = treeNode;
     }    
     parentNode->numberOfChildren = gRule.bodyLength;
@@ -491,7 +494,7 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
 
                 topOfStack = top(inputStack);
                 
-                current = createTreeNodesFromRule(grammarRules[parseTableEntry], current);
+                current = createTreeNodesFromRule(grammarRules[parseTableEntry], current, parseTableEntry);
                 current = current->children[0];
             }
         }
