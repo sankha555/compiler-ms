@@ -7,7 +7,6 @@
 typedef struct b {
     char buffer[2][BUFFER_SIZE];
     int forward;
-    int lexemeBegin; 
     int currentBufferID;
     FILE* fp;
 } twinBuffer;
@@ -19,7 +18,7 @@ twinBuffer* init_buffer(FILE *fp);
 char getch(twinBuffer* tBuffer);
 
 // places the input character back into the buffer returns the previous character from the buffer
-char ungetch(twinBuffer* tBuffer);
+void ungetch(twinBuffer* tBuffer);
 
 
 #endif

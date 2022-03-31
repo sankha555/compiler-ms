@@ -1,6 +1,7 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include "lexer.h"
 #include "buffer.h"
 #include "FirstAndFollow.h"
@@ -12,44 +13,46 @@
 #include <time.h>
 #include <stdlib.h>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     // The first argument is the file name
-    if (argc !=3 ) {
+    if (argc != 3)
+    {
         printf("Incorrect num of ARGUMENTS. Usage: %s <filename> <parseOutputFileName>\n", argv[0]);
         return 1;
     }
 
-    printf("CS F303 Compiler Construction\n");
-    printf("=======================================================\n");
-    printf("Group Members");
-    printf("\n\t1. Pratham Neeraj Gupta (2019A7PS0051P)");
-    printf("\n\t2. Madhav Gupta (2019A7PS0063P)");
-    printf("\n\t3. Sankha Das (2019A7PS0029P)");
-    printf("\n\t4. Yash Gupta (2019A7PS1138P)");
-    printf("\n\t5. Meenal Gupta (2019A7PS0243P)");
-    printf("\n=====================================================\n");
-    printf("\n\nProject Status:\n\n");
-    printf("1. \tBoth Lexical and Syntactic Analyser are implemented.\n");
-    printf("2. \tLexical Analyser is implemented using a finite state machine.\n");
-    printf("3. \tSyntactic Analyser is implemented using a non-recursive descent parser.\n");
-    printf("4. \tFirst and Follow sets automated.\n");
-    printf("5. \tParse Table construction automated\n");
-    printf("6. \tParse Tree generated successfully\n");
-    printf("7. \tError recovery done using Panic mode\n");
-    printf("8. \tAll modules compile successfully and work without segmentation fault.\n");
-    printf("9. \tModules work with all test cases provided (t1-t6).\n");
-    printf("10.\tTested with GCC 7.5.0 on Ubuntu 18.04 LTS\n");
-    printf("=======================================================\n");
+    char *treeFile;
 
-    char* treeFile;
-
-    //user gives custom name for parsetree file
+    // user gives custom name for parsetree file
     treeFile = argv[2];
 
     twinBuffer *buffer;
     FILE *fp;
 
-    while (1) {
+    while (1)
+    {
+        printf("CS F303 Compiler Construction\n");
+        printf("=======================================================\n");
+        printf("Group Members");
+        printf("\n\t1. Pratham Neeraj Gupta (2019A7PS0051P)");
+        printf("\n\t2. Madhav Gupta (2019A7PS0063P)");
+        printf("\n\t3. Sankha Das (2019A7PS0029P)");
+        printf("\n\t4. Yash Gupta (2019A7PS1138P)");
+        printf("\n\t5. Meenal Gupta (2019A7PS0243P)");
+        printf("\n=====================================================\n");
+        printf("\n\nProject Status:\n\n");
+        printf("1. \tBoth Lexical and Syntactic Analyser are implemented.\n");
+        printf("2. \tLexical Analyser is implemented using a finite state machine.\n");
+        printf("3. \tSyntactic Analyser is implemented using a non-recursive descent parser.\n");
+        printf("4. \tFirst and Follow sets automated.\n");
+        printf("5. \tParse Table construction automated\n");
+        printf("6. \tParse Tree generated successfully\n");
+        printf("7. \tError recovery done using Panic mode\n");
+        printf("8. \tAll modules compile successfully and work without segmentation fault.\n");
+        printf("9. \tModules work with all test cases provided (t1-t6).\n");
+        printf("10.\tTested with GCC 7.5.0 on Ubuntu 18.04 LTS\n");
+        printf("=======================================================\n");
         printf("\n\n\nTest a module\n\n");
         printf("0 - Quit\n");
         printf("1 - Removal of comments and print to console\n");
@@ -58,7 +61,6 @@ int main(int argc, char *argv[]) {
         printf("4 - Find parsing time\n");
         printf("\nEnter a command: ");
 
-
         int option;
 
         scanf("%d", &option);
@@ -66,63 +68,73 @@ int main(int argc, char *argv[]) {
         switch (option)
         {
         case 0:
-            
+
             return 0;
 
         case 1:
             removeComments(argv[1]);
+
+            execlp(argv[0], argv[0], argv[1], argv[2], NULL);
             break;
         case 2:
-            
+
             buffer = init_lexer(argv[1]);
-            if(buffer == NULL) {
-                printf("Lexer could not be initialised for \"%s\".\n",argv[1]);
+            if (buffer == NULL)
+            {
+                printf("Lexer could not be initialised for \"%s\".\n", argv[1]);
                 break;
             }
-            
+
             token receivedToken = get_next_token(buffer);
 
             printf("\n\n\n----------- List of Tokens -----------\n\n");
-            
-            while (receivedToken.type != TK_EOF) {
+
+            while (receivedToken.type != TK_EOF)
+            {
                 print_token(stdout, receivedToken);
                 receivedToken = get_next_token(buffer);
-            } 
-            
+            }
+
             printf("\n\n\n------------------------------------\n\n");
 
+            execlp(argv[0], argv[0], argv[1], argv[2], NULL);
             break;
         case 3:
 
-            //load key map, intiate twin buffer and wait for request of a token
+            // load key map, intiate twin buffer and wait for request of a token
             buffer = init_lexer(argv[1]);
-            if(buffer == NULL) {
-                printf("Lexer could not be initialised for \"%s\".\n",argv[1]);
+            if (buffer == NULL)
+            {
+                printf("Lexer could not be initialised for \"%s\".\n", argv[1]);
                 break;
             }
 
-            //compute first and follow sets for each non terminal in the grammar and store the information in NonTerms[MAX_NT]
-            //First and Follow sets.txt files are generated by the writeFirstsToFile() and writeFollowsToFile() functions
-            FirstAndFollowElement* FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+            // compute first and follow sets for each non terminal in the grammar and store the information in NonTerms[MAX_NT]
+            // First and Follow sets.txt files are generated by the writeFirstsToFile() and writeFollowsToFile() functions
+            FirstAndFollowElement *FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
 
-            //populate the grammar rules from the file -> grammarRules 
+            // populate the grammar rules from the file -> grammarRules
             populateRules();
 
-            //fill up the parse table 
+            // fill up the parse table
             createParseTable(FirstAndFollowAll, parseTable);
 
-            //print and store the parse table in a .csv file
+            // print and store the parse table in a .csv file
             printParseTableToFile();
 
-            ParseTreeNode* root =  parseInputSourceCode(buffer);
+            ParseTreeNode *root = parseInputSourceCode(buffer);
 
-            if(printParseTree(root,treeFile) == -1) {
+            if (printParseTree(root, treeFile) == -1)
+            {
                 printf("\nCould not print the parse tree.\n");
-            } else {
-                printf("\nSuccessfully printed the parse tree in %s.\n\n\n",treeFile);
             }
+            else
+            {
+                printf("\nSuccessfully printed the parse tree in %s.\n\n\n", treeFile);
+            }
+            execlp(argv[0], argv[0], argv[1], argv[2], NULL);
             break;
-        case 4: 
+        case 4:
         {
             clock_t startTime, endTime;
 
@@ -130,32 +142,34 @@ int main(int argc, char *argv[]) {
 
             startTime = clock();
 
-            //load key map, intiate twin buffer and wait for request of a token
+            // load key map, intiate twin buffer and wait for request of a token
             buffer = init_lexer(argv[1]);
-            if(buffer == NULL) {
+            if (buffer == NULL)
+            {
                 break;
             }
 
-            //compute first and follow sets for each non terminal in the grammar and store the information in NonTerms[MAX_NT]
-            //First and Follow sets.txt files are generated by the writeFirstsToFile() and writeFollowsToFile() functions
+            // compute first and follow sets for each non terminal in the grammar and store the information in NonTerms[MAX_NT]
+            // First and Follow sets.txt files are generated by the writeFirstsToFile() and writeFollowsToFile() functions
             FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
 
-            //populate the grammar rules from the file -> grammarRules 
+            // populate the grammar rules from the file -> grammarRules
             populateRules();
-            
-            //fill up the parse table 
+
+            // fill up the parse table
             createParseTable(FirstAndFollowAll, parseTable);
 
-            root =  parseInputSourceCode(buffer);
+            root = parseInputSourceCode(buffer);
 
             endTime = clock();
 
-            total_CPU_time = (double) (endTime - startTime);
+            total_CPU_time = (double)(endTime - startTime);
 
             total_CPU_time_in_seconds = total_CPU_time / CLOCKS_PER_SEC;
 
-            printf("Total time taken for parsing the file = %f seconds.\n\n",total_CPU_time_in_seconds);
+            printf("Total time taken for parsing the file = %f seconds.\n\n", total_CPU_time_in_seconds);
 
+            execlp(argv[0], argv[0], argv[1], argv[2], NULL);
             break;
         }
         default:
