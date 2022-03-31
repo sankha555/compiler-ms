@@ -7,6 +7,8 @@
 #include "parserDef.h"
 #include "parser.h"
 #include "globalDef.h"
+#include "astDef.h"
+#include "astGenerator.h"
 #include <time.h>
 #include <stdlib.h>
 

@@ -17,5 +17,7 @@ ParseTreeNode* parseInputSourceCode();
 
 int printParseTree(ParseTreeNode* root, char* filename);
 
+void printTreeNode(FILE* fp, ParseTreeNode* treeNode);
+
 #endif
 

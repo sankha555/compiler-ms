@@ -1,7 +1,7 @@
               Lexeme  Line no.     TOKEN_NAME     valueIfNum                  ParentSymbol          isLeafNode                    NodeSymbol
 
 
-_computeFunction @ã         6       TK_FUNID           ----                    <function>                 Yes                          ----
+   _computeFunction          6       TK_FUNID           ----                    <function>                 Yes                          ----
                 ----      ----           ----           ----              <otherFunctions>                  No                    <function>
                input         6       TK_INPUT           ----                   <input_par>                 Yes                          ----
                 ----      ----           ----           ----                    <function>                  No                   <input_par>
@@ -323,7 +323,6 @@ _computeFunction @ã         6       TK_FUNID           ----                    
                 ----      ----           ----           ----                        <term>                  No                   <termPrime>
                c4bbb        15          TK_ID           ----               <singleOrRecId>                 Yes                          ----
                 ----      ----           ----           ----                         <var>                  No               <singleOrRecId>
-                ----      ----        Epsilon           ----   <option_single_constructed>                 Yes                          ----
                 ----      ----           ----           ----               <singleOrRecId>                  No   <option_single_constructed>
                 ----      ----           ----           ----                      <factor>                  No                         <var>
                 ----      ----           ----           ----                   <termPrime>                  No                      <factor>
@@ -332,26 +331,11 @@ _computeFunction @ã         6       TK_FUNID           ----                    
                 ----      ----           ----           ----              <assignmentStmt>                  No        <arithmeticExpression>
                 ----      ----        Epsilon           ----                    <expPrime>                 Yes                          ----
                 ----      ----           ----           ----        <arithmeticExpression>                  No                    <expPrime>
-                   ;        15         TK_SEM           ----              <assignmentStmt>                 Yes                          ----
+                            17         TK_SEM           ----              <assignmentStmt>                 Yes                          ----
                 ----      ----           ----           ----             <conditionalStmt>                  No                        <stmt>
-                ----      ----        Epsilon           ----                  <otherStmts>                 Yes                          ----
                 ----      ----           ----           ----             <conditionalStmt>                  No                  <otherStmts>
-                else        16        TK_ELSE           ----                    <elsePart>                 Yes                          ----
-                ----      ----           ----           ----             <conditionalStmt>                  No                    <elsePart>
-               write        17       TK_WRITE           ----                      <ioStmt>                 Yes                          ----
-                ----      ----           ----           ----                        <stmt>                  No                      <ioStmt>
-                   (        17          TK_OP           ----                      <ioStmt>                 Yes                          ----
-               c4bbb        17          TK_ID           ----               <singleOrRecId>                 Yes                          ----
-                ----      ----           ----           ----                         <var>                  No               <singleOrRecId>
-                ----      ----        Epsilon           ----   <option_single_constructed>                 Yes                          ----
-                ----      ----           ----           ----               <singleOrRecId>                  No   <option_single_constructed>
-                ----      ----           ----           ----                      <ioStmt>                  No                         <var>
-                   )        17          TK_CL           ----                      <ioStmt>                 Yes                          ----
-                   ;        17         TK_SEM           ----                      <ioStmt>                 Yes                          ----
-                ----      ----           ----           ----                    <elsePart>                  No                        <stmt>
-                ----      ----        Epsilon           ----                  <otherStmts>                 Yes                          ----
-                ----      ----           ----           ----                    <elsePart>                  No                  <otherStmts>
                endif        18       TK_ENDIF           ----                    <elsePart>                 Yes                          ----
+                ----      ----           ----           ----             <conditionalStmt>                  No                    <elsePart>
                 ----      ----           ----           ----                  <otherStmts>                  No                        <stmt>
                 ----      ----           ----           ----                  <otherStmts>                  No                  <otherStmts>
                   b5        25          TK_ID           ----               <singleOrRecId>                 Yes                          ----
