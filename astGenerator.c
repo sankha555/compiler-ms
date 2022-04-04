@@ -660,6 +660,166 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         root->ptr = NULL;
         freeChildren(root, 0, 0);
         return NULL;
+
+	case 76:
+		/* <var> ===> <singleOrRecId> */
+		createAbtstractSyntaxTree(root->children[0]);
+		ptr = root->children[0]->ptr;
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+	case 77:
+		/* <var> ===> TK_NUM */
+		ptr = newASTleafNode(Num);
+		ptr->entry = root->children[0]->terminal;
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+	case 78:
+		/* <var> ===> TK_RNUM */
+		ptr = newASTleafNode(RealNum);
+		ptr->entry = root->children[0]->terminal;
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+	case 79:
+		/* <logicalOp> ===> TK_AND */
+		ptr = newASTleafNode(logOp_AND);
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+	case 80:
+		/* <logicalOp> ===> TK_OR */
+		ptr = newASTleafNode(logOp_OR);
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+	case 81:
+		/* <relationalOp> ===> TK_LT */
+		ptr = newASTleafNode(relOp_LT);
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+
+	case 82:
+		/* <relationalOp> ===> TK_LE */
+		ptr = newASTleafNode(relOp_LE);
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+
+	case 83:
+		/* <relationalOp> ===> TK_EQ */
+		ptr = newASTleafNode(relOp_EQ);
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+
+	case 84:
+		/* <relationalOp> ===> TK_GT */
+		ptr = newASTleafNode(relOp_GT);
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+	case 85:
+		/* <relationalOp> ===> TK_GE */
+		ptr = newASTleafNode(relOp_GE);
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+	case 86:
+		/* <relationalOp> ===> TK_NE */
+		ptr = newASTleafNode(relOp_NE);
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+	case 87:
+		/* <returnStmt> ===> TK_RETURN <optionalReturn> TK_SEM */
+		createAbstractSyntaxTree(root->children[1]);
+		ptr = newASTnode(Return);
+		ptr->children[0] = root->children[1]->ptr;
+		root->ptr = ptr;
+		freeChildren(root, 0, 2);
+		return ptr;
+
+	case 88:
+		/* <optionalReturn> ===> TK_SQL <idList> TK_SQR */
+		createAbstractSyntaxTree(root->children[1]);
+		ptr = root->children[1]->ptr;
+		root->ptr = ptr;
+		freeChildren(root, 0, 2);
+		return ptr;
+
+	case 89:
+		/* <optionalReturn> ===> epsilon */
+		root->ptr = NULL;
+		freeChildren(root, 0, 0);
+		return NULL;
+
+	case 90:
+		/* <idList> ===> TK_ID <more_ids> */
+		createAbstractSyntaxTree(root->children[1]);
+		ptr = newASTnode(IdLinkedListNode);
+		ptr->isLinkedListNode = TRUE;
+		ptr->data = newASTleafNode(Id);
+		ptr->data->entry = root->children[0]->terminal;
+		ptr->next = root->children[1]->ptr;
+		root->ptr = ptr;
+		freeChildren(root, 0, 1);
+		return ptr;
+
+	case 91:
+		/* <more_ids> ===> TK_COMMA <idList> */
+		createAbstractSyntaxTree(root->children[1]);
+		ptr = root->children[1]->ptr;
+		root->ptr = ptr;
+		freeChildren(root, 0, 1);
+		return ptr;
+
+	case 92:
+		/* <more_ids> ===> epsilon */
+		root->ptr = NULL;
+		freeChildren(root, 0, 0);
+		return NULL;
+
+	case 93:
+		/* <definetypestmt> ===> TK_DEFINETYPE <A> TK_RUID TK_AS TK_RUID */
+		ptr = newASTNode(DefineType);
+		createAbstractSyntaxTree(root->children[1]);
+		ptr->children[0] = root->children[1]->ptr;
+		ptr->children[1] = newASTleafNode(RecUnionId);
+		ptr->children[1]->entry = root->children[2]->terminal;
+		ptr->children[2] = newASTleafNode(RecUnionId);
+		ptr->children[2]->entry = root->children[4]->terminal;
+		root->ptr = ptr;
+		freeChildren(root, 0, 4);
+		return ptr;
+
+	case 94:
+		/* <A> ===> TK_RECORD */
+		ptr = newASTleafNode(Record);
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
+	case 95:
+		/* <A> ===> TK_UNION */
+		ptr = newASTleafNode(Union);
+		root->ptr = ptr;
+		freeChildren(root, 0, 0);
+		return ptr;
+
     default:
         printf("Unmatched rule encountered. Exiting!!\n");
         exit(1);
