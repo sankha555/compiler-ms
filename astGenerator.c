@@ -17,7 +17,6 @@ astNode *newASTnode(ASTtag tag)
 {
     astNode *ptr = (astNode *)malloc(sizeof(astNode));
     ptr->type = tag;
-    ptr->leafType = -1;
     ptr->isLeafNode = FALSE;
     ptr->next = NULL;
     ptr->data = NULL;
@@ -26,9 +25,10 @@ astNode *newASTnode(ASTtag tag)
     {
         ptr->children[i] = NULL;
     }
-    return ptr;
     ptr->intValue = 0;
     ptr->realValue = 0;
+    return ptr;
+    
 }
 
 /**
@@ -37,11 +37,10 @@ astNode *newASTnode(ASTtag tag)
  * @param tag the value (identifier / keyword) of the node
  * @return astNode* 
  */
-astNode *newASTleafNode(ASTLeafTag tag)
+astNode *newASTleafNode(ASTtag tag)
 {
     astNode *ptr = (astNode *)malloc(sizeof(astNode));
-    ptr->type = -1;
-    ptr->leafType = tag;
+    ptr->type = tag;
 
     ptr->isLinkedListNode = FALSE;
     ptr->isLeafNode = TRUE;
@@ -95,6 +94,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
     // applying rules, but not for some cases, in which inhptrs are required
 
     astNode *ptr = NULL;
+    astNode *temp = NULL;
 
     switch (root->ruleIndex + 1)
     {
@@ -660,10 +660,328 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         root->ptr = NULL;
         freeChildren(root, 0, 0);
         return NULL;
+    
+    case 51: 
+        /**
+         * @brief <funCallStmt> ===> <outputParameters> TK_CALL TK_FUNID TK_WITH 
+         *                              TK_PARAMETERS <inputParameters> TK_SEM
+         */
+        ptr= newASTnode(FuncCall);
+        createAbstractSyntaxTree(root->children[0]);
+        ptr->children[0]= root->children[0]->ptr;
+        ptr->children[1] = newASTleafNode(FuncId);
+        ptr->children[1]->entry= root->children[2]->terminal;
+        createAbstractSyntaxTree(root->children[5]);
+        ptr->children[2]= root->children[5]->ptr;
+        root->ptr = ptr;
+        freeChildren(root, 0,6);
+        return ptr;
+    
+    case 52:
+        /**
+         * @brief <outputParameters> ===> TK_SQL <idList> TK_SQR TK_ASSIGNOP
+         */
+        createAbstractSyntaxTree(root->children[1]);
+        root->ptr = root->children[1]->ptr;
+        freeChildren(root, 0, 3);
+        return root->ptr;
+
+    case 53:
+        /**
+         * @brief <outputParameters> ===> epsilon
+         */
+        root->ptr = NULL;
+        freeChildren(root, 0, 0);
+        return NULL;
+    case 54:
+        /**
+         * @brief <inputParameters> ===> TK_SQL <idList> TK_SQR
+         */
+
+        createAbstractSyntaxTree(root->children[1]);
+        root->ptr = root->children[1]->ptr;
+        freeChildren(root, 0,2);
+        return root->ptr;
+    case 55:
+        /**
+         * @brief <iterativeStmt> ===> TK_WHILE TK_OP <booleanExpression>
+         *                              TK_CL <stmt> <otherStmts> TK_ENDWHILE
+         */
+        
+        temp = newASTnode(StmtLinkedListNode);
+        temp->isLinkedListNode = TRUE;
+        createAbstractSyntaxTree(root->children[4]);
+        temp->data = root->children[4]->ptr;
+        createAbstractSyntaxTree(root->children[5]);
+        temp->next = root->children[5]->ptr;
+        
+        ptr  = newASTnode(While);
+        createAbstractSyntaxTree(root->children[2]);
+        ptr->children[0] = root->children[2]->ptr;
+        ptr->children[1] = temp;
+        root->ptr = ptr;
+        freeChildren(root, 0, 6);
+        return ptr;
+    
+    case 56:
+        /**
+         *
+         * @brief <conditionalStmt> ===> TK_IF TK_OP <booleanExpression> TK_CL TK_THEN <stmt> <otherStmts> <elsePart>
+         * 
+         */
+
+        temp = newASTnode(StmtLinkedListNode);
+        createAbstractSyntaxTree(root->children[5]);
+        createAbstractSyntaxTree(root->children[6]);
+        temp->data = root->children[5]->ptr;
+        temp->next = root->children[6]->ptr;
+
+        ptr = newASTnode(If);
+        createAbstractSyntaxTree(root->children[2]);
+        createAbstractSyntaxTree(root->children[7]);
+        ptr->children[0] = root->children[2]->ptr;
+        ptr->children[1] = temp;
+        ptr->children[2] = root->children[7]->ptr;
+        root->ptr = ptr;
+        freeChildren(root, 0,7);
+        return ptr;
+    
+    case 57:
+            /**
+             * @brief <elsePart> ===> TK_ELSE <stmt> <otherStmts> TK_ENDIF
+             * 
+             * 
+             */
+
+            temp = newASTnode(StmtLinkedListNode);
+            createAbstractSyntaxTree(root->children[1]);
+            createAbstractSyntaxTree(root->children[2]);
+            temp->data = root->children[1]->ptr;
+            temp->next = root->children[2]->ptr;
+            
+            ptr = newASTnode(Else);
+            ptr->children[0] = temp;
+            root->ptr = ptr;
+            freeChildren(root, 0,3);
+            return ptr;
+    
+
+    case 58: 
+            /**
+             * @brief <elsePart> ===> TK_ENDIF
+             */
+            root->ptr = NULL;
+            freeChildren(root, 0, 0);
+            return NULL;
+    
+    case 59:
+            /**
+             * @brief <ioStmt> ===> TK_READ TK_OP <var> TK_CL TK_SEM 
+             */
+            
+            createAbstractSyntaxTree(root->children[2]);
+            ptr = newASTnode(Read);
+            ptr->children[0] = root->children[2]->ptr;
+            root->ptr = ptr;
+            freeChildren(root, 0,4);
+            return ptr;
+    case 60:
+            /**
+             * @brief <ioStmt> ===> TK_WRITE TK_OP <var> TK_CL TK_SEM
+             */
+            
+            createAbstractSyntaxTree(root->children[2]);
+            ptr = newASTnode(Write);
+            ptr->children[0] = root->children[2]->ptr;
+            root->ptr = ptr;
+            freeChildren(root, 0,4);
+            return ptr;
+    case 61: 
+            /**
+             * 
+             * @brief <arithmeticExpression> ===> <term> <expPrime>
+             * 
+             */
+
+            createAbstractSyntaxTree(root->children[0]);
+            root->children[1]->inhptr = root->children[0]->ptr;
+            createAbstractSyntaxTree(root->children[1]);
+            root->ptr = root->children[1]->ptr;
+            freeChildren(root, 0,1);
+            return root->ptr;
+    
+    case 62: 
+            /**
+             * @brief <expPrime> ===> <lowPrecedenceOperators> <term> <expPrime>1
+             */
+
+            createAbstractSyntaxTree(root->children[0]);
+            createAbstractSyntaxTree(root->children[1]);
+            ptr = newASTnode(root->children[0]->ptr->type);
+            ptr->children[0] = root->inhptr;
+            ptr->children[1] = root->children[0]->ptr;
+            ptr->children[2] = root->children[1]->ptr;
+            root->children[2]->inhptr = ptr;
+            createAbstractSyntaxTree(root->children[2]);
+            root->ptr = root->children[2]->ptr;
+            freeChildren(root, 0,2);
+            return root->ptr;
+
+    case 63:
+            /**
+             * 
+             * @brief <expPrime> ===> epsilon
+             * 
+             */
+            root->ptr = root->inhptr;
+            freeChildren(root, 0, 0);
+            return root->ptr;
+    case 64: 
+            /**
+             * @brief <term> ===> <factor> <termPrime>
+             */
+
+            createAbstractSyntaxTree(root->children[0]);
+            root->children[1]->inhptr = root->children[0]->ptr;
+            createAbstractSyntaxTree(root->children[1]);
+            root->ptr = root->children[1]->ptr;
+            freeChildren(root, 0,1);
+            return root->ptr;
+    
+    case 65: 
+            /**
+             * 
+             * @brief <termPrime> ===> <highPrecedenceOperators> <factor> <termPrime>1
+             * 
+             */
+            createAbstractSyntaxTree(root->children[0]);
+            createAbstractSyntaxTree(root->children[1]);          
+            ptr = newASTnode(root->children[0]->ptr->type);
+            ptr->children[0] = root->inhptr;
+            ptr->children[1] = root->children[0]->ptr;
+            ptr->children[2] = root->children[1]->ptr;
+            root->children[2]->inhptr = ptr;
+            createAbstractSyntaxTree(root->children[2]);
+            root->ptr = root->children[2]->ptr;
+            freeChildren(root, 0, 2);
+            return root->ptr;
+    
+    case 66:
+            /**
+             * 
+             * @brief <termPrime> ===> epsilon
+             * 
+             */
+
+            root->ptr = root->inhptr;
+            freeChildren(root, 0, 0);
+            return root->ptr;
+    case 67:
+            /**
+             * 
+             * @brief <factor> ===> TK_OP <arithmeticExpression> TK_CL
+             * 
+             */
+            
+            createAbstractSyntaxTree(root->children[1]);
+            root->ptr = root->children[1]->ptr;
+            freeChildren(root, 0,2);
+            return root->ptr;
+    case 68: 
+            /**
+             *
+             * @brief  <factor> ===> <var>
+             * 
+             */
+            createAbstractSyntaxTree(root->children[0]);
+            root->ptr = root->children[0]->ptr;
+            freeChildren(root, 0,0);
+            return root->ptr;
+    case 69:
+            /**
+             * @brief <highPrecedenceOperators> ===> TK_MUL
+             * 
+             */
+            ptr = newASTleafNode(arithOp_MUL);
+            root->ptr = ptr;
+            freeChildren(root, 0, 0);
+            return ptr;
+    case 70:
+            /**
+             * 
+             * <highPrecedenceOperators> ===> TK_DIV
+             */
+            ptr = newASTleafNode(arithOp_DIV);
+            root->ptr = ptr;
+            freeChildren(root, 0, 0);
+            return ptr;
+    case 71:
+            /**
+             * 
+             * @brief <lowPrecedenceOperators> ===> TK_PLUS
+             */
+            ptr = newASTleafNode(arithOp_PLUS);
+            root->ptr = ptr;
+            freeChildren(root, 0, 0);
+            return ptr;
+    case 72: 
+            /**
+             * @brief <lowPrecedenceOperators> ===> TK_MINUS
+             * 
+             */
+            ptr = newASTleafNode(arithOp_MINUS);
+            root->ptr = ptr;
+            freeChildren(root, 0, 0);
+            return ptr;
+    
+    case 73: 
+            /**
+             * @brief <booleanExpression> ===> TK_NOT TK_OP <booleanExpression> TK_CL
+             * 
+             */
+            ptr = newASTnode(logOp_NOT);
+            createAbstractSyntaxTree(root->children[2]);
+            ptr->children[0] = root->children[2]->ptr;
+            root->ptr = ptr;
+            freeChildren(root, 0,3);
+            return ptr;
+
+    case 74: 
+            /**
+             * 
+             * @brief <booleanExpression> ===> TK_OP <booleanExpression> TK_CL <logicalOp> TK_OP <booleanExpression> TK_CL
+             * 
+             */
+
+            createAbstractSyntaxTree(root->children[1]);
+            createAbstractSyntaxTree(root->children[3]);
+            createAbstractSyntaxTree(root->children[5]);
+            ptr = newASTnode(root->children[3]->ptr->type);
+            ptr->children[0] = root->children[1]->ptr;
+            ptr->children[1] = root->children[5]->ptr;
+            root->ptr = ptr;
+            freeChildren(root, 0, 6);
+            return ptr;
+
+    case 75:
+            /**
+             *
+             * @brief <booleanExpression> ===> <var> <relationalOp> <var>
+             * 
+             */
+            createAbstractSyntaxTree(root->children[0]);
+            createAbstractSyntaxTree(root->children[1]);
+            createAbstractSyntaxTree(root->children[2]);
+            ptr = newASTnode(root->children[1]->ptr->type);
+            ptr->children[0] = root->children[0]->ptr;
+            ptr->children[2] = root->children[2]->ptr;
+            root->ptr = ptr;
+            freeChildren(root, 0,2);
+            return ptr;
 
     case 76:
         /* <var> ===> <singleOrRecId> */
-        createAbtstractSyntaxTree(root->children[0]);
+        createAbstractSyntaxTree(root->children[0]);
         ptr = root->children[0]->ptr;
         root->ptr = ptr;
         freeChildren(root, 0, 0);
@@ -795,7 +1113,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
 
     case 93:
         /* <definetypestmt> ===> TK_DEFINETYPE <A> TK_RUID TK_AS TK_RUID */
-        ptr = newASTNode(DefineType);
+        ptr = newASTnode(DefineType);
         createAbstractSyntaxTree(root->children[1]);
         ptr->children[0] = root->children[1]->ptr;
         ptr->children[1] = newASTleafNode(RecUnionId);

@@ -5,5 +5,8 @@
 #include "parserDef.h"
 
 astNode* createAbstractSyntaxTree (ParseTreeNode* root);
+astNode *newASTnode(ASTtag tag);
+astNode *newASTleafNode(ASTtag tag);
+int freeChildren(ParseTreeNode *root, int low, int high);
 
 #endif
