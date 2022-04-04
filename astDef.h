@@ -22,11 +22,11 @@ typedef enum ASTtag
     Declaration,
     StmtLinkedListNode,
     AssignmentOperation,
-	Return,
+    Return,
     SingleOrRecIdLinkedListNode,
     FieldIdLinkedListNode,
-	IdLinkedListNode,
-	DefineType
+    IdLinkedListNode,
+    DefineType
 } ASTtag;
 
 typedef enum ASTLeafTag
@@ -41,20 +41,20 @@ typedef enum ASTLeafTag
     FieldId,
     FieldTypeRUID,
     Global,
-	Num,
-	RealNum,
-	logOp_AND,
-	logOp_OR,
-	relOp_LT,
-	relOp_LE,
-	relOp_EQ,
-	relOp_GT,
-	relOp_GE,
-	relOp_NE,
-	Id,
-	RecUnionId,
-	Record,
-	Union
+    Num,
+    RealNum,
+    logOp_AND,
+    logOp_OR,
+    relOp_LT,
+    relOp_LE,
+    relOp_EQ,
+    relOp_GT,
+    relOp_GE,
+    relOp_NE,
+    Id,
+    RecUnionId,
+    Record,
+    Union
 } ASTLeafTag;
 
 typedef struct astNode
