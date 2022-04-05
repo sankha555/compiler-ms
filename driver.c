@@ -29,36 +29,40 @@ int main(int argc, char *argv[])
 
     twinBuffer *buffer;
     FILE *fp;
+    ParseTreeNode *root;
+    astNode *astRoot;
+
+    printf("CS F303 Compiler Construction\n");
+    printf("=======================================================\n");
+    printf("Group Members");
+    printf("\n\t1. Pratham Neeraj Gupta (2019A7PS0051P)");
+    printf("\n\t2. Madhav Gupta (2019A7PS0063P)");
+    printf("\n\t3. Sankha Das (2019A7PS0029P)");
+    printf("\n\t4. Yash Gupta (2019A7PS1138P)");
+    printf("\n\t5. Meenal Gupta (2019A7PS0243P)");
+    printf("\n=====================================================\n");
+    printf("\n\nProject Status:\n\n");
+    printf("1. \tBoth Lexical and Syntactic Analyser are implemented.\n");
+    printf("2. \tLexical Analyser is implemented using a finite state machine.\n");
+    printf("3. \tSyntactic Analyser is implemented using a non-recursive descent parser.\n");
+    printf("4. \tFirst and Follow sets automated.\n");
+    printf("5. \tParse Table construction automated\n");
+    printf("6. \tParse Tree generated successfully\n");
+    printf("7. \tError recovery done using Panic mode\n");
+    printf("8. \tAll modules compile successfully and work without segmentation fault.\n");
+    printf("9. \tModules work with all test cases provided (t1-t6).\n");
+    printf("10.\tTested with GCC 7.5.0 on Ubuntu 18.04 LTS\n");
+    printf("=======================================================\n");
 
     while (1)
     {
-        printf("CS F303 Compiler Construction\n");
-        printf("=======================================================\n");
-        printf("Group Members");
-        printf("\n\t1. Pratham Neeraj Gupta (2019A7PS0051P)");
-        printf("\n\t2. Madhav Gupta (2019A7PS0063P)");
-        printf("\n\t3. Sankha Das (2019A7PS0029P)");
-        printf("\n\t4. Yash Gupta (2019A7PS1138P)");
-        printf("\n\t5. Meenal Gupta (2019A7PS0243P)");
-        printf("\n=====================================================\n");
-        printf("\n\nProject Status:\n\n");
-        printf("1. \tBoth Lexical and Syntactic Analyser are implemented.\n");
-        printf("2. \tLexical Analyser is implemented using a finite state machine.\n");
-        printf("3. \tSyntactic Analyser is implemented using a non-recursive descent parser.\n");
-        printf("4. \tFirst and Follow sets automated.\n");
-        printf("5. \tParse Table construction automated\n");
-        printf("6. \tParse Tree generated successfully\n");
-        printf("7. \tError recovery done using Panic mode\n");
-        printf("8. \tAll modules compile successfully and work without segmentation fault.\n");
-        printf("9. \tModules work with all test cases provided (t1-t6).\n");
-        printf("10.\tTested with GCC 7.5.0 on Ubuntu 18.04 LTS\n");
-        printf("=======================================================\n");
         printf("\n\n\nTest a module\n\n");
         printf("0 - Quit\n");
         printf("1 - Removal of comments and print to console\n");
         printf("2 - Print token list to console\n");
         printf("3 - Parse the source code to generate parse tree\n");
         printf("4 - Find parsing time\n");
+        printf("5 - Generate Abstract Syntax Tree\n");
         printf("\nEnter a command: ");
 
         int option;
@@ -73,8 +77,6 @@ int main(int argc, char *argv[])
 
         case 1:
             removeComments(argv[1]);
-
-            execlp(argv[0], argv[0], argv[1], argv[2], NULL);
             break;
         case 2:
 
@@ -96,8 +98,6 @@ int main(int argc, char *argv[])
             }
 
             printf("\n\n\n------------------------------------\n\n");
-
-            execlp(argv[0], argv[0], argv[1], argv[2], NULL);
             break;
         case 3:
 
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
             // print and store the parse table in a .csv file
             printParseTableToFile();
 
-            ParseTreeNode *root = parseInputSourceCode(buffer);
+            root = parseInputSourceCode(buffer);
 
             if (printParseTree(root, treeFile) == -1)
             {
@@ -132,10 +132,9 @@ int main(int argc, char *argv[])
             {
                 printf("\nSuccessfully printed the parse tree in %s.\n\n\n", treeFile);
             }
-            execlp(argv[0], argv[0], argv[1], argv[2], NULL);
             break;
         case 4:
-        {
+            ;
             clock_t startTime, endTime;
 
             double total_CPU_time, total_CPU_time_in_seconds;
@@ -169,9 +168,36 @@ int main(int argc, char *argv[])
 
             printf("Total time taken for parsing the file = %f seconds.\n\n", total_CPU_time_in_seconds);
 
-            execlp(argv[0], argv[0], argv[1], argv[2], NULL);
             break;
-        }
+        case 5:
+            /**
+             * @brief AST generation
+             *
+             */
+            buffer = init_lexer(argv[1]);
+            if (buffer == NULL)
+            {
+                break;
+            }
+
+            FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+
+            populateRules();
+
+            createParseTable(FirstAndFollowAll, parseTable);
+
+            root = parseInputSourceCode(buffer);
+
+            astRoot = createAbstractSyntaxTree(root);
+
+            if (printAbstractSyntaxTree(astRoot, stdout) == -1)
+            {
+                printf("\nCould not print the Abstract Syntax Tree.\n");
+            }
+            else
+            {
+                printf("\nSuccessfully printed the Abstract Syntax Tree in %s.\n\n\n", treeFile);
+            }
         default:
             break;
         }

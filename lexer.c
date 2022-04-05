@@ -707,6 +707,7 @@ twinBuffer *init_lexer(char* filename)
     linenumber = 1;
     twinBuffer *buffer = init_buffer(fp);
 
+    free(table);
     // Initialize the keyword map
     table = (keyMap *)malloc(sizeof(keyMap));
     loadKeyMap(table, KEYWORD_FILE);

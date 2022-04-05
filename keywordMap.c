@@ -36,7 +36,7 @@ int insert(keyMap* table, char* lexeme, tokenTag tag) {
     newptr->next = NULL;
     if(pointer == NULL) {
         table->map[hashIndex] = newptr;
-        // printf("Lexeme:%s Tag:%s HashIndex:%d inserted in map.\n",lexeme,tag,hashIndex);
+        // printf("Lexeme:%s Tag:%d HashIndex:%d inserted in map.\n",lexeme,tag,hashIndex);
         return 1;
     }
     while(pointer->next != NULL) {
@@ -44,13 +44,13 @@ int insert(keyMap* table, char* lexeme, tokenTag tag) {
             //entry already exists, update tag
             pointer->tag = tag;
             free(newptr);
-            // printf("Lexeme:%s Tag:%s HashIndex:%d updated in map.\n",lexeme,tag,hashIndex);
+            // printf("Lexeme:%s Tag:%d HashIndex:%d updated in map.\n",lexeme,tag,hashIndex);
             return 0;    
         }
         pointer = pointer->next;
     }
     pointer->next = newptr;
-    // printf("Lexeme:%s Tag:%s HashIndex:%d inserted in map.\n",lexeme,tag,hashIndex);
+    // printf("Lexeme:%s Tag:%d HashIndex:%d inserted in map.\n",lexeme,tag,hashIndex);
     return 1;
 }
 
@@ -100,5 +100,6 @@ int loadKeyMap(keyMap* table, char* filename) {
         insert(table,lexeme,t);
         t++;
     }
+    fclose(fptr);
     return 1;
 }
