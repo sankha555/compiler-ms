@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
 
     twinBuffer *buffer;
     FILE *fp;
+    ParseTreeNode *root;
+    astNode *astRoot;
 
     while (1)
     {
@@ -59,6 +61,7 @@ int main(int argc, char *argv[])
         printf("2 - Print token list to console\n");
         printf("3 - Parse the source code to generate parse tree\n");
         printf("4 - Find parsing time\n");
+        printf("5 - Generate Abstract Syntax Tree\n");
         printf("\nEnter a command: ");
 
         int option;
@@ -122,7 +125,7 @@ int main(int argc, char *argv[])
             // print and store the parse table in a .csv file
             printParseTableToFile();
 
-            ParseTreeNode *root = parseInputSourceCode(buffer);
+            root = parseInputSourceCode(buffer);
 
             if (printParseTree(root, treeFile) == -1)
             {
@@ -172,6 +175,37 @@ int main(int argc, char *argv[])
             execlp(argv[0], argv[0], argv[1], argv[2], NULL);
             break;
         }
+        case 5:
+        /**
+         * @brief AST generation
+         * 
+         */
+            buffer = init_lexer(argv[1]);
+            if (buffer == NULL)
+            {
+                break;
+            }
+
+            FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+
+            populateRules();
+
+            createParseTable(FirstAndFollowAll, parseTable);
+
+            root = parseInputSourceCode(buffer);
+
+            astRoot = createAbstractSyntaxTree(root);
+
+            if (printAbstractSyntaxTree(astRoot, stdout) == -1)
+            {
+                printf("\nCould not print the Abstract Syntax Tree.\n");
+            }
+            else
+            {
+                printf("\nSuccessfully printed the Abstract Syntax Tree in %s.\n\n\n", treeFile);
+            }
+
+            execlp(argv[0], argv[0], argv[1], argv[2], NULL);
         default:
             break;
         }

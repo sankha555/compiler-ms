@@ -26,8 +26,8 @@ typedef enum ASTtag
     SingleOrRecIdLinkedListNode,
     FieldIdLinkedListNode,
     IdLinkedListNode,
-    DefineType, 
-    FuncCall, 
+    DefineType,
+    FuncCall,
     While,
     If,
     Else,
@@ -62,15 +62,14 @@ typedef enum ASTtag
     arithOp_DIV,
     arithOp_PLUS,
     arithOp_MINUS
-    } ASTtag;
-
+} ASTtag;
 
 typedef struct astNode
 {
     ASTtag type;
-    
+
     boolean isLinkedListNode;
-    boolean isLeafNode; //only this used to identify if leaf or not
+    boolean isLeafNode; // only this used to identify if leaf or not
 
     int intValue;
     float realValue;
