@@ -1,0 +1,53 @@
+<program> TK_FUNID TK_MAIN 
+<mainFunction> TK_MAIN 
+<otherFunctions> TK_FUNID epsilon 
+<function> TK_FUNID 
+<input_par> TK_INPUT 
+<output_par> TK_OUTPUT epsilon 
+<parameter_list> TK_INT TK_REAL TK_RECORD TK_UNION TK_RUID 
+<dataType> TK_INT TK_REAL TK_RECORD TK_UNION TK_RUID 
+<primitiveDatatype> TK_INT TK_REAL 
+<constructedDatatype> TK_RECORD TK_UNION TK_RUID 
+<remaining_list> TK_COMMA epsilon 
+<stmts> TK_RECORD TK_UNION TK_DEFINETYPE TK_TYPE TK_ID TK_WHILE TK_IF TK_READ TK_WRITE TK_SQL TK_CALL TK_RETURN 
+<typeDefinitions> TK_RECORD TK_UNION TK_DEFINETYPE epsilon 
+<actualOrRedefined> TK_RECORD TK_UNION TK_DEFINETYPE 
+<typeDefinition> TK_RECORD TK_UNION 
+<fieldDefinitions> TK_TYPE 
+<fieldDefinition> TK_TYPE 
+<fieldType> TK_INT TK_REAL TK_RUID 
+<moreFields> TK_TYPE epsilon 
+<declarations> TK_TYPE epsilon 
+<declaration> TK_TYPE 
+<global_or_not> TK_COLON epsilon 
+<otherStmts> TK_ID TK_WHILE TK_IF TK_READ TK_WRITE TK_SQL TK_CALL epsilon 
+<stmt> TK_ID TK_WHILE TK_IF TK_READ TK_WRITE TK_SQL TK_CALL 
+<assignmentStmt> TK_ID 
+<singleOrRecId> TK_ID 
+<option_single_constructed> TK_DOT epsilon 
+<oneExpansion> TK_DOT 
+<moreExpansions> TK_DOT epsilon 
+<funCallStmt> TK_SQL TK_CALL 
+<outputParameters> TK_SQL epsilon 
+<inputParameters> TK_SQL 
+<iterativeStmt> TK_WHILE 
+<conditionalStmt> TK_IF 
+<elsePart> TK_ELSE TK_ENDIF 
+<ioStmt> TK_READ TK_WRITE 
+<arithmeticExpression> TK_OP TK_ID TK_NUM TK_RNUM 
+<expPrime> TK_PLUS TK_MINUS epsilon 
+<term> TK_OP TK_ID TK_NUM TK_RNUM 
+<termPrime> TK_MUL TK_DIV epsilon 
+<factor> TK_OP TK_ID TK_NUM TK_RNUM 
+<highPrecedenceOperators> TK_MUL TK_DIV 
+<lowPrecedenceOperators> TK_PLUS TK_MINUS 
+<booleanExpression> TK_NOT TK_OP TK_ID TK_NUM TK_RNUM 
+<var> TK_ID TK_NUM TK_RNUM 
+<logicalOp> TK_AND TK_OR 
+<relationalOp> TK_LT TK_LE TK_EQ TK_GT TK_GE TK_NE 
+<returnStmt> TK_RETURN 
+<optionalReturn> TK_SQL epsilon 
+<idList> TK_ID 
+<more_ids> TK_COMMA epsilon 
+<definetypestmt> TK_DEFINETYPE 
+<A> TK_RECORD TK_UNION 

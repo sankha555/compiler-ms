@@ -1211,22 +1211,19 @@ int preOrderTraversal(astNode *root, FILE* fp, astNode* parent, astNode* prev)
 
     if (root->isLeafNode) {
         fprintf(fp, "Leaf: %40s\t Parent: %30s\n", tagNames[root->type], tagNames[parent->type]);
-    }
-
-    else if (root->isLinkedListNode) {
+    } else if (root->isLinkedListNode) {
         fprintf(fp, "LinkedListNode: %30s\t Parent: %30s\t Prev:%30s\n", tagNames[root->type], parent ? tagNames[parent->type] : NULL, prev ? tagNames[prev->type] : "NULL");
         preOrderTraversal(root->data, fp, root, NULL);
         preOrderTraversal(root->next, fp, parent, root);
-    }
-
-    else {
+    } else {
         fprintf(fp, "Node: %40s\t Parent: %30s\n", tagNames[root->type], parent ? tagNames[parent->type] : "NULL");
 
         // ignore NULLs at end of children list but not in middle or start
         int children = MAX_PROD_LEN;
 
-        while (children > 0 && root->children[children - 1] == NULL)
+        while (children > 0 && root->children[children - 1] == NULL){
             children--;
+        }
 
         for (int i = 0; i <= children; i++) {
             preOrderTraversal(root->children[i], fp, root, NULL);
