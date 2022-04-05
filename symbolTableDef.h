@@ -5,7 +5,7 @@
 #include "typing.h"
 
 /* Aliases store information about definetype type declarations */
-typedef struct aliasEntry {
+typedef struct AliasEntry {
     // definetype union #student as #newname
     int unionOrRecord;  // 0 = union, 1 = record
     char* actualName;   // union #student
@@ -14,34 +14,35 @@ typedef struct aliasEntry {
     struct aliasEntry* next;
 } AliasEntry;
 
-typedef struct aliasTable {
+typedef struct AliasTable {
     int count;
-    AliasEntry* head;
+    struct AliasEntry* head;
 } AliasTable;
 
 
 /* Symbol Table structures */
-typedef struct hashTable {
-    SymbolTableEntry* table[K_MAP_SIZE];
+typedef struct HashTable {
+    struct SymbolTableEntry* table[K_MAP_SIZE];
 } HashTable;
 
-typedef struct sTableEntry {
+typedef struct SymbolTableEntry {
     char* identifier; 
+
     boolean isFunction;  // whether this entry points to the symbol table of another function
-    
+    struct SymbolTable* tablePointer;   // required only is `isFunction == TRUE`
+
     Type type;
     int width;
     int offset;
-    SymbolTable* tablePointer;
 
-    SymbolTableEntry* next;
+    struct SymbolTableEntry* next;
 } SymbolTableEntry;
 
-typedef struct sTable {
+typedef struct SymbolTable {
     int lastStoredOffset;
-    SymbolTable returnTo;
+    struct SymbolTable* returnTo;
 
-    HashTable tableEntries;
+    struct HashTable tableEntries;
 } SymbolTable;
 
 #endif
