@@ -5,13 +5,8 @@
 
 void reloadBuffer(twinBuffer *tBuffer, int bufferID)
 {
-    printf("trying reload buffer\n");
-    if (!feof(tBuffer->fp))
-    {
-        memset(tBuffer->buffer[bufferID], EOF, BUFFER_SIZE);
-        fread((tBuffer->buffer)[bufferID], sizeof(char), BUFFER_SIZE, tBuffer->fp);
-    }
-
+    memset(tBuffer->buffer[bufferID], EOF, BUFFER_SIZE);
+    fread((tBuffer->buffer)[bufferID], sizeof(char), BUFFER_SIZE, tBuffer->fp);
     tBuffer->forward = 0;
     tBuffer->currentBufferID = bufferID;
     printf("reloaded buffer\n");
@@ -47,6 +42,7 @@ char getch(twinBuffer *tBuffer)
     if ((tBuffer->buffer)[currBufferID][tBuffer->forward] == EOF)
     {
         // end of source program
+        fclose(tBuffer->fp);
         return '\0';
     }
 
