@@ -21,10 +21,6 @@ typedef struct AliasTable {
 
 
 /* Symbol Table structures */
-typedef struct HashTable {
-    struct SymbolTableEntry* table[K_MAP_SIZE];
-} HashTable;
-
 typedef struct SymbolTableEntry {
     char* identifier; 
 
@@ -39,10 +35,13 @@ typedef struct SymbolTableEntry {
 } SymbolTableEntry;
 
 typedef struct SymbolTable {
-    int lastStoredOffset;
+    // header information
+    char* tableID;          // should genderally store the name of the function
+    int currentOffset;
     struct SymbolTable* returnTo;
 
-    struct HashTable tableEntries;
+    // actual table entries
+    struct SymbolTableEntry* tableEntries[K_MAP_SIZE];
 } SymbolTable;
 
 #endif
