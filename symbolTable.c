@@ -64,6 +64,32 @@ int insert(SymbolTable* symbolTable, SymbolTableEntry* entry) {
     return 1;
 }
 
+/* did you mean? */
+/*
+int insert(SymbolTable* symbolTable, SymbolTableEntry* entry) {
+	char* lexeme = entry->identifier;
+	int hashTableIndex = hashFunction(lexeme);
+
+	SymbolTableEntry* pointer = symbolTable->tableEntries[hashTableIndex];
+	
+	// new entry
+	if (pointer == NULL) {
+		pointer = entry;
+		return 0;
+	}
+
+	// update the existing entry
+	while (pointer->next != NULL) {
+		if (strcmp(pointer->identifier, lexeme) == 0) {
+			pointer = entry;
+			return 0;
+		}
+		pointer = pointer->next;
+	}
+	return 1;
+}
+*/
+
 SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTableEntry* tablePointer, Type type, int width, int offset){
     SymbolTableEntry* newEntry = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
     strcpy(newEntry->identifier, identifier);
