@@ -4,6 +4,23 @@
 
 #include "globalDef.h"
 #include "symbolTableDef.h"
+#include "astDef.h"
+
+SymbolTable* addToListOfSymbolTables(SymbolTable* symbolTable){
+    if(listOfSymbolTables == NULL){
+        listOfSymbolTables = symbolTable;
+        symbolTable->next = NULL;
+    }else{
+        SymbolTable* head = listOfSymbolTables;
+        while(head->next != NULL){
+            head = head->next;
+        }
+        head->next = symbolTable;
+        symbolTable->next = NULL;
+    }
+
+    return listOfSymbolTables;
+}
 
 int hashFunction(char* identifier) {
     int hash = 7;
@@ -13,7 +30,7 @@ int hashFunction(char* identifier) {
     return hash;
 }
 
-SymbolTableEntry* search(SymbolTable* symbolTable, char* identifer) {
+SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifer) {
     int hashTableIndex = hashFunction(identifer);
     SymbolTableEntry* entry = symbolTable->tableEntries[hashTableIndex];
     while(entry != NULL) {
@@ -66,5 +83,19 @@ SymbolTable* createSymbolTable(char* tableID, SymbolTable* returnTable){
     newTable->returnTo = returnTable;
     newTable->currentOffset = 0;    // is this correct tho? how do we compute the offset for each new table??
     
+    listOfSymbolTables = addToListOfSymbolTables(newTable);
+
     return newTable;
+}
+
+SymbolTable* getSymbolTable(char* identifier){
+    SymbolTable* head = listOfSymbolTables;
+    while(head != NULL && strcmp(head->tableID, identifier) != 0){
+        head = head->next;
+    }
+    return head;
+}
+
+void populateSymbolTable(SymbolTable* symbolTable, astNode* functionRoot){
+    return ;
 }

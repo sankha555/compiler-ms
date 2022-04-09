@@ -25,7 +25,10 @@ typedef struct SymbolTableEntry {
     char* identifier; 
 
     boolean isFunction;  // whether this entry points to the symbol table of another function
-    struct SymbolTable* tablePointer;   // required only is `isFunction == TRUE`
+    SymbolTable* tablePointer;   // required only is `isFunction == TRUE`
+
+    boolean isUnionOrRecord;
+    UnionOrRecordInfo* unionOrRecordInfo;
 
     Type type;
     int width;
@@ -36,12 +39,17 @@ typedef struct SymbolTableEntry {
 
 typedef struct SymbolTable {
     // header information
-    char* tableID;          // should genderally store the name of the function
+    char* tableID;          // should generally store the name of the function
     int currentOffset;
+    int totalWidth;
     struct SymbolTable* returnTo;
 
     // actual table entries
     struct SymbolTableEntry* tableEntries[K_MAP_SIZE];
+
+    struct SymbolTable* next;
 } SymbolTable;
+
+SymbolTable* listOfSymbolTables = NULL;    // a linked list of pointers to all symbol tables for the program
 
 #endif
