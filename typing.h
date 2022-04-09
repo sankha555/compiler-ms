@@ -7,6 +7,7 @@ typedef enum type {
     Record,
     Union,
     // TypeDefinition - controversial, should add or not? I will think later
+    //don't need to, as entire structure will be stored in the typeOrRecordInfo anyway
 } Type;
 
 typedef struct Field {
@@ -20,9 +21,14 @@ typedef struct Field {
 typedef struct UnionOrRecordInfo {
     char* identifier;
     
-    int offset;
+    int offset; 
     Field* listOfFields;
     int totalWidth;
 } UnionOrRecordInfo;
 
 #endif
+
+
+
+
+

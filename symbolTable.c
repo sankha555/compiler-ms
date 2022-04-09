@@ -34,7 +34,7 @@ SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifer) {
     int hashTableIndex = hashFunction(identifer);
     SymbolTableEntry* entry = symbolTable->tableEntries[hashTableIndex];
     while(entry != NULL) {
-        if(strcmp(entry->identifer, identifer) == 0){
+        if(strcmp(entry->identifier, identifer) == 0){
            return entry;
         }
         entry = entry->next;
@@ -45,22 +45,22 @@ SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifer) {
 //1: item added in the hash table
 //0: item updated in the table
 int insert(SymbolTable* symbolTable, SymbolTableEntry* entry) {
-    int hashTableIndex = kmapHash(lexeme);
+    int hashTableIndex = kmapHash(entry->identifier);
     
-    SymbolTableEntry* pointer = symbolTable->tableEntries[hashIndex];
+    SymbolTableEntry* pointer = symbolTable->tableEntries[hashTableIndex];
     if(pointer == NULL) {
         symbolTable->tableEntries[hashTableIndex] = entry;
         return 1;
     }
     while(pointer->next != NULL) {
-        if(strcmp(pointer->lexeme, lexeme) == 0) {
+        if(strcmp(pointer->identifier, entry->identifier) == 0) {
             //entry already exists, update tag
             pointer = entry;
             return 0;    
         }
         pointer = pointer->next;
     }
-    pointer->next = newptr;
+    pointer->next = entry;
     return 1;
 }
 
@@ -81,7 +81,10 @@ SymbolTable* createSymbolTable(char* tableID, SymbolTable* returnTable){
     SymbolTable* newTable = (SymbolTable*) malloc(sizeof(SymbolTable));
     strcpy(newTable->tableID, tableID);
     newTable->returnTo = returnTable;
+    
     newTable->currentOffset = 0;    // is this correct tho? how do we compute the offset for each new table??
+    // we don't need to compute the offset for each new table, as each new table represents a function, and the offset of the variables = offset of start of stack frame + relative offset
+    // we can just include the total width if required, to gauge the total memory required by the symbol table
     
     listOfSymbolTables = addToListOfSymbolTables(newTable);
 

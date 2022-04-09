@@ -14,6 +14,7 @@ typedef struct AliasEntry {
     struct aliasEntry* next;
 } AliasEntry;
 
+//AliasTable is actually a linkedList of Alias entries
 typedef struct AliasTable {
     int count;
     struct AliasEntry* head;
@@ -27,8 +28,8 @@ typedef struct SymbolTableEntry {
     boolean isFunction;  // whether this entry points to the symbol table of another function
     SymbolTable* tablePointer;   // required only is `isFunction == TRUE`
 
-    boolean isUnionOrRecord;
-    UnionOrRecordInfo* unionOrRecordInfo;
+    boolean isUnionOrRecord; //used when the identifier is a record/union
+    UnionOrRecordInfo* unionOrRecordInfo; //used only when isUnionorRecord == TRUE
 
     Type type;
     int width;
