@@ -171,7 +171,8 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
          *
          */
         createAbstractSyntaxTree(root->children[4]);
-        root->ptr = root->children[4]->ptr;
+        ptr = root->children[4]->ptr;
+        root->ptr = ptr;
         freeChildren(root, 0, 5);
         return ptr;
         break;
@@ -181,7 +182,8 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
          *
          */
         createAbstractSyntaxTree(root->children[4]);
-        root->ptr = root->children[4]->ptr;
+        ptr = root->children[4]->ptr;
+        root->ptr = ptr;
         freeChildren(root, 0, 5);
         return ptr;
         break;
@@ -205,7 +207,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         ptr->data = newASTnode(Parameter);
         ptr->data->children[0] = root->children[0]->ptr;
         ptr->data->children[1] = newASTleafNode(VariableId);
-        // ptr->data->children[1]->entry = root->children[0]->terminal; ?? krna hai right?
+        ptr->data->children[1]->entry = root->children[1]->terminal;
         ptr->next = root->children[2]->ptr;
         root->ptr = ptr;
         freeChildren(root, 0, 2);
@@ -1085,6 +1087,9 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         createAbstractSyntaxTree(root->children[1]);
         ptr = newASTnode(IdLinkedListNode);
         ptr->isLinkedListNode = TRUE;
+        /*
+        TODO: Check if this can be changed to VariableId
+        */
         ptr->data = newASTleafNode(Id);
         ptr->data->entry = root->children[0]->terminal;
         ptr->next = root->children[1]->ptr;

@@ -54,7 +54,7 @@ typedef enum ASTtag
     relOp_GT,
     relOp_GE,
     relOp_NE,
-    Id,
+    Id, // Seems redundant to VariableId
     RecUnionId,
     Record,
     Union,
