@@ -26,7 +26,7 @@ typedef struct SymbolTableEntry {
     char* identifier; 
 
     boolean isFunction;  // whether this entry points to the symbol table of another function
-    SymbolTable* tablePointer;   // required only is `isFunction == TRUE`
+    struct SymbolTable* tablePointer;   // required only if `isFunction == TRUE`
 
     boolean isUnionOrRecord; //used when the identifier is a record/union
     UnionOrRecordInfo* unionOrRecordInfo; //used only when isUnionorRecord == TRUE
@@ -37,6 +37,7 @@ typedef struct SymbolTableEntry {
 
     struct SymbolTableEntry* next;
 } SymbolTableEntry;
+
 
 typedef struct SymbolTable {
     // header information
@@ -51,6 +52,6 @@ typedef struct SymbolTable {
     struct SymbolTable* next;
 } SymbolTable;
 
-SymbolTable* listOfSymbolTables = NULL;    // a linked list of pointers to all symbol tables for the program
+SymbolTable* listOfSymbolTables;    // a linked list of pointers to all symbol tables for the program
 
 #endif

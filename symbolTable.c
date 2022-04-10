@@ -64,32 +64,6 @@ int insert(SymbolTable* symbolTable, SymbolTableEntry* entry) {
     return 1;
 }
 
-/* did you mean? */
-/*
-int insert(SymbolTable* symbolTable, SymbolTableEntry* entry) {
-	char* lexeme = entry->identifier;
-	int hashTableIndex = hashFunction(lexeme);
-
-	SymbolTableEntry* pointer = symbolTable->tableEntries[hashTableIndex];
-	
-	// new entry
-	if (pointer == NULL) {
-		pointer = entry;
-		return 0;
-	}
-
-	// update the existing entry
-	while (pointer->next != NULL) {
-		if (strcmp(pointer->identifier, lexeme) == 0) {
-			pointer = entry;
-			return 0;
-		}
-		pointer = pointer->next;
-	}
-	return 1;
-}
-*/
-
 SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTableEntry* tablePointer, Type type, int width, int offset){
     SymbolTableEntry* newEntry = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
     strcpy(newEntry->identifier, identifier);
@@ -123,6 +97,17 @@ SymbolTable* getSymbolTable(char* identifier){
         head = head->next;
     }
     return head;
+}
+
+SymbolTable* handleFunctionParameters(astNode* functionRootNode){
+    SymbolTable* newSymbolTable = (SymbolTable*) malloc(sizeof(SymbolTable));
+
+    // input parameters
+    astNode* inputParameters = functionRootNode->children[1]->children[];
+
+    // output parameters
+    astNode* outputParameters = functionRootNode->children[2];
+    
 }
 
 void populateSymbolTable(SymbolTable* symbolTable, astNode* functionRoot){

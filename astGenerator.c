@@ -33,7 +33,7 @@ astNode *newASTnode(ASTtag tag)
 /**
  * @brief Creates a leaf node of the abstract syntax tree
  *
- * @param tag the value (identifier / keyword) of the node
+ * @param tag the value (identifier / keyword) of the node  // ??? doesn't seem so, we are setting tag to type
  * @return astNode*
  */
 astNode *newASTleafNode(ASTtag tag)
@@ -198,7 +198,6 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         /**
          * @brief <parameter_list> ===> <dataType> TK_ID <remaining_list>
          */
-        ;
         createAbstractSyntaxTree(root->children[0]);
         createAbstractSyntaxTree(root->children[2]);
         ptr = newASTnode(ParameterLinkedListNode);
@@ -206,6 +205,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         ptr->data = newASTnode(Parameter);
         ptr->data->children[0] = root->children[0]->ptr;
         ptr->data->children[1] = newASTleafNode(VariableId);
+        // ptr->data->children[1]->entry = root->children[0]->terminal; ?? krna hai right?
         ptr->next = root->children[2]->ptr;
         root->ptr = ptr;
         freeChildren(root, 0, 2);

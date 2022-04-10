@@ -10,6 +10,8 @@
 #include "globalDef.h"
 #include "astDef.h"
 #include "astGenerator.h"
+#include "symbolTable.h"
+#include "symbolTableDef.h"
 #include <time.h>
 #include <stdlib.h>
 
@@ -198,6 +200,10 @@ int main(int argc, char *argv[])
             {
                 printf("\nSuccessfully printed the Abstract Syntax Tree in %s.\n\n\n", treeFile);
             }
+
+        case 6:
+            listOfSymbolTables = NULL;
+        
         default:
             break;
         }
