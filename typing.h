@@ -26,6 +26,8 @@ typedef struct UnionOrRecordInfo {
     int totalWidth;
 } UnionOrRecordInfo;
 
+int getWidth(Type);
+
 #endif
 
 

@@ -5,6 +5,7 @@
 #include "globalDef.h"
 #include "symbolTableDef.h"
 #include "astDef.h"
+#include "typing.h"
 
 SymbolTable* addToListOfSymbolTables(SymbolTable* symbolTable){
     if(listOfSymbolTables == NULL){
@@ -39,7 +40,7 @@ SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifer) {
         }
         entry = entry->next;
     }
-    return -1;
+    return NULL;
 }
 
 //1: item added in the hash table
@@ -99,17 +100,41 @@ SymbolTable* getSymbolTable(char* identifier){
     return head;
 }
 
-SymbolTable* handleFunctionParameters(astNode* functionRootNode){
+void handleFunctionParameters(astNode* functionRootNode, SymbolTable* symbolTable){
     SymbolTable* newSymbolTable = (SymbolTable*) malloc(sizeof(SymbolTable));
+    int offset = 0;
 
     // input parameters
-    astNode* inputParameters = functionRootNode->children[1]->children[];
+    astNode* inputParameters = functionRootNode->children[1];   // this gives the linked list of parameters ig
+    astNode* parameter = inputParameters;
+
+    while(parameter != NULL){
+        Type type = parameter->children[0]->type;
+        char* identifier = parameter->children[1]->entry.lexeme;
+        int width = getWidth(type);
+
+        SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, type, width, offset);
+        insert(symbolTable, entry);
+
+        offset += width;
+    }
 
     // output parameters
     astNode* outputParameters = functionRootNode->children[2];
-    
+    parameter = outputParameters;
+
+    while(parameter != NULL){
+        Type type = parameter->children[0]->type;
+        char* identifier = parameter->children[1]->entry.lexeme;
+        int width = getWidth(type);
+
+        SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, type, width, offset);
+        insert(symbolTable, entry);
+
+        offset += width;
+    }
 }
 
 void populateSymbolTable(SymbolTable* symbolTable, astNode* functionRoot){
-    return ;
+    SymbolTable* symbolTable = createSymbolTable();
 }
