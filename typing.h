@@ -1,6 +1,8 @@
 #ifndef TYPING_H
 #define TYPING_H
 
+#include "globalDef.h"
+
 typedef enum type {
     Integer,
     Real,
@@ -11,7 +13,9 @@ typedef enum type {
 } Type;
 
 typedef struct Field {
-    Type type;
+    char* identifier;
+
+    int typeIndex;
     int width;
     int offset;
 
@@ -25,6 +29,29 @@ typedef struct UnionOrRecordInfo {
     Field* listOfFields;
     int totalWidth;
 } UnionOrRecordInfo;
+
+typedef struct Parameter {
+    int data;
+    struct Parameter* next;
+} Parameter;
+
+typedef struct FunctionType {
+    char* identifier;
+    struct Parameter* inputParameters;
+    struct Parameter* outputParameters;
+} FunctionType;
+
+typedef struct TypeArrayElement {
+    boolean isPrimitive;
+    boolean isUnion;
+    boolean isRecord;
+    boolean isFunction;
+    boolean isAlias;
+
+    char* identifier;
+    struct UnionOrRecordInfo* compositeVariableInfo;
+    struct FunctionType functionInfo;
+} TypeArrayElement;
 
 int getWidth(Type);
 
