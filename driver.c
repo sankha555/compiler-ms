@@ -10,6 +10,8 @@
 #include "globalDef.h"
 #include "astDef.h"
 #include "astGenerator.h"
+#include "symbolTableDef.h"
+#include "symbolTable.h"
 #include <time.h>
 #include <stdlib.h>
 
@@ -63,6 +65,7 @@ int main(int argc, char *argv[])
         printf("3 - Parse the source code to generate parse tree\n");
         printf("4 - Find parsing time\n");
         printf("5 - Generate Abstract Syntax Tree\n");
+        printf("6 - Generate Symbol Table\n");
         printf("\nEnter a command: ");
 
         int option;
@@ -198,6 +201,30 @@ int main(int argc, char *argv[])
             {
                 printf("\nSuccessfully printed the Abstract Syntax Tree in %s.\n\n\n", treeFile);
             }
+            break;
+        case 6:
+            /**
+             * @brief Symbol Table Generation
+             * 
+             */
+            buffer = init_lexer(argv[1]);
+            if (buffer == NULL)
+            {
+                break;
+            }
+
+            FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+
+            populateRules();
+
+            createParseTable(FirstAndFollowAll, parseTable);
+
+            root = parseInputSourceCode(buffer);
+
+            astRoot = createAbstractSyntaxTree(root);
+
+            initializeSymbolTable(astRoot);
+            break;
         default:
             break;
         }

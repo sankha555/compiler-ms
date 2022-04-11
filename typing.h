@@ -4,8 +4,9 @@
 typedef enum type {
     Integer,
     Real,
-    Record,
-    Union,
+    RecordType,
+    UnionType,
+    Function // use the symbol table entry to see I/P and O/P parameter types
     // TypeDefinition - controversial, should add or not? I will think later
     //don't need to, as entire structure will be stored in the typeOrRecordInfo anyway
 } Type;
