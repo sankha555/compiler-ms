@@ -31,11 +31,11 @@ int hashFunction(char* identifier) {
     return hash;
 }
 
-SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifer) {
-    int hashTableIndex = hashFunction(identifer);
+SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifier) {
+    int hashTableIndex = hashFunction(identifier);
     SymbolTableEntry* entry = symbolTable->tableEntries[hashTableIndex];
     while(entry != NULL) {
-        if(strcmp(entry->identifier, identifer) == 0){
+        if(strcmp(entry->identifier, identifier) == 0){
            return entry;
         }
         entry = entry->next;
@@ -46,7 +46,7 @@ SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifer) {
 //1: item added in the hash table
 //0: item updated in the table
 int insert(SymbolTable* symbolTable, SymbolTableEntry* entry) {
-    int hashTableIndex = kmapHash(entry->identifier);
+    int hashTableIndex = hashFunction(entry->identifier);
     
     SymbolTableEntry* pointer = symbolTable->tableEntries[hashTableIndex];
     if(pointer == NULL) {

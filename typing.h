@@ -3,13 +3,15 @@
 
 #include "globalDef.h"
 
-typedef enum type {
+//broad type category, used in the type expression
+typedef enum typeCat {
     Integer,
     Real,
     Record,
     Union,
-    // TypeDefinition - controversial, should add or not? I will think later
-    //don't need to, as entire structure will be stored in the typeOrRecordInfo anyway
+    Function, 
+    Alias
+    
 } Type;
 
 typedef struct Field {
@@ -52,18 +54,34 @@ typedef struct FunctionType {
 //element of the dynamic type array 
 //datatypes possible : primitive, Union, Record, Function, Alias
 typedef struct TypeArrayElement {
-    boolean isPrimitive;
-    boolean isUnion;
-    boolean isRecord;
-    boolean isFunction;
-    boolean isAlias;
-
+ 
+    Type type;
     char* identifier; //name of the type
+    int aliasTypeInfo; //stores the typeIndex of the actual type if the type is alias
     struct UnionOrRecordInfo* compositeVariableInfo; //points to the Record/Union type expression if Record/Union otherwise NULL
-    struct FunctionType functionInfo; //points to the function type expression if Record/Union otherwise NULL
+    struct FunctionType* functionInfo; //points to the function type expression if Record/Union otherwise NULL
+    struct TypeArrayElement *next; //used in the LinkedList in the hash table Implementation fo the type table
 } TypeArrayElement;
 
+
+//the TypeArray will be implemented as a HashTable 
+// basically, identifier of the type will be used to index into the Hash Table where each entry will be a linkedList(in order to deal with collisions)
+
+typedef struct TypeTable{
+
+char *tableID; //to store the name of the type table
+struct TypeArrayElement* tableEntries[K_MAP_SIZE]; //type expression hash table for the program
+
+} TypeTable;
+
 int getWidth(Type);
+
+
+
+
+
+
+
 
 #endif
 
