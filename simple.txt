@@ -1,0 +1,8 @@
+_main
+    type int : b5;
+
+    b5 <--- 1;
+
+    b5 <--- 1 + 2;
+    return;
+end

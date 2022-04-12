@@ -2,7 +2,7 @@
 #include<stdlib.h>
 #include<stdio.h>
 
-#include "globalDef.h"
+#include "stdbool.h"
 #include "symbolTableDef.h"
 #include "astDef.h"
 #include "typing.h"
@@ -135,6 +135,85 @@ void handleFunctionParameters(astNode* functionRootNode, SymbolTable* symbolTabl
     }
 }
 
-void populateSymbolTable(SymbolTable* symbolTable, astNode* functionRoot){
-    SymbolTable* symbolTable = createSymbolTable();
+/**
+ * @brief Returns the symbol table entry for the given function root
+ * 
+ * @param root of the current function
+ * @param wrapper symbol table
+ * @return SymbolTable* 
+ */
+void populateOtherFunctionTable(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
+    printf("Populating function table\n");
+    printAbstractSyntaxTree(root, stdout);
+    // the 3 children of the function node are:
+    // 1. Input parameters
+    // 2. Output variables
+    // 3. Function Body Statements (Stmts)
+
+    // 1. Input parameters
+
+    // 2. Output variables
+
+    // 3. Function Body Statements
+    // <typeDefinitions> <declarations> <otherStmts> <returnStmt>
+    // we need to parse typeDefinitions and declarations to get the type of the variables
+    
+
+    // If we see a record or union type, it must go in wrapper table
+}
+
+/**
+ * @brief 
+ * 
+ * @param root 
+ * @param globalSymbolTable 
+ * @param functionSymbolTable 
+ */
+void populateMainFunctionTable(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
+    printf("Populating main function table\n");
+    printAbstractSyntaxTree(root, stdout);
+    // Main does not have any input parameters, output variables
+    // Only the function body statements (Stmts) are there
+
+    // 1. Function Body Statements (Stmts)
+    // <typeDefinitions> <declarations> <otherStmts> <returnStmt>
+    // we need to parse typeDefinitions and declarations to get the type of the variables
+    
+
+    // If we see a record or union type, it must go in wrapper table
+}
+
+/**
+ * @brief returns the WRAPPER Symbol Table - function table pointers, global variables, etc.
+ * 
+ * @param root of AST
+ * @return SymbolTable* 
+ */
+SymbolTable* initializeSymbolTable(astNode* root) {
+    SymbolTable* globalSymbolTable = createSymbolTable("GLOBAL", NULL);
+
+    // AST ROOT is program
+    // first child is otherFunc, second is Main
+    astNode* otherFunctions = root->children[0];
+    astNode* mainFunction = root->children[1];
+
+    // go to otherFunc, it is a linked list of functions
+    while (otherFunctions) {
+        astNode* current = otherFunctions->data;
+        SymbolTable* functionTable = createSymbolTable(current->children[0]->entry.lexeme, globalSymbolTable);
+        // populate the symbol table for each function
+        populateOtherFunctionTable(current, globalSymbolTable, functionTable);
+
+        // TODO: add the function symbol table to the global symbol table
+
+        otherFunctions = otherFunctions->next;
+    }
+
+    SymbolTable* mainFunctionSymbolTable = createSymbolTable("_main", globalSymbolTable);
+
+    insert(globalSymbolTable, createNewSymbolTableEntry("_main", true, mainFunctionSymbolTable, NULL, 0, 0));
+
+    populateMainFunctionTable(mainFunction, globalSymbolTable, mainFunctionSymbolTable);
+
+    return globalSymbolTable;
 }

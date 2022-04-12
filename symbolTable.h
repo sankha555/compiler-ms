@@ -1,6 +1,7 @@
 #ifndef SYMBOLTABLE_H
 #define SYMBOLTABLE_H
 #include "symbolTableDef.h"
+#include "astDef.h"
 
 SymbolTable* addToListOfSymbolTables(SymbolTable* symbolTable);
 int hashFunction(char* identifier);
