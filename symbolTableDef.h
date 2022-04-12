@@ -22,6 +22,7 @@ typedef struct AliasTable {
 
 
 /* Symbol Table structures */
+/* Symbol Table structures */
 typedef struct SymbolTableEntry {
     char* identifier; 
 
@@ -32,6 +33,8 @@ typedef struct SymbolTableEntry {
     TypeArrayElement* type; //pointer to the array type -> will be found using the lookup operation in the hash table
     int width;
     int offset;
+
+    char* usage; //stores the usage of the identifier, for example, if it is inparameter, outparameter, or variable
 
     struct SymbolTableEntry* next;
 } SymbolTableEntry;
