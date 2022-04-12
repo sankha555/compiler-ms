@@ -9,14 +9,17 @@
 #include "typing.h"
 
 void printSymbolTableEntry(SymbolTable* symbolTable, SymbolTableEntry* entry, FILE* fp){
-    fprintf(fp,"%10s%10s%15s%15s%30d%20s%30d%30s\n\n\n", entry->identifier, symbolTable->tableID, "TODO", "TODO", entry->width, strcmp(symbolTable->tableID, "GLOBAL")==0 ? "Yes" : "No", entry->offset, "TODO");
+    fprintf(fp, "\t Name: %30s ; Scope: %30s ; Width: %d ; Offset: %d; Is Global: %3s\n", entry->identifier, symbolTable->tableID, entry->width, entry->offset, (!strcmp(symbolTable->tableID, "GLOBAL") ? "YES" : "NO"));
+    fprintf(fp, "\t Type Name: %s\n", "TODO");
+    fprintf(fp, "\t Type Expression: %s\n", "TODO");
+    fprintf(fp, "\t Variable Usage: %s\n", "TODO");
+    fprintf(fp, "------------------------------------------------------------------\n");
 }
 
 void printASingleSymbolTable(SymbolTable* symbolTable, FILE* fp){
     fprintf(fp, "================ SYMBOL TABLE : %s ================\n", symbolTable->tableID);
     fprintf(fp, "Total Width: %d\n", symbolTable->totalWidth);
     fprintf(fp, "*** Entries in Table: *** \n");
-    fprintf(fp,"%10s%10s%15s%15s%30s%20s%30s%30s\n\n\n","Name", "Scope", "Type Name", "Type Expr.", "Width", "isGlobal", "Offset", "Var. Usage");
     for(int i = 0; i < K_MAP_SIZE; i++){
         SymbolTableEntry* head = symbolTable->tableEntries[i];
         while(head != NULL){
