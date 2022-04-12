@@ -119,11 +119,11 @@ FunctionType *createFunctionType(char *identifier){
     return func;
 }
 
-Field* createField(char *identifier){
+Field* createField(char *identifier, char* typeid){
 
     Field* field = (Field*)malloc(sizeof(Field));
     field->identifier = identifier;
-    field->datatype = lookup(globalTypeTable, identifier);
+    field->datatype = lookup(globalTypeTable, typeid);
     field->width = field->datatype->width;
     field->offset = 0;
     field->next = NULL;
@@ -131,19 +131,19 @@ Field* createField(char *identifier){
 
 }
 
-Parameter *createParameter(char *identifier){
+Parameter *createParameter(char *identifier, char* typeid){
 
     Parameter *parameter = (Parameter*)malloc(sizeof(Parameter));
     parameter->identifier = identifier;
-    parameter->datatype = lookup(globalTypeTable, identifier);
+    parameter->datatype = lookup(globalTypeTable, typeid);
     parameter->next= NULL;
     return parameter;
 
 }
 
-Field* addtoListofFields(char *identifier, Field *listofFields){
+Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields){
 
-    Field* field = createField(identifier);
+    Field* field = createField(identifier, typeid);
     Field* trav = listofFields;
     if(trav == NULL) 
         listofFields = field;
@@ -154,9 +154,9 @@ Field* addtoListofFields(char *identifier, Field *listofFields){
 
 }
 
-Parameter* addtoParameterList(char* identifier, Parameter* paramlist){
+Parameter* addtoParameterList(char* identifier,char* typeid, Parameter* paramlist){
 
-    Parameter* parameter= createParameter(identifier);
+    Parameter* parameter= createParameter(identifier, typeid);
     Parameter* trav = paramlist;
     if(trav == NULL) 
         paramlist = parameter;

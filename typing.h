@@ -2,8 +2,7 @@
 #define TYPING_H
 
 #include "globalDef.h"
-globalTypeTable = createTypeTable("globalTypeTable");
-
+TypeTable* globalTypeTable;
 //broad type category, used in the type expression
 typedef enum Type {
     Integer,
@@ -58,7 +57,7 @@ typedef struct TypeArrayElement {
  
     Type type;
     char* identifier; //name of the type
-    int aliasTypeInfo; //stores the typeIndex of the actual type if the type is alias
+    TypeArrayElement* aliasTypeInfo; //stores the typeIndex of the actual type if the type is alias
     struct UnionOrRecordInfo* compositeVariableInfo; //points to the Record/Union type expression if Record/Union otherwise NULL
     struct FunctionType* functionInfo; //points to the function type expression if Record/Union otherwise NULL
     struct TypeArrayElement *next; //used in the LinkedList in the hash table Implementation fo the type table
@@ -82,8 +81,12 @@ int insert(TypeTable* typeTable, TypeArrayElement* entry);
 TypeArrayElement* loopkup(TypeTable* typeTable, char* identifier);
 TypeTable* createTypeTable(char* tableID);
 TypeArrayElement* createTypeArrayElement(Type type, char *identifier);
-
-
+UnionOrRecordInfo* createUnionOrRecordinfo(char *identifier);
+FunctionType *createFunctionType(char *identifier);
+Field* createField(char *identifier, char* typeid);
+Parameter *createParameter(char *identifier, char* typeid);
+Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields);
+Parameter* addtoParameterList(char* identifier,char* typeid, Parameter* paramlist);
 #endif
 
 
