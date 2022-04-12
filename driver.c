@@ -66,6 +66,7 @@ int main(int argc, char *argv[])
         printf("3 - Parse the source code to generate parse tree\n");
         printf("4 - Find parsing time\n");
         printf("5 - Generate Abstract Syntax Tree\n");
+        printf("6 - Generate Symbol Table\n");
         printf("\nEnter a command: ");
 
         int option;
@@ -221,6 +222,10 @@ int main(int argc, char *argv[])
             root = parseInputSourceCode(buffer);
 
             astRoot = createAbstractSyntaxTree(root);
+            // printAbstractSyntaxTree(astRoot, stdout);
+
+            globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
+            printf("created type table\n");
 
             globalSymbolTable = initializeSymbolTable(astRoot);
             break;

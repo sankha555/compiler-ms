@@ -8,11 +8,18 @@
 #include "astDef.h"
 #include "typing.h"
 
+void printSymbolTables(){
+    ;
+}
+
 SymbolTable* addToListOfSymbolTables(SymbolTable* symbolTable){
+    printf("this is called\n");
     if(listOfSymbolTables == NULL){
+        printf("bruh\n");
         listOfSymbolTables = symbolTable;
         symbolTable->next = NULL;
     }else{
+        printf("bruh1\n");
         SymbolTable* head = listOfSymbolTables;
         while(head->next != NULL){
             head = head->next;
@@ -50,10 +57,15 @@ int insertintoSymbolTable(SymbolTable* symbolTable, SymbolTableEntry* entry) {
     int hashTableIndex = hashFunctionSymbolTable(entry->identifier);
     
     SymbolTableEntry* pointer = symbolTable->tableEntries[hashTableIndex];
+    entry->offset = symbolTable->totalWidth;
+
     if(pointer == NULL) {
         symbolTable->tableEntries[hashTableIndex] = entry;
+        symbolTable->totalWidth += entry->width;
+
         return 1;
     }
+
     while(pointer->next != NULL) {
         if(strcmp(pointer->identifier, entry->identifier) == 0) {
             //entry already exists, update tag
@@ -63,17 +75,20 @@ int insertintoSymbolTable(SymbolTable* symbolTable, SymbolTableEntry* entry) {
         pointer = pointer->next;
     }
     pointer->next = entry;
+    symbolTable->totalWidth += entry->width;
+
     return 1;
 }
 
-SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTable* tablePointer, TypeArrayElement* type, int width, int offset){
+SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTable* tablePointer, TypeArrayElement* type, int width){
     SymbolTableEntry* newEntry = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
+    newEntry->identifier = (char*) malloc(strlen(identifier)*sizeof(char));
     strcpy(newEntry->identifier, identifier);
     newEntry->isFunction = isFunction;
     newEntry->tablePointer =  tablePointer;
     newEntry->type = type;
     newEntry->width = width;
-    newEntry->offset = offset;
+    newEntry->offset = 0;
     newEntry->next = NULL;
 
     return newEntry;
@@ -81,14 +96,20 @@ SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction
 
 SymbolTable* createSymbolTable(char* tableID, SymbolTable* returnTable){
     SymbolTable* newTable = (SymbolTable*) malloc(sizeof(SymbolTable));
+    newTable->tableID = (char*) malloc(strlen(tableID)*sizeof(char));
+
     strcpy(newTable->tableID, tableID);
+    printf("String has been copied\n");
     newTable->returnTo = returnTable;
+    newTable->totalWidth = 0;
     
-    newTable->currentOffset = 0;    // is this correct tho? how do we compute the offset for each new table??
+    // newTable->currentOffset = 0;    // is this correct tho? how do we compute the offset for each new table??
     // we don't need to compute the offset for each new table, as each new table represents a function, and the offset of the variables = offset of start of stack frame + relative offset
     // we can just include the total width if required, to gauge the total memory required by the symbol table
     
+    printf("going to call addto list of stables\n");
     listOfSymbolTables = addToListOfSymbolTables(newTable);
+    // printf("Added to list of symbols \n");
 
     return newTable;
 }
@@ -101,38 +122,104 @@ SymbolTable* getSymbolTable(char* identifier){
     return head;
 }
 
-void parseInputParams(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
-    printAbstractSyntaxTree(root, stdout);
+void parseInputParams(char* functionName, astNode* root, SymbolTable* globalSymbolTable, SymbolTable* symbolTable) {
+    TypeArrayElement* typeElement = createTypeArrayElement(Function, functionName);
+    FunctionType* newFuncType = createFunctionType(functionName);
+    typeElement->functionInfo = newFuncType;
+
+    while(root){
+        ASTtag dataType = root->data->children[0]->type;
+        char* identifier = root->data->children[1]->entry.lexeme;
+
+        SymbolTableEntry* entry;
+
+        switch (dataType)
+        {
+            case TypeInt:
+                entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(globalTypeTable, "Int"), getWidth(Integer));            
+                insertintoSymbolTable(symbolTable, entry);
+
+                newFuncType->inputParameters = addtoParameterList(identifier, "Int", newFuncType->inputParameters);
+                break;
+
+            case TypeReal:
+                entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(globalTypeTable, "Real"), getWidth(Real));            
+                insertintoSymbolTable(symbolTable, entry);
+                
+                newFuncType->inputParameters = addtoParameterList(identifier, "Real", newFuncType->inputParameters);
+                break;
+            
+            default:
+                break;
+        }
+
+        root = root->next;
+    }
+
+    insertintoTypeTable(globalTypeTable, typeElement);
 }
 
-void parseOutputParams(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
-    printAbstractSyntaxTree(root, stdout);
+void parseOutputParams(char* functionName, astNode* root, SymbolTable* globalSymbolTable, SymbolTable* symbolTable) {
+    FunctionType* funcType = lookupTypeTable(globalTypeTable, functionName)->functionInfo;
+
+    while(root){
+        ASTtag dataType = root->data->children[0]->type;
+        char* identifier = root->data->children[1]->entry.lexeme;
+
+        SymbolTableEntry* entry;
+
+        switch (dataType)
+        {
+            case TypeInt:
+                entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(globalTypeTable, "Int"), getWidth(Integer));            
+                insertintoSymbolTable(symbolTable, entry);
+
+                funcType->outputParameters = addtoParameterList(identifier, "Int", funcType->outputParameters);
+                break;
+
+            case TypeReal:
+                entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(globalTypeTable, "Real"), getWidth(Real));            
+                insertintoSymbolTable(symbolTable, entry);
+                
+                funcType->outputParameters = addtoParameterList(identifier, "Real", funcType->outputParameters);
+                break;
+            
+            default:
+                break;
+        }
+
+        root = root->next;
+    }
 }
 
 void parseTypeDefinitions(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
     printAbstractSyntaxTree(root, stdout);
 }
 
-void parseDeclarations(astNode* root, SymbolTable* globalSymbolTable) {
-    printAbstractSyntaxTree(root, stdout);
-
+void parseDeclarations(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* symbolTable) {
     while(root){
-        ASTtag dataType =root->data->children[0]->type;
+        ASTtag dataType = root->data->children[0]->type;
         astNode *variable = root->data->children[1];
 
         char* identifier = variable->entry.lexeme;
-        
+        printf("Datatype: %d\n", dataType);
+        SymbolTableEntry* entry;
+
         switch (dataType)
         {
-        case TypeInt:
-            SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(), getWidth())
+            case TypeInt:
+                entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(globalTypeTable, "Int"), getWidth(Integer));            
+                insertintoSymbolTable(symbolTable, entry);
+
+                break;
+            case TypeReal:
+                entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(globalTypeTable, "Real"), getWidth(Real));            
+                insertintoSymbolTable(symbolTable, entry);
+
+                break;
             
-            break;
-        case TypeReal:
-            
-            break;
-        default:
-            break;
+            default:
+                break;
         }
 
         root = root->next;
@@ -148,20 +235,21 @@ void parseDeclarations(astNode* root, SymbolTable* globalSymbolTable) {
  */
 void populateOtherFunctionTable(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
     printf("Populating function table\n");
-    printAbstractSyntaxTree(root, stdout);
     // the 3 children of the function node are:
     // 1. Input parameters
     // 2. Output variables
     // 3. Function Body Statements (Stmts)
-    astNode* inputParams = root->children[0];
-    astNode* outputParams = root->children[1];
-    astNode* stmts = root->children[2];
+    
+    char* functionName = root->children[0]->entry.lexeme;
+    astNode* inputParams = root->children[1];
+    astNode* outputParams = root->children[2];
+    astNode* stmts = root->children[3];
 
     // 1. Input parameters
-    parseInputParams(inputParams, globalSymbolTable, functionSymbolTable);
+    parseInputParams(functionName, inputParams, globalSymbolTable, functionSymbolTable);
 
     // 2. Output variables
-    parseOutputParams(outputParams, globalSymbolTable, functionSymbolTable);
+    parseOutputParams(functionName, outputParams, globalSymbolTable, functionSymbolTable);
 
     // 3. Function Body Statements
     // <typeDefinitions> <declarations> <otherStmts> <returnStmt>
@@ -182,9 +270,6 @@ void populateOtherFunctionTable(astNode* root, SymbolTable* globalSymbolTable, S
 void populateMainFunctionTable(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
     printf("Populating main function table\n");
 
-    FILE* fp = fopen("t2AST.txt", "w+");
-    printAbstractSyntaxTree(root, fp);
-    fclose(fp);
     // Main does not have any input parameters, output variables
     // Only the function body statements (Stmts) are there
 
@@ -206,6 +291,7 @@ void populateMainFunctionTable(astNode* root, SymbolTable* globalSymbolTable, Sy
  * @return SymbolTable* 
  */
 SymbolTable* initializeSymbolTable(astNode* root) {
+    listOfSymbolTables = NULL;
     SymbolTable* globalSymbolTable = createSymbolTable("GLOBAL", NULL);
 
     // AST ROOT is program
@@ -226,8 +312,10 @@ SymbolTable* initializeSymbolTable(astNode* root) {
     }
 
     SymbolTable* mainFunctionSymbolTable = createSymbolTable("_main", globalSymbolTable);
+    printf("Symbol table created for _main...\n");
 
-    insertintoSymbolTable(globalSymbolTable, createNewSymbolTableEntry("_main", true, mainFunctionSymbolTable, NULL, 0, 0));
+    insertintoSymbolTable(globalSymbolTable, createNewSymbolTableEntry("_main", true, mainFunctionSymbolTable, NULL, 0));
+    printf("It has been inserted into global function table...\n");
 
     populateMainFunctionTable(mainFunction, globalSymbolTable, mainFunctionSymbolTable);
 
