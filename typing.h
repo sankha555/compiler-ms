@@ -2,7 +2,6 @@
 #define TYPING_H
 
 #include "globalDef.h"
-TypeTable* globalTypeTable;
 //broad type category, used in the type expression
 typedef enum Type {
     Integer,
@@ -14,10 +13,11 @@ typedef enum Type {
     
 } Type;
 
+struct TypeArrayElement;
 typedef struct Field {
     char* identifier; //name of the field
 
-    TypeArrayElement *datatype; //is an index of the type array, denoting the type of that field
+    struct TypeArrayElement *datatype; //is an index of the type array, denoting the type of that field
     //the type can be primitive/record/union
     
     int width; //width of the type
@@ -87,6 +87,8 @@ Field* createField(char *identifier, char* typeid);
 Parameter *createParameter(char *identifier, char* typeid);
 Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields);
 Parameter* addtoParameterList(char* identifier,char* typeid, Parameter* paramlist);
+TypeTable* globalTypeTable;
+
 #endif
 
 
