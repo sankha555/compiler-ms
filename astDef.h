@@ -78,6 +78,9 @@ typedef struct astNode
     struct astNode *next;
     struct astNode *data;
     struct astNode *children[MAX_PROD_LEN];
+
+    char* code;
+    char* data;
 } astNode;
 
 #endif
