@@ -179,7 +179,7 @@ struct FunctionParameter* addtoParameterList(char* identifier,char* typeid, Func
     FunctionParameter* parameter= createParameter(identifier, typeid);
     FunctionParameter* trav = paramlist;
     if(trav == NULL) 
-        paramlist = parameter;
+        trav = parameter;
     while(trav->next != NULL)
         trav = trav->next;
     trav->next = parameter;
