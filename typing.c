@@ -312,15 +312,40 @@ void addToListofFieldsUnion(char *identifier, char *typeid, UnionOrRecordInfo *i
     info->totalWidth = field->width > info->totalWidth ? field->width : info->totalWidth;
 }
 
-struct FunctionParameter *addtoParameterList(char *identifier, char *typeid, FunctionParameter *paramlist)
+void addToInputParameters(char *identifier, char *typeid, FunctionType *info)
 {
 
     FunctionParameter *parameter = createParameter(identifier, typeid);
-    FunctionParameter *trav = paramlist;
+    FunctionParameter *trav = info->inputParameters;
     if (trav == NULL)
-        trav = parameter;
-    while (trav->next != NULL)
-        trav = trav->next;
-    trav->next = parameter;
-    return paramlist;
+    {
+        info->inputParameters = parameter;
+    }
+    else
+    {
+        while (trav->next != NULL)
+        {
+            trav = trav->next;
+        }
+        trav->next = parameter;
+    }
+}
+
+void addToOutputParameters(char *identifier, char *typeid, FunctionType *info)
+{
+
+    FunctionParameter *parameter = createParameter(identifier, typeid);
+    FunctionParameter *trav = info->outputParameters;
+    if (trav == NULL)
+    {
+        info->outputParameters = parameter;
+    }
+    else
+    {
+        while (trav->next != NULL)
+        {
+            trav = trav->next;
+        }
+        trav->next = parameter;
+    }
 }

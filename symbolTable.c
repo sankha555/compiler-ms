@@ -200,7 +200,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
 
             insertintoSymbolTable(symbolTable, entry);
 
-            newFuncType->inputParameters = addtoParameterList(identifier, "Int", newFuncType->inputParameters);
+            addToInputParameters(identifier, "Int", newFuncType);
             break;
 
         case TypeReal:
@@ -209,7 +209,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
 
             insertintoSymbolTable(symbolTable, entry);
 
-            newFuncType->inputParameters = addtoParameterList(identifier, "Real", newFuncType->inputParameters);
+            addToInputParameters(identifier, "Real", newFuncType);
             break;
         case TypeRecord:
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
@@ -218,7 +218,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
 
             insertintoSymbolTable(symbolTable, entry);
 
-            newFuncType->inputParameters = addtoParameterList(identifier, lookupResult->identifier, newFuncType->inputParameters);
+            addToInputParameters(identifier, typeidentifier, newFuncType);
             break;
         case TypeUnion:
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
@@ -227,7 +227,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
 
             insertintoSymbolTable(symbolTable, entry);
 
-            newFuncType->inputParameters = addtoParameterList(identifier, lookupResult->identifier, newFuncType->inputParameters);
+            addToInputParameters(identifier, typeidentifier, newFuncType);
             break;
         default:
             break;
@@ -259,7 +259,7 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
             entry->usage = "output Parameter";
             insertintoSymbolTable(symbolTable, entry);
 
-            funcType->outputParameters = addtoParameterList(identifier, "Int", funcType->outputParameters);
+            addToOutputParameters(identifier, "Int", funcType);
             break;
 
         case TypeReal:
@@ -267,7 +267,7 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
             entry->usage = "output Parameter";
             insertintoSymbolTable(symbolTable, entry);
 
-            funcType->outputParameters = addtoParameterList(identifier, "Real", funcType->outputParameters);
+            addToOutputParameters(identifier, "Real", funcType);
             break;
         case TypeRecord:
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
@@ -277,7 +277,7 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
             entry->usage = "output Parameter";
             insertintoSymbolTable(symbolTable, entry);
 
-            funcType->outputParameters = addtoParameterList(identifier, lookupResult->identifier, funcType->outputParameters);
+            addToOutputParameters(identifier, typeidentifier, funcType);
             break;
         case TypeUnion:
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
@@ -285,7 +285,7 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
             entry->usage = "output Parameter";
             insertintoSymbolTable(symbolTable, entry);
 
-            funcType->outputParameters = addtoParameterList(identifier, lookupResult->identifier, funcType->outputParameters);
+            addToOutputParameters(identifier, typeidentifier, funcType);
             break;
         default:
             break;

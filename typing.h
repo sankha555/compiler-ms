@@ -95,7 +95,8 @@ struct Field *createField(char *identifier, char *typeid);
 struct FunctionParameter *createParameter(char *identifier, char *typeid);
 void addToListofFieldsRecord(char *identifier, char* typeid, UnionOrRecordInfo* info);
 void addToListofFieldsUnion(char *identifier, char* typeid, UnionOrRecordInfo* info);
-struct FunctionParameter *addtoParameterList(char *identifier, char *typeid, struct FunctionParameter *paramlist);
+void addToInputParameters(char *identifier, char *typeid, FunctionType *info);
+void addToOutputParameters(char *identifier, char *typeid, FunctionType *info);
 struct TypeTable *globalTypeTable;
 
 #endif
