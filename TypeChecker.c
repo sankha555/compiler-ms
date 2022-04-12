@@ -23,6 +23,7 @@ struct TypeArrayElement* findType(astNode* root,
 	
 	// to store the symbol table entry pointer for the identifier
 	SymbolTableEntry* entry;
+
 	if (root->isLeafNode) {
 		switch (root->type) {
 			/* INTEGER LITERAL
@@ -77,6 +78,8 @@ struct TypeArrayElement* findType(astNode* root,
 			t2 = findType(root->children[2], localTable, baseTable);
 			if (t1->type == t2->type && 
 					(t1->type == Integer || t1->type == Real))
+				return t1;
+			else if (t1->type == Record && (t1 == t2))
 				return t1;
 			else {
 				printf("Relational operator: incompatible operands.\n");
@@ -142,8 +145,8 @@ struct TypeArrayElement* findType(astNode* root,
 					|| (t1->type == Real && t2->type == Integer)
 					|| (t1->type == Real && t2->type == Real))
 				return realPtr;
-			else if (t1->type == Record && (t1 == t2))
-				return t1;
+			else if (t1->type == Record)
+				return checkTypeEquality(t1, t2);
 			else {
 				printf("Multiplication: real or integer operands required.\n");
 				return typeErrPtr;
@@ -159,8 +162,8 @@ struct TypeArrayElement* findType(astNode* root,
 			if ((t1->type == Integer || t1->type == Real)
 					&& (t2->type == Integer || t2->type == Real))
 				return realPtr;
-			else if (t1->type == Record && (t1 == t2))
-				return t1;
+			else if (t1->type == Record)
+				return checkTypeEquality(t1, t2);
 			else {
 				printf("Division: real or integer operands required.\n");
 				return typeErrPtr;
@@ -176,8 +179,8 @@ struct TypeArrayElement* findType(astNode* root,
 					|| (t1->type == Real && (t2->type == Integer || t2->type == Real)))
 				return voidPtr;
 			/*--TO DO: assignment for whole records?--*/
-			else if (t1->type == Record && (t1 == t2))
-				return t1;
+			else if (t1->type == Record)
+				return checkTypeEquality(t1, t2);
 
 			else {
 				printf("Assignment: incompatible types.\n");
@@ -220,6 +223,88 @@ struct TypeArrayElement* findType(astNode* root,
 				printf("Empty composite!\n");
 				return typeErrPtr;
 			}
+
+		/* FUNCTION CALL STATEMENT
+		 * <funCallStmt> ===> <outputParameters> TK_CALL TK_FUNID TK_WITH
+         * TK_PARAMETERS <inputParameters> TK_SEM
+		 */
+		case FuncCall:
+			// function identifier should be present in the symbol table
+			entry = lookupSymbolTable(baseTable, root->children[1]->entry.lexeme);
+			if (entry == NULL || entry->isFunction != 0) {
+				printf("Function not defined.\n");
+				return typeErrPtr;
+			}
+
+			// function call should not be recursive
+			if (strcmp(localTable->tableID, root->children[1]->entry.lexeme) == 0) {
+				printf("Recursion not allowed!\n");
+				return typeErrPtr;
+			}
+
+
+
+			// information about the input and output parameters
+			// IMPORTANT: please ensure that this is not NULL for a function
+			struct FunctionType* funcInfo = entry->type->functionInfo;
+
+			if (funcInfo == NULL) {
+				printf("Erroneous function entry in symbol table.\n");
+				return typeErrPtr;
+			}
+
+			// input parameters linked list from function prototype
+			struct FunctionParameter* formalInput = funcInfo->inputParameters;
+			// output parameters linked list from function prototype
+			struct FunctionParameter* formalOutput = funcInfo->outputParameters;
+			
+			// actual input and output parameters used
+			astNode* actualInput = root->children[2];
+			astNode* actualOutput = root->children[0];
+			
+			if (findLengthActual(actualInput) != findLengthFormal(formalInput)
+					|| findLengthActual(actualOutput) != findLengthFormal(formalOutput)) {
+				printf("Number of parameters in function call do not match.\n");
+				return typeErrPtr;
+			}
+
+			// checking the input parameters
+			while (actualInput != NULL) {
+				t1 = findType(actualInput->data, localTable, baseTable);
+				t2 = formalInput->datatype;
+				
+				// passing union parameters not allowed
+				if (t1->type == Union || t2->type == Union)
+					return typeErrPtr;
+
+				// parameters should match in type
+				if (checkTypeEquality(t1, t2)->type == TypeErr) {
+					printf("Input parameter mismatch.\n");
+					return typeErrPtr;
+				}
+				actualInput = actualInput->next;
+				formalInput = formalInput->next;
+			}
+
+			// checking the output parameters
+			while (actualOutput != NULL) {
+				t1 = findType(actualOutput->data, localTable, baseTable);
+				t2 = formalOutput->datatype;
+
+				// passing union parameters not allowed
+				if (t1->type == Union || t2->type == Union)
+					return typeErrPtr;
+
+				// parameters should match in type
+				if (checkTypeEquality(t1, t2)->type == TypeErr) {
+					printf("Output parameter mismatch.\n");
+					return typeErrPtr;
+				}
+				actualInput = actualOutput->next;
+				formalInput = formalOutput->next;
+			}
+
+			return voidPtr;
 
 
 		default:
@@ -353,4 +438,42 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 
 	printf("TYPE CHECKING SUCCESSFUL - ALL TESTS CLEARED!");
 	return 0;
+}
+
+/* find the length of actual parameters linked list */
+int findLengthActual(astNode* head) {
+	astNode* curr = head;
+	int count = 0;
+	while (curr != NULL) {
+		count++;
+		curr = curr->next;
+	}
+	return count;
+}
+
+/* find the length of formal parameters linked list */
+int findLengthFormal(FunctionParameter* head) {
+	FunctionParameter* curr = head;
+	int count = 0;
+	while (curr != NULL) {
+		count++;
+		curr = curr->next;
+	}
+	return count;
+}
+
+/* useful for checking record type equality */
+struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1, 
+		struct TypeArrayElement* t2) {
+	if (t1 == typeErrPtr || t2 == typeErrPtr)
+		return typeErrPtr;
+	if (t1 == t2)
+		return t1;
+	else if (t1->aliasTypeInfo != NULL && t1->aliasTypeInfo == t2)
+		return t2;
+	else if (t2->aliasTypeInfo != NULL && t1 == t2->aliasTypeInfo)
+		return t1;
+	else if (t1->aliasTypeInfo != NULL && t1->aliasTypeInfo == t2->aliasTypeInfo)
+		return t1->aliasTypeInfo;
+	return typeErrPtr;
 }
