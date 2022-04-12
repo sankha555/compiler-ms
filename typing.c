@@ -77,6 +77,7 @@ void printTypeArrayElement(FILE* fp, TypeArrayElement *t)
         printUnionOrRecordInfo(fp, t->compositeVariableInfo);
         break;
     case Function:
+        printf("printing FunctionInfo\n");
         fprintf(fp, "Function \t %s\n", t->identifier);
         printFunctionInfo(fp, t->functionInfo);
         break;
@@ -165,6 +166,11 @@ struct TypeArrayElement *lookupTypeTable(TypeTable *typeTable, char *identifier)
     {
         if (strcmp(entry->identifier, identifier) == 0)
         {
+            // check if entry is alias
+            if (entry->type == Alias)
+            {
+                return lookupTypeTable(typeTable, entry->aliasTypeInfo->identifier);
+            }
             return entry;
         }
         entry = entry->next;
@@ -190,9 +196,10 @@ struct TypeTable *createTypeTable(char *tableID)
     entry = createTypeArrayElement(0, "Int");
     entry->width = 4;
     insertintoTypeTable(newTable, entry);
-    printf("Inserted into type table\n");
+    //printf("Inserted into type table\n");
     entry = createTypeArrayElement(1, "Real");
     entry->width = 8;
+
     insertintoTypeTable(newTable, entry);
     return newTable;
 }

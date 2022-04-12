@@ -11,8 +11,10 @@
 void printSymbolTableEntry(SymbolTable *symbolTable, SymbolTableEntry *entry, FILE *fp)
 {
     fprintf(fp, "\t Name: %30s ; Scope: %30s ; Width: %d ; Offset: %d; Is Global: %3s\n", entry->identifier, symbolTable->tableID, entry->width, entry->offset, (!strcmp(symbolTable->tableID, "GLOBAL") ? "YES" : "NO"));
-    fprintf(fp, "\t Type Name: %s\n", "TODO");
-    fprintf(fp, "\t Type Expression: %s\n", "TODO");
+    // printf("Entry Type: %d\n", entry->type);
+    // fprintf(fp, "\t Type Name: %s\n", entry->type->identifier);
+    fprintf(fp, "\t Type Expression:\n");
+    printTypeArrayElement(stdout, entry->type);
     fprintf(fp, "\t Variable Usage: %s\n", entry->usage != NULL ? entry->usage : "undefined");
     fprintf(fp, "------------------------------------------------------------------\n");
 }
@@ -186,11 +188,11 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
     while (root)
     {
         ASTtag dataType = root->data->children[0]->type;
-        char *typeidentifier = root->data->children[0]->entry.lexeme;
+        char *typeidentifier;
         char *identifier = root->data->children[1]->entry.lexeme;
 
         SymbolTableEntry *entry;
-        TypeArrayElement* lookupResult;
+        TypeArrayElement *lookupResult;
 
         switch (dataType)
         {
@@ -212,6 +214,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
             addToInputParameters(identifier, "Real", newFuncType);
             break;
         case TypeRecord:
+            typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "input Parameter";
@@ -221,8 +224,9 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
             addToInputParameters(identifier, typeidentifier, newFuncType);
             break;
         case TypeUnion:
+            typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
-            entry = createNewSymbolTableEntry(identifier, false, NULL,lookupResult, lookupResult->width);
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "input Parameter";
 
             insertintoSymbolTable(symbolTable, entry);
@@ -246,11 +250,11 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
     while (root)
     {
         ASTtag dataType = root->data->children[0]->type;
-        char *typeidentifier = root->data->children[0]->entry.lexeme;
+        char *typeidentifier;
         char *identifier = root->data->children[1]->entry.lexeme;
 
         SymbolTableEntry *entry;
-        TypeArrayElement* lookupResult;
+        TypeArrayElement *lookupResult;
 
         switch (dataType)
         {
@@ -270,8 +274,9 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
             addToOutputParameters(identifier, "Real", funcType);
             break;
         case TypeRecord:
+            typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
-            printf("identifier is %s\n",typeidentifier);
+            printf("identifier is %s\n", typeidentifier);
             printf("lookup result is %s\n", lookupResult == NULL ? "NULL" : "NOT NULL");
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "output Parameter";
@@ -280,6 +285,7 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
             addToOutputParameters(identifier, typeidentifier, funcType);
             break;
         case TypeUnion:
+            typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "output Parameter";
@@ -298,7 +304,6 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
 void parseTypeDefinitions(astNode *root, SymbolTable *globalSymbolTable, SymbolTable *functionSymbolTable)
 {
     printf("parsing type definitions\n");
-    
 
     while (root != NULL)
     {
@@ -341,8 +346,8 @@ void parseTypeDefinitions(astNode *root, SymbolTable *globalSymbolTable, SymbolT
 
                 head = head->next;
             }
+            entry->width = record->totalWidth;
             insertintoTypeTable(globalTypeTable, entry);
-
         }
         else if (root->data->type == TypeUnionDefinition)
         {
@@ -354,7 +359,6 @@ void parseTypeDefinitions(astNode *root, SymbolTable *globalSymbolTable, SymbolT
             UnionOrRecordInfo *newUnion = createUnionOrRecordinfo(unionName);
             newUnion->isRecord = TRUE;
             entry->compositeVariableInfo = newUnion;
-
 
             astNode *fieldsList = root->data->children[1];
             astNode *head = fieldsList;
@@ -382,6 +386,7 @@ void parseTypeDefinitions(astNode *root, SymbolTable *globalSymbolTable, SymbolT
 
                 head = head->next;
             }
+            entry->width = newUnion->totalWidth;
 
             insertintoTypeTable(globalTypeTable, entry);
         }
@@ -404,6 +409,7 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
     while (root)
     {
         ASTtag dataType = root->data->children[0]->type;
+        char *typeidentifier;
         astNode *variable = root->data->children[1];
 
         char *identifier = variable->entry.lexeme;
@@ -412,6 +418,8 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
         bool isGlobal = root->data->children[2] ? true : false;
 
         TypeArrayElement *intTypeElement = lookupTypeTable(globalTypeTable, "Int");
+
+        TypeArrayElement *lookupResult;
 
         switch (dataType)
         {
@@ -443,6 +451,43 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
             }
 
             break;
+        case TypeRecord:
+            printf("parsing record\n");
+            typeidentifier = root->data->children[0]->entry.lexeme;
+            lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
+            printf("lookup result is %s\n", lookupResult->identifier);
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
+            printf("width is %d\n", lookupResult->width);
+            if (isGlobal)
+            {
+                entry->usage = "global Variable";
+                insertintoSymbolTable(globalSymbolTable, entry);
+            }
+            else
+            {
+                entry->usage = "local Variable";
+                insertintoSymbolTable(symbolTable, entry);
+                printf("inserting into symbol table\n");
+            }
+            break;
+
+        case TypeUnion:
+            printf("parsing union\n");
+            typeidentifier = root->data->children[0]->entry.lexeme;
+            lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
+            if (isGlobal)
+            {
+                entry->usage = "global Variable";
+                insertintoSymbolTable(globalSymbolTable, entry);
+            }
+            else
+            {
+                entry->usage = "local Variable";
+                insertintoSymbolTable(symbolTable, entry);
+            }
+            break;
+
         default:
             break;
         }
@@ -498,6 +543,9 @@ void populateOtherFunctionTable(astNode *root, SymbolTable *globalSymbolTable, S
  */
 void populateMainFunctionTable(astNode *root, SymbolTable *globalSymbolTable, SymbolTable *functionSymbolTable)
 {
+    TypeArrayElement *typeElement = createTypeArrayElement(Function, "_main");
+    typeElement->functionInfo = createFunctionType("_main");
+    insertintoTypeTable(globalTypeTable, typeElement);
     printf("Populating main function table\n");
 
     // Main does not have any input parameters, output variables
@@ -533,11 +581,18 @@ SymbolTable *initializeSymbolTable(astNode *root)
     SymbolTable *mainFunctionSymbolTable = createSymbolTable("_main", globalSymbolTable);
     printf("Symbol table created for _main...\n");
 
-    insertintoSymbolTable(globalSymbolTable, createNewSymbolTableEntry("_main", true, mainFunctionSymbolTable, NULL, 0));
+    populateMainFunctionTable(mainFunction, globalSymbolTable, mainFunctionSymbolTable);
+
+
+    SymbolTableEntry *entry = createNewSymbolTableEntry("_main", true, mainFunctionSymbolTable, lookupTypeTable(globalTypeTable, "_main"), 0);
+
+    entry->usage = "main function";
+
+    insertintoSymbolTable(globalSymbolTable, entry);
     printf("It has been inserted into global function table...\n");
 
-    populateMainFunctionTable(mainFunction, globalSymbolTable, mainFunctionSymbolTable);
     printf("Main function has been populated \n");
+
 
 
     // go to otherFunc, it is a linked list of functions
@@ -549,6 +604,10 @@ SymbolTable *initializeSymbolTable(astNode *root)
         populateOtherFunctionTable(current, globalSymbolTable, functionTable);
 
         // TODO: add the function symbol table to the global symbol table
+        entry = createNewSymbolTableEntry(current->children[0]->entry.lexeme, true, functionTable, lookupTypeTable(globalTypeTable,current->children[0]->entry.lexeme), 0);
+        entry->usage = "function";
+
+        insertintoSymbolTable(globalSymbolTable, entry);
 
         otherFunctions = otherFunctions->next;
     }
