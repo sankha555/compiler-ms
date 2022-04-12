@@ -6,6 +6,7 @@
 #include "symbolTableDef.h"
 #include "symbolTable.h"
 #include "astDef.h"
+#include "typing.h"
 
 void generateIntermediateCode(astNode *root, SymbolTable* globalSymbolTable, SymbolTable* currentSymbolTable)
 {
@@ -174,6 +175,26 @@ void generateIntermediateCode(astNode *root, SymbolTable* globalSymbolTable, Sym
             sprintf(root->code, "MOV AX, %s\nMOV BX, %s\nAND AX, BX\n STOREW %s, AX\n", root->children[0]->dataPlace, root->children[1]->data, tempDataPlace);
             break;
         case arithOp_PLUS:
+            // create a new temp data variables
+            // check the type of children, real real, int int, real int -> real, int real -> real            
+
+            char* tempDataPlace = getTempDataPlace();
+            
+            generateIntermediateCode(root->children[0], globalSymbolTable, currentSymbolTable);
+            generateIntermediateCode(root->children[1], globalSymbolTable, currentSymbolTable);
+            
+            int firstType = lookupSymbolTable(currentSymbolTable, root->children[0]->dataPlace)->type;
+            int secondType = lookupSymbolTable(currentSymbolTable, root->children[1]->dataPlace)->type;
+
+            if(firstType == secondType == INT) {
+                sprintf(root->code, "LOADI A\n LOADI B\n ADDI X,A,B\n STOREI X");
+            } else if (firstType == secondType == REAL) {
+                sprintf(root->code, "LOADR A\n LOADR B\n ADDR X,A,B\n STORER X");
+            } else if (firstType != secondType && firstType == INT && secondType == REAL){
+                
+            } else {
+
+            }
 
 
 
