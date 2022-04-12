@@ -4,6 +4,7 @@
 
 #include "stdbool.h"
 #include "symbolTableDef.h"
+#include "astGenerator.h"
 #include "astDef.h"
 #include "typing.h"
 
@@ -23,7 +24,7 @@ SymbolTable* addToListOfSymbolTables(SymbolTable* symbolTable){
     return listOfSymbolTables;
 }
 
-int hashFunction(char* identifier) {
+int hashFunctionSymbolTable(char* identifier) {
     int hash = 7;
     for(int i = 0; i < strlen(identifier); i++) {
         hash = (hash*31 + identifier[i])%K_MAP_SIZE;
@@ -31,8 +32,8 @@ int hashFunction(char* identifier) {
     return hash;
 }
 
-SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifier) {
-    int hashTableIndex = hashFunction(identifier);
+SymbolTableEntry* lookupSymbolTable(SymbolTable* symbolTable, char* identifier) {
+    int hashTableIndex = hashFunctionSymbolTable(identifier);
     SymbolTableEntry* entry = symbolTable->tableEntries[hashTableIndex];
     while(entry != NULL) {
         if(strcmp(entry->identifier, identifier) == 0){
@@ -46,7 +47,7 @@ SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifier) {
 //1: item added in the hash table
 //0: item updated in the table
 int insertintoSymbolTable(SymbolTable* symbolTable, SymbolTableEntry* entry) {
-    int hashTableIndex = hashFunction(entry->identifier);
+    int hashTableIndex = hashFunctionSymbolTable(entry->identifier);
     
     SymbolTableEntry* pointer = symbolTable->tableEntries[hashTableIndex];
     if(pointer == NULL) {
@@ -65,7 +66,7 @@ int insertintoSymbolTable(SymbolTable* symbolTable, SymbolTableEntry* entry) {
     return 1;
 }
 
-SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTableEntry* tablePointer, Type type, int width, int offset){
+SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTable* tablePointer, TypeArrayElement* type, int width, int offset){
     SymbolTableEntry* newEntry = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
     strcpy(newEntry->identifier, identifier);
     newEntry->isFunction = isFunction;
@@ -100,40 +101,40 @@ SymbolTable* getSymbolTable(char* identifier){
     return head;
 }
 
-void handleFunctionParameters(astNode* functionRootNode, SymbolTable* symbolTable){
-    SymbolTable* newSymbolTable = (SymbolTable*) malloc(sizeof(SymbolTable));
-    int offset = 0;
+// void handleFunctionParameters(astNode* functionRootNode, SymbolTable* symbolTable){
+//     SymbolTable* newSymbolTable = (SymbolTable*) malloc(sizeof(SymbolTable));
+//     int offset = 0;
 
-    // input parameters
-    astNode* inputParameters = functionRootNode->children[1];   // this gives the linked list of parameters ig
-    astNode* parameter = inputParameters;
+//     // input parameters
+//     astNode* inputParameters = functionRootNode->children[1];   // this gives the linked list of parameters ig
+//     astNode* parameter = inputParameters;
 
-    while(parameter != NULL){
-        Type type = parameter->children[0]->type;
-        char* identifier = parameter->children[1]->entry.lexeme;
-        int width = getWidth(type);
+//     while(parameter != NULL){
+//         Type type = parameter->children[0]->type;
+//         char* identifier = parameter->children[1]->entry.lexeme;
+//         int width = getWidth(type);
 
-        SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, type, width, offset);
-        insertintoSymbolTable(symbolTable, entry);
+//         SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, type, width, offset);
+//         insertintoSymbolTable(symbolTable, entry);
 
-        offset += width;
-    }
+//         offset += width;
+//     }
 
-    //output parameters
-    astNode* outputParameters = functionRootNode->children[2];
-    parameter = outputParameters;
+//     //output parameters
+//     astNode* outputParameters = functionRootNode->children[2];
+//     parameter = outputParameters;
 
-    while(parameter != NULL){
-        Type type = parameter->children[0]->type;
-        char* identifier = parameter->children[1]->entry.lexeme;
-        int width = getWidth(type);
+//     while(parameter != NULL){
+//         Type type = parameter->children[0]->type;
+//         char* identifier = parameter->children[1]->entry.lexeme;
+//         int width = getWidth(type);
 
-        SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, type, width, offset);
-        insertintoSymbolTable(symbolTable, entry);
+//         SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, type, width, offset);
+//         insertintoSymbolTable(symbolTable, entry);
 
-        offset += width;
-    }
-}
+//         offset += width;
+//     }
+// }
 
 /**
  * @brief Returns the symbol table entry for the given function root
@@ -149,15 +150,21 @@ void populateOtherFunctionTable(astNode* root, SymbolTable* globalSymbolTable, S
     // 1. Input parameters
     // 2. Output variables
     // 3. Function Body Statements (Stmts)
+    astNode* inputParams = root->children[0];
+    astNode* outputParams = root->children[1];
+    astNode* stmts = root->children[2];
 
     // 1. Input parameters
+    parseInputParams(inputParams, globalSymbolTable, functionSymbolTable);
 
     // 2. Output variables
+    parseOutputParams(outputParams, globalSymbolTable, functionSymbolTable);
 
     // 3. Function Body Statements
     // <typeDefinitions> <declarations> <otherStmts> <returnStmt>
     // we need to parse typeDefinitions and declarations to get the type of the variables
-    
+    parseTypeDefinitions(stmts->children[0], globalSymbolTable, functionSymbolTable);
+    parseDeclarations(stmts->children[1], globalSymbolTable, functionSymbolTable);
 
     // If we see a record or union type, it must go in wrapper table
 }
@@ -171,14 +178,19 @@ void populateOtherFunctionTable(astNode* root, SymbolTable* globalSymbolTable, S
  */
 void populateMainFunctionTable(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
     printf("Populating main function table\n");
-    printAbstractSyntaxTree(root, stdout);
+
+    FILE* fp = fopen("t2AST.txt", "w+");
+    printAbstractSyntaxTree(root, fp);
     // Main does not have any input parameters, output variables
     // Only the function body statements (Stmts) are there
+
+    astNode* stmts = root->children[0];
 
     // 1. Function Body Statements (Stmts)
     // <typeDefinitions> <declarations> <otherStmts> <returnStmt>
     // we need to parse typeDefinitions and declarations to get the type of the variables
-    
+    parseTypeDefinitions(stmts->children[0], globalSymbolTable, functionSymbolTable);
+    parseDeclarations(stmts->children[1], globalSymbolTable, functionSymbolTable);
 
     // If we see a record or union type, it must go in wrapper table
 }

@@ -10,6 +10,8 @@
 #include "globalDef.h"
 #include "astDef.h"
 #include "astGenerator.h"
+#include "symbolTableDef.h"
+#include "symbolTable.h"
 #include <time.h>
 #include <stdlib.h>
 
@@ -31,6 +33,7 @@ int main(int argc, char *argv[])
     FILE *fp;
     ParseTreeNode *root;
     astNode *astRoot;
+    SymbolTable* globalSymbolTable;
 
     printf("CS F303 Compiler Construction\n");
     printf("=======================================================\n");
@@ -197,7 +200,30 @@ int main(int argc, char *argv[])
             else
             {
                 printf("\nSuccessfully printed the Abstract Syntax Tree in %s.\n\n\n", treeFile);
-            }        
+            }  
+        case 6:
+            /**
+             * @brief Symbol Table
+             * 
+             */
+            buffer = init_lexer(argv[1]);
+            if (buffer == NULL)
+            {
+                break;
+            }
+
+            FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+
+            populateRules();
+
+            createParseTable(FirstAndFollowAll, parseTable);
+
+            root = parseInputSourceCode(buffer);
+
+            astRoot = createAbstractSyntaxTree(root);
+
+            globalSymbolTable = initializeSymbolTable(astRoot);
+            break;
         default:
             break;
         }

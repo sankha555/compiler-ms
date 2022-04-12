@@ -1,0 +1,33 @@
+Abstract Syntax Tree
+===========================================================
+Node:                                 MainFunc	 Parent:                           NULL
+Node:                                    Stmts	 Parent:                       MainFunc
+LinkedListNode:      DeclarationLinkedListNode	 Parent:                          Stmts	 Prev:                          NULL
+Node:                              Declaration	 Parent:      DeclarationLinkedListNode
+Leaf:                                  TypeInt	 Parent:                    Declaration
+Leaf:                               VariableId	 Parent:                    Declaration
+LinkedListNode:      DeclarationLinkedListNode	 Parent:                          Stmts	 Prev:     DeclarationLinkedListNode
+Node:                              Declaration	 Parent:      DeclarationLinkedListNode
+Leaf:                                 TypeReal	 Parent:                    Declaration
+Leaf:                               VariableId	 Parent:                    Declaration
+LinkedListNode:             StmtLinkedListNode	 Parent:                          Stmts	 Prev:                          NULL
+Node:                      AssignmentOperation	 Parent:             StmtLinkedListNode
+LinkedListNode:    SingleOrRecIdLinkedListNode	 Parent:            AssignmentOperation	 Prev:                          NULL
+Leaf:                               VariableId	 Parent:    SingleOrRecIdLinkedListNode
+Leaf:                                      Num	 Parent:            AssignmentOperation
+LinkedListNode:             StmtLinkedListNode	 Parent:                          Stmts	 Prev:            StmtLinkedListNode
+Node:                                 FuncCall	 Parent:             StmtLinkedListNode
+LinkedListNode:               IdLinkedListNode	 Parent:                       FuncCall	 Prev:                          NULL
+Leaf:                                       Id	 Parent:               IdLinkedListNode
+Leaf:                                   FuncId	 Parent:                       FuncCall
+LinkedListNode:               IdLinkedListNode	 Parent:                       FuncCall	 Prev:                          NULL
+Leaf:                                       Id	 Parent:               IdLinkedListNode
+LinkedListNode:             StmtLinkedListNode	 Parent:                          Stmts	 Prev:            StmtLinkedListNode
+Node:                                    Write	 Parent:             StmtLinkedListNode
+LinkedListNode:    SingleOrRecIdLinkedListNode	 Parent:                          Write	 Prev:                          NULL
+Leaf:                               VariableId	 Parent:    SingleOrRecIdLinkedListNode
+Node:                                   Return	 Parent:                          Stmts
+
+========================================================
+
+
