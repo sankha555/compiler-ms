@@ -17,7 +17,7 @@ typedef enum Type {
 typedef struct Field {
     char* identifier; //name of the field
 
-    int typeIndex; //is an index of the type array, denoting the type of that field
+    TypeArrayElement *datatype; //is an index of the type array, denoting the type of that field
     //the type can be primitive/record/union
     
     int width; //width of the type
@@ -39,7 +39,7 @@ typedef struct UnionOrRecordInfo {
 } UnionOrRecordInfo;
 
 typedef struct Parameter {
-    int datatype; //stores the type of the parameter as an index of the type array
+    TypeArrayElement* datatype; //stores the type of the parameter as an index of the type array
     char *identifier; //name of the parameter in the function declaration
     struct Parameter* next; //for LinkedList implementation
 } Parameter;
@@ -61,6 +61,7 @@ typedef struct TypeArrayElement {
     struct UnionOrRecordInfo* compositeVariableInfo; //points to the Record/Union type expression if Record/Union otherwise NULL
     struct FunctionType* functionInfo; //points to the function type expression if Record/Union otherwise NULL
     struct TypeArrayElement *next; //used in the LinkedList in the hash table Implementation fo the type table
+    int width;
 } TypeArrayElement;
 
 
@@ -69,8 +70,8 @@ typedef struct TypeArrayElement {
 
 typedef struct TypeTable{
 
-char *tableID; //to store the name of the type table
-struct TypeArrayElement* tableEntries[K_MAP_SIZE]; //type expression hash table for the program
+    char *tableID; //to store the name of the type table
+    struct TypeArrayElement* tableEntries[K_MAP_SIZE]; //type expression hash table for the program
 
 } TypeTable;
 

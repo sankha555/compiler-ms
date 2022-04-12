@@ -90,6 +90,28 @@ TypeArrayElement* createTypeArrayElement(Type type, char *identifier){
     entry->compositeVariableInfo= NULL;
     entry->functionInfo = NULL;
     entry->next = NULL;
+    entry->width = 0;
     return entry;
 
 }
+
+UnionOrRecordInfo* createUnionOrRecordinfo(char *identifier){
+
+    UnionOrRecordInfo* unionOrRecord = (UnionOrRecordInfo*)malloc(sizeof(UnionOrRecordInfo));
+    unionOrRecord->identifier = identifier;
+    unionOrRecord->isRecord = false;
+    unionOrRecord->isUnion = true;
+    unionOrRecord->listOfFields = NULL;
+    unionOrRecord->totalWidth =0;
+    return unionOrRecord;
+
+}
+
+FunctionType *createFunctionType(char *identifier){
+
+    FunctionType* func = (FunctionType*)malloc(sizeof(FunctionType));
+    func->identifier = identifier;
+    func->inputParameters = NULL;
+    func->outputParameters = NULL;
+}
+

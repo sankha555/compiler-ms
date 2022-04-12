@@ -28,10 +28,8 @@ typedef struct SymbolTableEntry {
     boolean isFunction;  // whether this entry points to the symbol table of another function
     struct SymbolTable* tablePointer;   // required only if `isFunction == TRUE`
 
-    boolean isUnionOrRecord; //used when the identifier is a record/union
-    UnionOrRecordInfo* unionOrRecordInfo; //used only when isUnionorRecord == TRUE
-
-    Type type;
+    
+    TypeArrayElement* type; //pointer to the array type -> will be found using the lookup operation in the hash table
     int width;
     int offset;
 
