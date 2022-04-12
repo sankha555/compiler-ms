@@ -1,3 +1,5 @@
+# include "TypeChecker.h"
+
 /* inputs:
  * the ast node that will serve as root for the subtree to traverse
  * pointer to the local function's symbol table or record table
@@ -14,15 +16,15 @@
 struct TypeArrayElement* findType(astNode* root, 
 		SymbolTable* localTable, SymbolTable* baseTable) {
 	if (root == NULL);
-		return Void;
+		return voidPtr;
 
 	// for storing types of operands
-	struct TypeArrayElement* t1, t2;
+	struct TypeArrayElement *t1, *t2;
 	
 	// to store the symbol table entry pointer for the identifier
 	SymbolTableEntry* entry;
 	if (root->isLeafNode) {
-		switch (root->type->type) {
+		switch (root->type) {
 			/* INTEGER LITERAL
 			 * <var> ===> TK_NUM
 			 */
@@ -39,11 +41,11 @@ struct TypeArrayElement* findType(astNode* root,
 			/* a VARIABLE IDENTIFIER */
 			case VariableId:
 				// check in function's local symbol table
-				entry = lookupSymbolTable(localTable, root->entry);
+				entry = lookupSymbolTable(localTable, root->entry.lexeme);
 
 				// check in global table
 				if (entry == NULL)
-					entry = lookupSymbolTable(baseTable, root->entry);
+					entry = lookupSymbolTable(baseTable, root->entry.lexeme);
 
 				// variable probably undeclared - unaccessible
 				if (entry == NULL) {
@@ -120,7 +122,7 @@ struct TypeArrayElement* findType(astNode* root,
 					|| (t1->type == Real && t2->type == Integer)
 					|| (t1->type == Real && t2->type == Real))
 				return realPtr;
-			else if (t1->type == Record && (t1 == t2-))
+			else if (t1->type == Record && (t1 == t2))
 				return t1;
 			else {
 				printf("Addition/Subtraction: real or integer operands required.\n");
@@ -187,11 +189,11 @@ struct TypeArrayElement* findType(astNode* root,
 		 */
 		case SingleOrRecIdLinkedListNode:
 			// lookup in the most local scope - scope of function
-			entry = lookupSymbolTable(localTable, root->data->entry);
+			entry = lookupSymbolTable(localTable, root->data->entry.lexeme);
 
 			// next lookup in the global table
 			if (entry == NULL)
-				entry = lookupSymbolTable(baseTable, root->data->entry);
+				entry = lookupSymbolTable(baseTable, root->data->entry.lexeme);
 
 			// entry not found - probably undeclared / out of scope
 			if (entry == NULL) {
@@ -210,8 +212,8 @@ struct TypeArrayElement* findType(astNode* root,
 				return entry->type;
 
 			// variable is a record or a union
-			if (entry->compositeVariableInfo != NULL) {
-				return findTypeField(root->next, entry->compositeVariableInfo->listOfFields);
+			if (entry->type->compositeVariableInfo != NULL) {
+				return findTypeField(root->next, entry->type->compositeVariableInfo->listOfFields);
 			}
 
 			else {
@@ -236,7 +238,7 @@ struct TypeArrayElement* findType(astNode* root,
 				while (children > 0 && root->children[children-1] == NULL)
 					children--;
 				for (int i = 0; i <= children; i++)
-					if (findType(children, localTable, baseTable)->type == TypeErr)
+					if (findType(root->children[i], localTable, baseTable)->type == TypeErr)
 						return typeErrPtr;
 				return voidPtr;
 			}
@@ -256,7 +258,7 @@ struct TypeArrayElement* findTypeField(astNode* root, struct Field* fieldLL) {
 		return typeErrPtr;
 	}
 
-	struct Field* fieldSelected = searchInFieldLL(root->entry, fieldLL);
+	struct Field* fieldSelected = searchInFieldLL(root->entry.lexeme, fieldLL);
 
 	if (fieldSelected == NULL) {
 		printf("Field not found.\n");
@@ -268,26 +270,26 @@ struct TypeArrayElement* findTypeField(astNode* root, struct Field* fieldLL) {
 	 * <optionSingleConstructed> ===> <oneExpansion> <moreExpansions>
 	 */
 	if (root->type == FieldIdLinkedListNode) {
-		struct TypeArrayElement* entry = fieldSelected->datatype;
+		struct TypeArrayElement* entryType = fieldSelected->datatype;
 			
-		if (entry == NULL) {
+		if (entryType == NULL) {
 			printf("Field not found.\n");
-			return TypeErr; // type undefined for undefined variable
+			return typeErrPtr; // type undefined for undefined variable
 		}
 
 		// the field is a primitive
-		if (entry->type->type == Real || entry->type->type == Integer)
+		if (entryType->type == Real || entryType->type == Integer)
 			if (root->next == NULL)
-				return entry.type;
+				return entryType;
 			else
 				return typeErrPtr; // a primitive can not have fields
 
 		if (root->next == NULL)
-			return entry->type;
+			return entryType;
 
 		/* replace the localTable here with the mini-table for record */
-		if (entry->compositeVariableInfo != NULL) {
-				return findTypeField(root->next, entry->compositeVariableInfo->listOfFields);
+		if (entryType->compositeVariableInfo != NULL) {
+				return findTypeField(root->next, entryType->compositeVariableInfo->listOfFields);
 		}
 
 		else {
@@ -297,7 +299,7 @@ struct TypeArrayElement* findTypeField(astNode* root, struct Field* fieldLL) {
 	}
 
 	// not supposed to be here otherwise according to AST
-	return typeErr;
+	return typeErrPtr;
 }
 
 struct Field* searchInFieldLL(char* fieldLexeme, struct Field* fieldLL) {
@@ -327,13 +329,13 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 	astNode* funcNode = root->children[0];
 	while (funcNode != NULL) {
 		// name of the function
-		char* funcLexeme = funcNode->children[0]->entry;
+		char* funcLexeme = funcNode->children[0]->entry.lexeme;
 
 		// obtain the symbol table for the current function
 		SymbolTableEntry* currFunc = lookupSymbolTable(baseTable, funcLexeme);
 		localTable = currFunc->tablePointer;
 
-		if (findType(children, localTable, baseTable)->type != Void) {
+		if (findType(funcNode, localTable, baseTable)->type != Void) {
 			printf("TYPE ERROR DETECTED IN %s.\n", funcLexeme);
 			return -1;
 		}
@@ -342,9 +344,9 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 	}
 
 	/* traverse <mainFunction> */
-	char *mainLexeme = "_main"
+	char *mainLexeme = "_main";
 	localTable = (lookupSymbolTable(baseTable, mainLexeme))->tablePointer;
-	if (findType(children, localTable, baseTable)->type != Void) {
+	if (findType(root->children[1], localTable, baseTable)->type != Void) {
 		printf("TYPE ERROR DETECTED IN MAIN.\n");
 		return -1;
 	}
