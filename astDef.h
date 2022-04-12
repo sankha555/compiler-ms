@@ -75,6 +75,9 @@ typedef struct astNode
     float realValue;
     token entry;
 
+    char* code;
+    char* dataPlace;
+
     struct astNode *next;
     struct astNode *data;
     struct astNode *children[MAX_PROD_LEN];

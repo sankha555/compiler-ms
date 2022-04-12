@@ -57,7 +57,7 @@ int insertintoTypeTable(TypeTable* typeTable, TypeArrayElement* entry) {
 
 
 //returns the entry is found in the symbol table, else returns NULL
-struct TypeArrayElement* loopkup(TypeTable* typeTable, char* identifier) {
+struct TypeArrayElement* lookup(TypeTable* typeTable, char* identifier) {
     int hashTableIndex = hashFunction(identifier);
     TypeArrayElement* entry = typeTable->tableEntries[hashTableIndex];
     while(entry != NULL) {

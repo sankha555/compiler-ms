@@ -78,7 +78,7 @@ typedef struct TypeTable{
 int getWidth(Type);
 int hashFunction(char* identifier);
 int insertintoTypeTable(TypeTable* typeTable, TypeArrayElement* entry);
-struct TypeArrayElement* loopkup(TypeTable* typeTable, char* identifier);
+struct TypeArrayElement* lookup(TypeTable* typeTable, char* identifier);
 struct TypeTable* createTypeTable(char* tableID);
 struct TypeArrayElement* createTypeArrayElement(Type type, char *identifier);
 struct UnionOrRecordInfo* createUnionOrRecordinfo(char *identifier);
