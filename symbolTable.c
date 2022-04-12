@@ -113,8 +113,30 @@ void parseTypeDefinitions(astNode* root, SymbolTable* globalSymbolTable, SymbolT
     printAbstractSyntaxTree(root, stdout);
 }
 
-void parseDeclarations(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
+void parseDeclarations(astNode* root, SymbolTable* globalSymbolTable) {
     printAbstractSyntaxTree(root, stdout);
+
+    while(root){
+        ASTtag dataType =root->data->children[0]->type;
+        astNode *variable = root->data->children[1];
+
+        char* identifier = variable->entry.lexeme;
+        
+        switch (dataType)
+        {
+        case TypeInt:
+            SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(), getWidth())
+            
+            break;
+        case TypeReal:
+            
+            break;
+        default:
+            break;
+        }
+
+        root = root->next;
+    }
 }
 
 /**
