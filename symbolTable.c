@@ -119,7 +119,7 @@ void handleFunctionParameters(astNode* functionRootNode, SymbolTable* symbolTabl
         offset += width;
     }
 
-    // output parameters
+    //output parameters
     astNode* outputParameters = functionRootNode->children[2];
     parameter = outputParameters;
 

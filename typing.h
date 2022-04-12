@@ -4,7 +4,7 @@
 #include "globalDef.h"
 
 //broad type category, used in the type expression
-typedef enum typeCat {
+typedef enum Type {
     Integer,
     Real,
     Record,
@@ -75,12 +75,11 @@ struct TypeArrayElement* tableEntries[K_MAP_SIZE]; //type expression hash table 
 } TypeTable;
 
 int getWidth(Type);
-
-
-
-
-
-
+int hashFunction(char* identifier);
+int insert(TypeTable* typeTable, TypeArrayElement* entry);
+TypeArrayElement* loopkup(TypeTable* typeTable, char* identifier);
+TypeTable* createTypeTable(char* tableID);
+TypeArrayElement* createTypeArrayElement(Type type, char *identifier);
 
 
 #endif

@@ -72,10 +72,24 @@ TypeTable* createTypeTable(char* tableID){
     TypeTable* newTable = (TypeTable*) malloc(sizeof(TypeTable));
     strcpy(newTable->tableID, tableID);
     //always insert Int and Real entries into the type Table
+    TypeArrayElement* entry;
 
- 
-    
-    
+    entry = createTypeArrayElement(0, "Int");
+    insert(newTable, entry);
+    entry = createTypeArrayElement(1, "Real");
+    insert(newTable, entry);    
     return newTable;
 }
 
+TypeArrayElement* createTypeArrayElement(Type type, char *identifier){
+
+    TypeArrayElement *entry = (TypeArrayElement*)malloc(sizeof(TypeArrayElement));
+    entry->type = type;
+    entry->identifier = identifier;
+    entry->aliasTypeInfo = -1;
+    entry->compositeVariableInfo= NULL;
+    entry->functionInfo = NULL;
+    entry->next = NULL;
+    return entry;
+
+}
