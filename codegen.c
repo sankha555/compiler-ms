@@ -7,9 +7,23 @@
 #include "symbolTable.h"
 #include "astDef.h"
 #include "typing.h"
+#include <string.h>
+
+int tempVarNumber = 0;
+
+char* getTempDataPlace(SymbolTable* currentSymbolTable, TypeArrayElement* t) {
+    
+    char tempVarName[30];
+    
+    sprintf(tempVarName,"tempVariableName_%d",tempVarNumber);
+
+    SymbolTableEntry* temp = createNewSymbolTableEntry(tempVarName,FALSE,currentSymbolTable,t->type,t->width);
+
+}
 
 void generateIntermediateCode(astNode *root, SymbolTable* globalSymbolTable, SymbolTable* currentSymbolTable)
 {
+        
     if (root == NULL)
         return;
 
@@ -19,6 +33,10 @@ void generateIntermediateCode(astNode *root, SymbolTable* globalSymbolTable, Sym
     switch (root->type)
     {
         case Program:
+            
+            //resetting the temp variable index
+            tempVarNumber = 0;
+            
             generateIntermediateCode(root->children[0], globalSymbolTable, currentSymbolTable);
             generateIntermediateCode(root->children[1], globalSymbolTable, currentSymbolTable);
 
@@ -270,7 +288,6 @@ void generateIntermediateCode(astNode *root, SymbolTable* globalSymbolTable, Sym
             }
 
             break;
-        case 
     }
 }
 
