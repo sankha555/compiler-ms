@@ -101,40 +101,21 @@ SymbolTable* getSymbolTable(char* identifier){
     return head;
 }
 
-// void handleFunctionParameters(astNode* functionRootNode, SymbolTable* symbolTable){
-//     SymbolTable* newSymbolTable = (SymbolTable*) malloc(sizeof(SymbolTable));
-//     int offset = 0;
+void parseInputParams(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
+    printAbstractSyntaxTree(root, stdout);
+}
 
-//     // input parameters
-//     astNode* inputParameters = functionRootNode->children[1];   // this gives the linked list of parameters ig
-//     astNode* parameter = inputParameters;
+void parseOutputParams(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
+    printAbstractSyntaxTree(root, stdout);
+}
 
-//     while(parameter != NULL){
-//         Type type = parameter->children[0]->type;
-//         char* identifier = parameter->children[1]->entry.lexeme;
-//         int width = getWidth(type);
+void parseTypeDefinitions(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
+    printAbstractSyntaxTree(root, stdout);
+}
 
-//         SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, type, width, offset);
-//         insertintoSymbolTable(symbolTable, entry);
-
-//         offset += width;
-//     }
-
-//     //output parameters
-//     astNode* outputParameters = functionRootNode->children[2];
-//     parameter = outputParameters;
-
-//     while(parameter != NULL){
-//         Type type = parameter->children[0]->type;
-//         char* identifier = parameter->children[1]->entry.lexeme;
-//         int width = getWidth(type);
-
-//         SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, type, width, offset);
-//         insertintoSymbolTable(symbolTable, entry);
-
-//         offset += width;
-//     }
-// }
+void parseDeclarations(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
+    printAbstractSyntaxTree(root, stdout);
+}
 
 /**
  * @brief Returns the symbol table entry for the given function root
