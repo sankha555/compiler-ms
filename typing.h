@@ -2,6 +2,7 @@
 #define TYPING_H
 
 #include "globalDef.h"
+globalTypeTable = createTypeTable("globalTypeTable");
 
 //broad type category, used in the type expression
 typedef enum Type {

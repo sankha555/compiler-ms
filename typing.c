@@ -6,6 +6,7 @@
 #include "typing.h"
 #include "globalDef.h"
 
+
 int getWidth(Type type){
     switch (type)
     {
@@ -73,10 +74,12 @@ TypeTable* createTypeTable(char* tableID){
     strcpy(newTable->tableID, tableID);
     //always insert Int and Real entries into the type Table
     TypeArrayElement* entry;
-
+    
     entry = createTypeArrayElement(0, "Int");
+    entry->width =4;
     insert(newTable, entry);
     entry = createTypeArrayElement(1, "Real");
+    entry->width =8;
     insert(newTable, entry);    
     return newTable;
 }
@@ -86,7 +89,7 @@ TypeArrayElement* createTypeArrayElement(Type type, char *identifier){
     TypeArrayElement *entry = (TypeArrayElement*)malloc(sizeof(TypeArrayElement));
     entry->type = type;
     entry->identifier = identifier;
-    entry->aliasTypeInfo = -1;
+    entry->aliasTypeInfo = NULL;
     entry->compositeVariableInfo= NULL;
     entry->functionInfo = NULL;
     entry->next = NULL;
@@ -113,5 +116,54 @@ FunctionType *createFunctionType(char *identifier){
     func->identifier = identifier;
     func->inputParameters = NULL;
     func->outputParameters = NULL;
+    return func;
 }
 
+Field* createField(char *identifier){
+
+    Field* field = (Field*)malloc(sizeof(Field));
+    field->identifier = identifier;
+    field->datatype = lookup(globalTypeTable, identifier);
+    field->width = field->datatype->width;
+    field->offset = 0;
+    field->next = NULL;
+    return field;
+
+}
+
+Parameter *createParameter(char *identifier){
+
+    Parameter *parameter = (Parameter*)malloc(sizeof(Parameter));
+    parameter->identifier = identifier;
+    parameter->datatype = lookup(globalTypeTable, identifier);
+    parameter->next= NULL;
+    return parameter;
+
+}
+
+Field* addtoListofFields(char *identifier, Field *listofFields){
+
+    Field* field = createField(identifier);
+    Field* trav = listofFields;
+    if(trav == NULL) 
+        listofFields = field;
+    while(trav->next != NULL)
+        trav = trav->next;
+    trav->next = field;
+    return listofFields;
+
+}
+
+Parameter* addtoParameterList(char* identifier, Parameter* paramlist){
+
+    Parameter* parameter= createParameter(identifier);
+    Parameter* trav = paramlist;
+    if(trav == NULL) 
+        paramlist = parameter;
+    while(trav->next != NULL)
+        trav = trav->next;
+    trav->next = parameter;
+    return paramlist;
+
+
+}

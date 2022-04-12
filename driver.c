@@ -202,7 +202,9 @@ int main(int argc, char *argv[])
             }
 
         case 6:
+            globalTypeTable = createTypeTable("globalTypeTable");
             listOfSymbolTables = NULL;
+
         
         default:
             break;
