@@ -4,11 +4,10 @@
 #include "astDef.h"
 
 SymbolTable* addToListOfSymbolTables(SymbolTable* symbolTable);
-int hashFunction(char* identifier);
-SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifier) ;
+SymbolTableEntry* lookupSymbolTable(SymbolTable* symbolTable, char* identifier) ;
 int insertintoSymbolTable(SymbolTable* symbolTable, SymbolTableEntry* entry);
-SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTableEntry* tablePointer, Type type, int width, int offset);
+SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTable* tablePointer, Type type, int width, int offset);
 SymbolTable* createSymbolTable(char* tableID, SymbolTable* returnTable);
 SymbolTable* getSymbolTable(char* identifier);
-void populateSymbolTable(SymbolTable* symbolTable, astNode* functionRoot);
+SymbolTable* initializeSymbolTable(astNode* root);
 #endif

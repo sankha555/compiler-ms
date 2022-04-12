@@ -2,12 +2,13 @@
 #define TYPING_H
 
 #include "globalDef.h"
+#include "stdbool.h"
 //broad type category, used in the type expression
 typedef enum Type {
     Integer,
     Real,
-    Record,
-    Union,
+    RecordType,
+    UnionType,
     Function, 
     Alias
     
@@ -37,18 +38,17 @@ typedef struct UnionOrRecordInfo {
     Field* listOfFields; // is a linkedList of the fields, data structure defines above
     int totalWidth; //stores the total width of the record/union -> data occupied in memory
 } UnionOrRecordInfo;
-
-typedef struct Parameter {
-    TypeArrayElement* datatype; //stores the type of the parameter as an index of the type array
+typedef struct FunctionParameter {
+    struct TypeArrayElement* datatype; //stores the type of the parameter as an index of the type array
     char *identifier; //name of the parameter in the function declaration
-    struct Parameter* next; //for LinkedList implementation
-} Parameter;
+    struct FunctionParameter* next; //for LinkedList implementation
+} FunctionParameter;
 //for a parameter list, used in the Function type expression as follows
 
 typedef struct FunctionType {
     char* identifier; //name of the function
-    struct Parameter* inputParameters; //Parameter List of input parameters
-    struct Parameter* outputParameters;//Parameter List of output parameters
+    struct FunctionParameter* inputParameters; //Parameter List of input parameters
+    struct FunctionParameter* outputParameters;//Parameter List of output parameters
 } FunctionType;
 
 //element of the dynamic type array 
@@ -57,7 +57,7 @@ typedef struct TypeArrayElement {
  
     Type type;
     char* identifier; //name of the type
-    TypeArrayElement* aliasTypeInfo; //stores the typeIndex of the actual type if the type is alias
+    struct TypeArrayElement* aliasTypeInfo; //stores the typeIndex of the actual type if the type is alias
     struct UnionOrRecordInfo* compositeVariableInfo; //points to the Record/Union type expression if Record/Union otherwise NULL
     struct FunctionType* functionInfo; //points to the function type expression if Record/Union otherwise NULL
     struct TypeArrayElement *next; //used in the LinkedList in the hash table Implementation fo the type table
@@ -76,17 +76,17 @@ typedef struct TypeTable{
 } TypeTable;
 
 int getWidth(Type);
-int hashFunction(char* identifier);
+int hashFunctionSymbolTable(char* identifier);
 int insertintoTypeTable(TypeTable* typeTable, TypeArrayElement* entry);
-struct TypeArrayElement* lookup(TypeTable* typeTable, char* identifier);
+struct TypeArrayElement* lookupTypeTable(TypeTable* typeTable, char* identifier);
 struct TypeTable* createTypeTable(char* tableID);
 struct TypeArrayElement* createTypeArrayElement(Type type, char *identifier);
 struct UnionOrRecordInfo* createUnionOrRecordinfo(char *identifier);
 struct FunctionType *createFunctionType(char *identifier);
 struct Field* createField(char *identifier, char* typeid);
-struct Parameter* createParameter(char *identifier, char* typeid);
+struct FunctionParameter* createParameter(char *identifier, char* typeid);
 struct Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields);
-struct Parameter* addtoParameterList(char* identifier,char* typeid, struct Parameter* paramlist);
+struct FunctionParameter* addtoParameterList(char* identifier,char* typeid, struct FunctionParameter* paramlist);
 struct TypeTable* globalTypeTable;
 
 #endif

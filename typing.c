@@ -23,20 +23,9 @@ int getWidth(Type type){
 // basically, identifier of the type will be used to index into the Hash Table where each entry will be a linkedList(in order to deal with collisions)
 
 
-
-int hashFunction(char* identifier) {
-    
-    //hash function for the hash table
-    int hash = 7;
-    for(int i = 0; i < strlen(identifier); i++) {
-        hash = (hash*31 + identifier[i])%K_MAP_SIZE;
-    }
-    return hash;
-}
-
 //inserts the type element into the given type table, returns 1 when entered, 0 if the entry already exists
 int insertintoTypeTable(TypeTable* typeTable, TypeArrayElement* entry) {
-    int hashTableIndex = hashFunction(entry->identifier);
+    int hashTableIndex = hashFunctionSymbolTable(entry->identifier);
     
     TypeArrayElement* pointer = typeTable->tableEntries[hashTableIndex];
     if(pointer == NULL) {
@@ -57,8 +46,8 @@ int insertintoTypeTable(TypeTable* typeTable, TypeArrayElement* entry) {
 
 
 //returns the entry is found in the symbol table, else returns NULL
-struct TypeArrayElement* lookup(TypeTable* typeTable, char* identifier) {
-    int hashTableIndex = hashFunction(identifier);
+struct TypeArrayElement* lookupTypeTable(TypeTable* typeTable, char* identifier) {
+    int hashTableIndex = hashFunctionSymbolTable(identifier);
     TypeArrayElement* entry = typeTable->tableEntries[hashTableIndex];
     while(entry != NULL) {
         if(strcmp(entry->identifier, identifier) == 0){
@@ -123,7 +112,7 @@ struct Field* createField(char *identifier, char* typeid){
 
     Field* field = (Field*)malloc(sizeof(Field));
     field->identifier = identifier;
-    field->datatype = lookup(globalTypeTable, typeid);
+    field->datatype = lookupTypeTable(globalTypeTable, typeid);
     field->width = field->datatype->width;
     field->offset = 0;
     field->next = NULL;
@@ -131,11 +120,11 @@ struct Field* createField(char *identifier, char* typeid){
 
 }
 
-struct Parameter *createParameter(char *identifier, char* typeid){
+struct FunctionParameter *createParameter(char *identifier, char* typeid){
 
-    Parameter *parameter = (Parameter*)malloc(sizeof(Parameter));
+    FunctionParameter *parameter = (FunctionParameter*)malloc(sizeof(FunctionParameter));
     parameter->identifier = identifier;
-    parameter->datatype = lookup(globalTypeTable, typeid);
+    parameter->datatype = lookupTypeTable(globalTypeTable, typeid);
     parameter->next= NULL;
     return parameter;
 
@@ -155,10 +144,10 @@ struct Field* addtoListofFields(char *identifier, char* typeid,Field *listofFiel
 
 }
 
-struct Parameter* addtoParameterList(char* identifier,char* typeid, Parameter* paramlist){
+struct FunctionParameter* addtoParameterList(char* identifier,char* typeid, FunctionParameter* paramlist){
 
-    Parameter* parameter= createParameter(identifier, typeid);
-    Parameter* trav = paramlist;
+    FunctionParameter* parameter= createParameter(identifier, typeid);
+    FunctionParameter* trav = paramlist;
     if(trav == NULL) 
         paramlist = parameter;
     while(trav->next != NULL)

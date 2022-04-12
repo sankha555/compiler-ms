@@ -1,0 +1,26 @@
+Abstract Syntax Tree
+===========================================================
+Node:                                 MainFunc	 Parent:                           NULL
+Node:                                    Stmts	 Parent:                       MainFunc
+LinkedListNode:      DeclarationLinkedListNode	 Parent:                          Stmts	 Prev:                          NULL
+Node:                              Declaration	 Parent:      DeclarationLinkedListNode
+Leaf:                                  TypeInt	 Parent:                    Declaration
+Leaf:                               VariableId	 Parent:                    Declaration
+LinkedListNode:             StmtLinkedListNode	 Parent:                          Stmts	 Prev:                          NULL
+Node:                      AssignmentOperation	 Parent:             StmtLinkedListNode
+LinkedListNode:    SingleOrRecIdLinkedListNode	 Parent:            AssignmentOperation	 Prev:                          NULL
+Leaf:                               VariableId	 Parent:    SingleOrRecIdLinkedListNode
+Leaf:                                      Num	 Parent:            AssignmentOperation
+LinkedListNode:             StmtLinkedListNode	 Parent:                          Stmts	 Prev:            StmtLinkedListNode
+Node:                      AssignmentOperation	 Parent:             StmtLinkedListNode
+LinkedListNode:    SingleOrRecIdLinkedListNode	 Parent:            AssignmentOperation	 Prev:                          NULL
+Leaf:                               VariableId	 Parent:    SingleOrRecIdLinkedListNode
+Node:                             arithOp_PLUS	 Parent:            AssignmentOperation
+Leaf:                                      Num	 Parent:                   arithOp_PLUS
+Leaf:                             arithOp_PLUS	 Parent:                   arithOp_PLUS
+Leaf:                                      Num	 Parent:                   arithOp_PLUS
+Node:                                   Return	 Parent:                          Stmts
+
+========================================================
+
+
