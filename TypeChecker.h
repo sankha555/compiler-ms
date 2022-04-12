@@ -12,10 +12,15 @@
 # include "symbolTableDef.h"
 # include "symbolTable.h"
 
-Type findType(astNode* root, SymbolTable* localTable, SymbolTable* globalTable, SymboleTable* baseTable);
+struct TypeArrayElement* findType(astNode* root, 
+		SymbolTable* localTable, SymbolTable* baseTable);
 
-Type findTypeField(astNode* root, SymbolTable* localTable, SymboleTable* baseTable)
+struct TypeArrayElement* findTypeField(astNode* root, 
+		struct Field* fieldLL);
 
-void typeCheck(astNode* root, SymbolTable* baseTable);
+struct Field* searchInFieldLL(char* fieldLexeme,
+		struct Field* fieldLL);
+
+int typeCheck(astNode* root, SymbolTable* baseTable);
 
 # endif
