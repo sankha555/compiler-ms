@@ -161,6 +161,9 @@ void generateIntermediateCode(astNode *root, SymbolTable* globalSymbolTable, Sym
                 temp = temp->next;
             }
             break;
+        case AssignmentOperation:
+            // Only handle 
+            break;
         case logOp_AND:
             generateIntermediateCode(root->children[0], globalSymbolTable, currentSymbolTable);
             generateIntermediateCode(root->children[1], globalSymbolTable, currentSymbolTable);
@@ -168,8 +171,14 @@ void generateIntermediateCode(astNode *root, SymbolTable* globalSymbolTable, Sym
             // ask for a temporary data place
             char* tempDataPlace = getTempDataPlace();
 
-            sprintf(root->code, "MOV AX, %s\nMOV BX, %s\nAND AX, BX\n STOREW %s, AX\n", root->children[0]->data, root->children[1]->data, tempDataPlace);
+            sprintf(root->code, "MOV AX, %s\nMOV BX, %s\nAND AX, BX\n STOREW %s, AX\n", root->children[0]->dataPlace, root->children[1]->data, tempDataPlace);
             break;
+        case arithOp_PLUS:
+
+
+
+
+
     }
 }
 

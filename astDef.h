@@ -80,7 +80,7 @@ typedef struct astNode
     struct astNode *children[MAX_PROD_LEN];
 
     char* code;
-    char* data;
+    char* dataPlace;
 } astNode;
 
 #endif
