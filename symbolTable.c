@@ -45,7 +45,7 @@ SymbolTableEntry* loopkup(SymbolTable* symbolTable, char* identifier) {
 
 //1: item added in the hash table
 //0: item updated in the table
-int insert(SymbolTable* symbolTable, SymbolTableEntry* entry) {
+int insertintoSymbolTable(SymbolTable* symbolTable, SymbolTableEntry* entry) {
     int hashTableIndex = hashFunction(entry->identifier);
     
     SymbolTableEntry* pointer = symbolTable->tableEntries[hashTableIndex];
@@ -114,7 +114,7 @@ void handleFunctionParameters(astNode* functionRootNode, SymbolTable* symbolTabl
         int width = getWidth(type);
 
         SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, type, width, offset);
-        insert(symbolTable, entry);
+        insertintoSymbolTable(symbolTable, entry);
 
         offset += width;
     }
@@ -129,7 +129,7 @@ void handleFunctionParameters(astNode* functionRootNode, SymbolTable* symbolTabl
         int width = getWidth(type);
 
         SymbolTableEntry* entry = createNewSymbolTableEntry(identifier, false, NULL, type, width, offset);
-        insert(symbolTable, entry);
+        insertintoSymbolTable(symbolTable, entry);
 
         offset += width;
     }
@@ -211,7 +211,7 @@ SymbolTable* initializeSymbolTable(astNode* root) {
 
     SymbolTable* mainFunctionSymbolTable = createSymbolTable("_main", globalSymbolTable);
 
-    insert(globalSymbolTable, createNewSymbolTableEntry("_main", true, mainFunctionSymbolTable, NULL, 0, 0));
+    insertintoSymbolTable(globalSymbolTable, createNewSymbolTableEntry("_main", true, mainFunctionSymbolTable, NULL, 0, 0));
 
     populateMainFunctionTable(mainFunction, globalSymbolTable, mainFunctionSymbolTable);
 

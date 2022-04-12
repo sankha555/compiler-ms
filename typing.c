@@ -35,7 +35,7 @@ int hashFunction(char* identifier) {
 }
 
 //inserts the type element into the given type table, returns 1 when entered, 0 if the entry already exists
-int insert(TypeTable* typeTable, TypeArrayElement* entry) {
+int insertintoTypeTable(TypeTable* typeTable, TypeArrayElement* entry) {
     int hashTableIndex = hashFunction(entry->identifier);
     
     TypeArrayElement* pointer = typeTable->tableEntries[hashTableIndex];
@@ -57,7 +57,7 @@ int insert(TypeTable* typeTable, TypeArrayElement* entry) {
 
 
 //returns the entry is found in the symbol table, else returns NULL
-TypeArrayElement* loopkup(TypeTable* typeTable, char* identifier) {
+struct TypeArrayElement* loopkup(TypeTable* typeTable, char* identifier) {
     int hashTableIndex = hashFunction(identifier);
     TypeArrayElement* entry = typeTable->tableEntries[hashTableIndex];
     while(entry != NULL) {
@@ -69,7 +69,7 @@ TypeArrayElement* loopkup(TypeTable* typeTable, char* identifier) {
     return NULL;
 }
 
-TypeTable* createTypeTable(char* tableID){
+struct TypeTable* createTypeTable(char* tableID){
     TypeTable* newTable = (TypeTable*) malloc(sizeof(TypeTable));
     strcpy(newTable->tableID, tableID);
     //always insert Int and Real entries into the type Table
@@ -77,14 +77,14 @@ TypeTable* createTypeTable(char* tableID){
     
     entry = createTypeArrayElement(0, "Int");
     entry->width =4;
-    insert(newTable, entry);
+    insertintoTypeTable(newTable, entry);
     entry = createTypeArrayElement(1, "Real");
     entry->width =8;
-    insert(newTable, entry);    
+    insertintoTypeTable(newTable, entry);    
     return newTable;
 }
 
-TypeArrayElement* createTypeArrayElement(Type type, char *identifier){
+struct TypeArrayElement* createTypeArrayElement(Type type, char *identifier){
 
     TypeArrayElement *entry = (TypeArrayElement*)malloc(sizeof(TypeArrayElement));
     entry->type = type;
@@ -98,7 +98,7 @@ TypeArrayElement* createTypeArrayElement(Type type, char *identifier){
 
 }
 
-UnionOrRecordInfo* createUnionOrRecordinfo(char *identifier){
+struct UnionOrRecordInfo* createUnionOrRecordinfo(char *identifier){
 
     UnionOrRecordInfo* unionOrRecord = (UnionOrRecordInfo*)malloc(sizeof(UnionOrRecordInfo));
     unionOrRecord->identifier = identifier;
@@ -110,7 +110,7 @@ UnionOrRecordInfo* createUnionOrRecordinfo(char *identifier){
 
 }
 
-FunctionType *createFunctionType(char *identifier){
+struct FunctionType *createFunctionType(char *identifier){
 
     FunctionType* func = (FunctionType*)malloc(sizeof(FunctionType));
     func->identifier = identifier;
@@ -119,7 +119,7 @@ FunctionType *createFunctionType(char *identifier){
     return func;
 }
 
-Field* createField(char *identifier, char* typeid){
+struct Field* createField(char *identifier, char* typeid){
 
     Field* field = (Field*)malloc(sizeof(Field));
     field->identifier = identifier;
@@ -131,7 +131,7 @@ Field* createField(char *identifier, char* typeid){
 
 }
 
-Parameter *createParameter(char *identifier, char* typeid){
+struct Parameter *createParameter(char *identifier, char* typeid){
 
     Parameter *parameter = (Parameter*)malloc(sizeof(Parameter));
     parameter->identifier = identifier;
@@ -141,7 +141,8 @@ Parameter *createParameter(char *identifier, char* typeid){
 
 }
 
-Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields){
+
+struct Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields){
 
     Field* field = createField(identifier, typeid);
     Field* trav = listofFields;
@@ -154,7 +155,7 @@ Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields){
 
 }
 
-Parameter* addtoParameterList(char* identifier,char* typeid, Parameter* paramlist){
+struct Parameter* addtoParameterList(char* identifier,char* typeid, Parameter* paramlist){
 
     Parameter* parameter= createParameter(identifier, typeid);
     Parameter* trav = paramlist;

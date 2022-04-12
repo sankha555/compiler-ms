@@ -77,17 +77,17 @@ typedef struct TypeTable{
 
 int getWidth(Type);
 int hashFunction(char* identifier);
-int insert(TypeTable* typeTable, TypeArrayElement* entry);
-TypeArrayElement* loopkup(TypeTable* typeTable, char* identifier);
-TypeTable* createTypeTable(char* tableID);
-TypeArrayElement* createTypeArrayElement(Type type, char *identifier);
-UnionOrRecordInfo* createUnionOrRecordinfo(char *identifier);
-FunctionType *createFunctionType(char *identifier);
-Field* createField(char *identifier, char* typeid);
-Parameter *createParameter(char *identifier, char* typeid);
-Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields);
-Parameter* addtoParameterList(char* identifier,char* typeid, Parameter* paramlist);
-TypeTable* globalTypeTable;
+int insertintoTypeTable(TypeTable* typeTable, TypeArrayElement* entry);
+struct TypeArrayElement* loopkup(TypeTable* typeTable, char* identifier);
+struct TypeTable* createTypeTable(char* tableID);
+struct TypeArrayElement* createTypeArrayElement(Type type, char *identifier);
+struct UnionOrRecordInfo* createUnionOrRecordinfo(char *identifier);
+struct FunctionType *createFunctionType(char *identifier);
+struct Field* createField(char *identifier, char* typeid);
+struct Parameter* createParameter(char *identifier, char* typeid);
+struct Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields);
+struct Parameter* addtoParameterList(char* identifier,char* typeid, struct Parameter* paramlist);
+struct TypeTable* globalTypeTable;
 
 #endif
 
