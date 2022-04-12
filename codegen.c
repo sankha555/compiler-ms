@@ -222,9 +222,55 @@ void generateIntermediateCode(astNode *root, SymbolTable* globalSymbolTable, Sym
 
 
             break;
-        
+        case arithOp_DIV:
 
+            // create a new temp data variables
+            // check the type of children, real real, int int, real int -> real, int real -> real            
 
+            char* tempDataPlace = getTempDataPlace();
+            
+            generateIntermediateCode(root->children[0], globalSymbolTable, currentSymbolTable);
+            generateIntermediateCode(root->children[1], globalSymbolTable, currentSymbolTable);
+            
+            int firstType = lookupSymbolTable(currentSymbolTable, root->children[0]->dataPlace)->type;
+            int secondType = lookupSymbolTable(currentSymbolTable, root->children[1]->dataPlace)->type;
+
+            if(firstType == secondType == Integer) {
+                sprintf(root->code, "LOADI A\n LOADI B\n DIVI X,A,B\n STOREI X");
+            } else if (firstType == secondType == Real) {
+                sprintf(root->code, "LOADR A\n LOADR B\n DIVR X,A,B\n STORER X");
+            } else if (firstType != secondType && firstType == Integer && secondType == Real){
+                
+            } else {
+
+            }
+
+            break;
+        case arithOp_MUL:
+            
+            // create a new temp data variables
+            // check the type of children, real real, int int, real int -> real, int real -> real            
+
+            char* tempDataPlace = getTempDataPlace();
+            
+            generateIntermediateCode(root->children[0], globalSymbolTable, currentSymbolTable);
+            generateIntermediateCode(root->children[1], globalSymbolTable, currentSymbolTable);
+            
+            int firstType = lookupSymbolTable(currentSymbolTable, root->children[0]->dataPlace)->type;
+            int secondType = lookupSymbolTable(currentSymbolTable, root->children[1]->dataPlace)->type;
+
+            if(firstType == secondType == Integer) {
+                sprintf(root->code, "LOADI A\n LOADI B\n DIVI X,A,B\n STOREI X");
+            } else if (firstType == secondType == Real) {
+                sprintf(root->code, "LOADR A\n LOADR B\n DIVR X,A,B\n STORER X");
+            } else if (firstType != secondType && firstType == Integer && secondType == Real){
+                
+            } else {
+
+            }
+
+            break;
+        case 
     }
 }
 
