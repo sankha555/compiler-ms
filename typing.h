@@ -86,7 +86,7 @@ struct FunctionType *createFunctionType(char *identifier);
 struct Field* createField(char *identifier, char* typeid);
 struct FunctionParameter* createParameter(char *identifier, char* typeid);
 struct Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields);
-struct FunctionParameter* addtoParameterList(char* identifier,char* typeid, struct FunctionParameter* paramlist);
+struct FunctionParameter* addtoParameterList(char* identifier, char* typeid, struct FunctionParameter* paramlist);
 struct TypeTable* globalTypeTable;
 
 #endif
