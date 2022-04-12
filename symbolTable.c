@@ -8,8 +8,32 @@
 #include "astDef.h"
 #include "typing.h"
 
-void printSymbolTables(){
-    ;
+void printSymbolTableEntry(SymbolTable* symbolTable, SymbolTableEntry* entry, FILE* fp){
+    fprintf(fp,"%10s%10s%15s%15s%30d%20s%30d%30s\n\n\n", entry->identifier, symbolTable->tableID, "TODO", "TODO", entry->width, strcmp(symbolTable->tableID, "GLOBAL")==0 ? "Yes" : "No", entry->offset, "TODO");
+}
+
+void printASingleSymbolTable(SymbolTable* symbolTable, FILE* fp){
+    fprintf(fp, "================ SYMBOL TABLE : %s ================\n", symbolTable->tableID);
+    fprintf(fp, "Total Width: %d\n", symbolTable->totalWidth);
+    fprintf(fp, "*** Entries in Table: *** \n");
+    fprintf(fp,"%10s%10s%15s%15s%30s%20s%30s%30s\n\n\n","Name", "Scope", "Type Name", "Type Expr.", "Width", "isGlobal", "Offset", "Var. Usage");
+    for(int i = 0; i < K_MAP_SIZE; i++){
+        SymbolTableEntry* head = symbolTable->tableEntries[i];
+        while(head != NULL){
+            printSymbolTableEntry(symbolTable, head, fp);
+            head = head->next;
+        }
+    }
+    fprintf(fp, "================ ================ ================\n\n\n");
+}
+
+void printSymbolTables(FILE* fp){
+    printf("Printing all symbol tables\n");
+    SymbolTable* head = listOfSymbolTables;
+    while(head != NULL){
+        printASingleSymbolTable(head, fp);
+        head = head->next;
+    }
 }
 
 SymbolTable* addToListOfSymbolTables(SymbolTable* symbolTable){
@@ -97,12 +121,15 @@ SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction
 SymbolTable* createSymbolTable(char* tableID, SymbolTable* returnTable){
     SymbolTable* newTable = (SymbolTable*) malloc(sizeof(SymbolTable));
     newTable->tableID = (char*) malloc(strlen(tableID)*sizeof(char));
-
     strcpy(newTable->tableID, tableID);
-    printf("String has been copied\n");
+
     newTable->returnTo = returnTable;
     newTable->totalWidth = 0;
-    
+
+    for(int i = 0; i < K_MAP_SIZE; i++){
+        newTable->tableEntries[i] = NULL;
+    }
+
     // newTable->currentOffset = 0;    // is this correct tho? how do we compute the offset for each new table??
     // we don't need to compute the offset for each new table, as each new table represents a function, and the offset of the variables = offset of start of stack frame + relative offset
     // we can just include the total width if required, to gauge the total memory required by the symbol table
@@ -193,10 +220,12 @@ void parseOutputParams(char* functionName, astNode* root, SymbolTable* globalSym
 }
 
 void parseTypeDefinitions(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
-    printAbstractSyntaxTree(root, stdout);
+    // printAbstractSyntaxTree(root, stdout);
+    printf("parsing type definitions\n");
 }
 
 void parseDeclarations(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* symbolTable) {
+    printf("parsing declarations\n");
     while(root){
         ASTtag dataType = root->data->children[0]->type;
         astNode *variable = root->data->children[1];
@@ -205,11 +234,16 @@ void parseDeclarations(astNode* root, SymbolTable* globalSymbolTable, SymbolTabl
         printf("Datatype: %d\n", dataType);
         SymbolTableEntry* entry;
 
+        TypeArrayElement* intTypeElement = lookupTypeTable(globalTypeTable, "Int");
+        printf("Int type element created\n");
+        printf("Type: %d\n", intTypeElement->type);
+
         switch (dataType)
         {
             case TypeInt:
-                entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(globalTypeTable, "Int"), getWidth(Integer));            
+                entry = createNewSymbolTableEntry(identifier, false, NULL, intTypeElement, getWidth(Integer));            
                 insertintoSymbolTable(symbolTable, entry);
+                printf("Inserted type int, this is in parse decl\n");
 
                 break;
             case TypeReal:
@@ -224,6 +258,7 @@ void parseDeclarations(astNode* root, SymbolTable* globalSymbolTable, SymbolTabl
 
         root = root->next;
     }
+    printf("parsing declarations successful\n");
 }
 
 /**
@@ -318,6 +353,9 @@ SymbolTable* initializeSymbolTable(astNode* root) {
     printf("It has been inserted into global function table...\n");
 
     populateMainFunctionTable(mainFunction, globalSymbolTable, mainFunctionSymbolTable);
+    printf("Main function has been populated \n");
+
+    printSymbolTables(stdout);
 
     return globalSymbolTable;
 }
