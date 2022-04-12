@@ -162,6 +162,7 @@ void populateMainFunctionTable(astNode* root, SymbolTable* globalSymbolTable, Sy
 
     FILE* fp = fopen("t2AST.txt", "w+");
     printAbstractSyntaxTree(root, fp);
+    fclose(fp);
     // Main does not have any input parameters, output variables
     // Only the function body statements (Stmts) are there
 
