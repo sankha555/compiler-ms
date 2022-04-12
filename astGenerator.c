@@ -337,7 +337,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         return NULL;
     case 22:
         /**
-         * @brief <actualOrRedefined> ===> <typeDefinition>
+         * @brief <actualOrRedefined> ===> <typeDefinition> // normal record or union
          *
          */
         createAbstractSyntaxTree(root->children[0]);
@@ -347,7 +347,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         return ptr;
     case 23:
         /**
-         * @brief <actualOrRedefined> ===> <definetypestmt>
+         * @brief <actualOrRedefined> ===> <definetypestmt> // as vala
          *
          */
         createAbstractSyntaxTree(root->children[0]);

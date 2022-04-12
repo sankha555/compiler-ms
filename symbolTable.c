@@ -223,8 +223,55 @@ void parseOutputParams(char* functionName, astNode* root, SymbolTable* globalSym
 }
 
 void parseTypeDefinitions(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* functionSymbolTable) {
-    // printAbstractSyntaxTree(root, stdout);
     printf("parsing type definitions\n");
+
+    while(root != NULL){
+        if(root->data->type == TypeRecordDefinition){
+            // record
+            astNode* recordInfo = root->data->children[0];
+            char* recordName = recordInfo->entry.lexeme;
+
+            UnionOrRecordInfo* record = createUnionOrRecordinfo(recordName);
+            record->isRecord = TRUE;
+
+            astNode* fieldsList = root->data->children[1];
+            astNode* head = fieldsList;
+            while(head != NULL){
+                astNode* field = head->data;
+
+                char* fieldName = field->children[1]->entry.lexeme;
+
+                astNode* fieldTypeInfo = field->children[0];
+                switch(fieldTypeInfo) {
+                    case TypeInt:
+                    break;
+                    
+                    case TypeReal:
+                    break;
+
+                    case FieldTypeRUID:
+                    break;
+                }
+
+                head = head->next;
+            }
+
+        } else if (root->data->type == TypeUnionDefinition){
+            // union
+            astNode* unionInfo = root->data->children[0];
+            char* unionName = recordInfo->entry.lexeme;
+
+            UnionOrRecordInfo* union = createUnionOrRecordinfo(unionName);
+            record->isUnion = TRUE;
+
+
+        } else if (root->data->type == DefineType){
+            // as vala case
+            ;
+        }
+
+        root = root->next;
+    }
 }
 
 void parseDeclarations(astNode* root, SymbolTable* globalSymbolTable, SymbolTable* symbolTable) {

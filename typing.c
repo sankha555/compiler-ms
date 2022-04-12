@@ -160,18 +160,21 @@ struct FunctionParameter *createParameter(char *identifier, char* typeid){
 
 }
 
-
-struct Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields){
+void addtoListofFields(char *identifier, char* typeid, UnionOrRecordInfo* info){
 
     Field* field = createField(identifier, typeid);
-    Field* trav = listofFields;
-    if(trav == NULL) 
-        listofFields = field;
-    while(trav->next != NULL)
-        trav = trav->next;
-    trav->next = field;
-    return listofFields;
+    field->offset = info->totalWidth;
+    Field* trav = info->listOfFields;
+    if(trav == NULL){
+        info->listOfFields = field;
+    }else{
+        while(trav->next != NULL){
+            trav = trav->next;
+        }
+        trav->next = field;
+    }
 
+    info->totalWidth += field->width;
 }
 
 struct FunctionParameter* addtoParameterList(char* identifier,char* typeid, FunctionParameter* paramlist){
@@ -184,6 +187,5 @@ struct FunctionParameter* addtoParameterList(char* identifier,char* typeid, Func
         trav = trav->next;
     trav->next = parameter;
     return paramlist;
-
 
 }

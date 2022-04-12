@@ -54,7 +54,7 @@ typedef struct FunctionType {
 //element of the dynamic type array 
 //datatypes possible : primitive, Union, Record, Function, Alias
 typedef struct TypeArrayElement {
- 
+
     Type type;
     char* identifier; //name of the type
     struct TypeArrayElement* aliasTypeInfo; //stores the typeIndex of the actual type if the type is alias
@@ -85,7 +85,7 @@ struct UnionOrRecordInfo* createUnionOrRecordinfo(char *identifier);
 struct FunctionType *createFunctionType(char *identifier);
 struct Field* createField(char *identifier, char* typeid);
 struct FunctionParameter* createParameter(char *identifier, char* typeid);
-struct Field* addtoListofFields(char *identifier, char* typeid,Field *listofFields);
+void addtoListofFields(char *identifier, char* typeid,Field *listofFields);
 struct FunctionParameter* addtoParameterList(char* identifier, char* typeid, struct FunctionParameter* paramlist);
 struct TypeTable* globalTypeTable;
 
