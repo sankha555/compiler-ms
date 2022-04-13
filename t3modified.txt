@@ -7,6 +7,7 @@
 % atleast one input parameter
 _readMarks input parameter list[int b7]
 output parameter list [ record #marks b3c45];
+	[b3c45] <--- call _readMarks with parameters [b7];
 	read(b3c45.maths);
 	read(b3c45.physics);
 	read(b3c45.chemistry);
@@ -33,13 +34,13 @@ _main
 	type record #marks : b5c6 : global;
 	%The identifier b5c6 stores the sum of marks
 
-	b5 <--- 1;
+	b5 <--- 1.66;
 	read(d5cb34567);
 	b5c6.maths <--- 0.00;
 	b5c6.physics <--- 0.00;
 	b5c6.chemistry <---0.00;
 	while(b5<=d5cb34567)
-		[d4] <--- call _readMarks with parameters [b5];
+		[d4] <--- call _readMarks with parameters [b5, d5cb34567];
 		b5c6 <--- b5c6 + d4; 
 		% above displays the sum of records
 		b5 <--- b5 +1;

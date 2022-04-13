@@ -13,10 +13,10 @@
  *
  * uses preorder and linkedlist traversal of ast subtree
  */
-struct TypeArrayElement* findType(astNode* root, 
-		SymbolTable* localTable, SymbolTable* baseTable) {
-	if (root == NULL);
+struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, SymbolTable* baseTable) {
+	if (root == NULL){
 		return voidPtr;
+	}
 
 	// for storing types of operands
 	struct TypeArrayElement *t1, *t2;
@@ -45,8 +45,9 @@ struct TypeArrayElement* findType(astNode* root,
 				entry = lookupSymbolTable(localTable, root->entry.lexeme);
 
 				// check in global table
-				if (entry == NULL)
+				if (entry == NULL){
 					entry = lookupSymbolTable(baseTable, root->entry.lexeme);
+				}
 
 				// variable probably undeclared - unaccessible
 				if (entry == NULL) {
@@ -54,8 +55,7 @@ struct TypeArrayElement* findType(astNode* root,
 					return typeErrPtr;
 				}
 
-				return entry->type->type != Union ? 
-					entry->type : typeErrPtr;
+				return entry->type->type != Union ? entry->type : typeErrPtr;
 			
 			/* all other leaves assumed typeless
 			 * TypeErr used only for erroneous leaves
@@ -76,12 +76,11 @@ struct TypeArrayElement* findType(astNode* root,
 		case relOp_GT:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[2], localTable, baseTable);
-			if (t1->type == t2->type && 
-					(t1->type == Integer || t1->type == Real))
+			if (t1->type == t2->type && (t1->type == Integer || t1->type == Real)){
 				return t1;
-			else if (t1->type == Record && (t1 == t2))
+			} else if (t1->type == Record && (t1 == t2)) {
 				return t1;
-			else {
+			} else {
 				printf("Relational operator: incompatible operands.\n");
 				return typeErrPtr;
 			}
@@ -93,9 +92,9 @@ struct TypeArrayElement* findType(astNode* root,
 		case logOp_OR:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[1], localTable, baseTable);
-			if (t1->type == Boolean && t2->type == Boolean)
+			if (t1->type == Boolean && t2->type == Boolean){
 				return booleanPtr;
-			else {
+			} else {
 				printf("And/or: boolean operands required.\n");
 				return typeErrPtr;
 			}
@@ -104,9 +103,9 @@ struct TypeArrayElement* findType(astNode* root,
 		 * <booleanExpression> ===> TK_NOT TK_OP <booleanExpression> TK_CL
 		 */
 		case logOp_NOT:
-			if ((findType(root->children[0], localTable, baseTable))->type == Boolean)
+			if ((findType(root->children[0], localTable, baseTable))->type == Boolean){
 				return booleanPtr;
-			else {
+			} else {
 				printf("Complementation: boolean operand required.\n");
 				return typeErrPtr;
 			}
@@ -119,15 +118,13 @@ struct TypeArrayElement* findType(astNode* root,
 		case arithOp_MINUS:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[2], localTable, baseTable);
-			if (t1->type == Integer && t2->type == Integer)
+			if (t1->type == Integer && t2->type == Integer){
 				return intPtr;
-			else if ((t1->type == Integer && t2->type == Real)
-					|| (t1->type == Real && t2->type == Integer)
-					|| (t1->type == Real && t2->type == Real))
+			}else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
 				return realPtr;
-			else if (t1->type == Record && (t1 == t2))
+			} else if (t1->type == Record && (t1 == t2)) {
 				return t1;
-			else {
+			} else {
 				printf("Addition/Subtraction: real or integer operands required.\n");
 				return typeErrPtr;
 			}
@@ -139,15 +136,13 @@ struct TypeArrayElement* findType(astNode* root,
 		case arithOp_MUL:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[2], localTable, baseTable);
-			if (t1->type == Integer && t2->type == Integer)
+			if (t1->type == Integer && t2->type == Integer){
 				return intPtr;
-			else if ((t1->type == Integer && t2->type == Real)
-					|| (t1->type == Real && t2->type == Integer)
-					|| (t1->type == Real && t2->type == Real))
+			} else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
 				return realPtr;
-			//else if (t1->type == Record)
-			//	return checkTypeEquality(t1, t2);
-			else {
+				//else if (t1->type == Record)
+				//	return checkTypeEquality(t1, t2);
+			} else {
 				printf("Multiplication: real or integer operands required.\n");
 				return typeErrPtr;
 			}
@@ -159,12 +154,11 @@ struct TypeArrayElement* findType(astNode* root,
 		case arithOp_DIV:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[2], localTable, baseTable);
-			if ((t1->type == Integer || t1->type == Real)
-					&& (t2->type == Integer || t2->type == Real))
+			if ((t1->type == Integer || t1->type == Real) && (t2->type == Integer || t2->type == Real)){
 				return realPtr;
-			//else if (t1->type == Record)
-			//	return checkTypeEquality(t1, t2);
-			else {
+				//else if (t1->type == Record)
+				//	return checkTypeEquality(t1, t2);
+			} else {
 				printf("Division: real or integer operands required.\n");
 				return typeErrPtr;
 			}
@@ -175,14 +169,12 @@ struct TypeArrayElement* findType(astNode* root,
 		case AssignmentOperation:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[1], localTable, baseTable);
-			if ((t1->type == Integer && t2->type == Integer)
-					|| (t1->type == Real && (t2->type == Integer || t2->type == Real)))
+			if ((t1->type == Integer && t2->type == Integer) || (t1->type == Real && (t2->type == Integer || t2->type == Real))){
 				return voidPtr;
-			/*--TO DO: assignment for whole records?--*/
-			else if (t1->type == Record)
+				/*--TO DO: assignment for whole records?--*/
+			} else if (t1->type == Record) {
 				return checkTypeEquality(t1, t2);
-
-			else {
+			} else {
 				printf("Assignment: incompatible types.\n");
 				return typeErrPtr;
 			}
@@ -205,21 +197,22 @@ struct TypeArrayElement* findType(astNode* root,
 			}
 
 			// the variable is a primitive
-			if (entry->type->type == Real || entry->type->type == Integer)
-				if (root->next == NULL)
+			if (entry->type->type == Real || entry->type->type == Integer){
+				if(root->next == NULL){
 					return entry->type;
-				else
+				}else{
 					return typeErrPtr; // a primitive can not have fields
+				}
+			}
 		
-			if (root->next == NULL)
+			if (root->next == NULL){
 				return entry->type;
+			}
 
 			// variable is a record or a union
 			if (entry->type->compositeVariableInfo != NULL) {
 				return findTypeField(root->next, entry->type->compositeVariableInfo->listOfFields);
-			}
-
-			else {
+			} else {
 				printf("Empty composite!\n");
 				return typeErrPtr;
 			}
@@ -274,8 +267,9 @@ struct TypeArrayElement* findType(astNode* root,
 				t2 = formalInput->datatype;
 				
 				// passing union parameters not allowed
-				if (t1->type == Union || t2->type == Union)
+				if (t1->type == Union || t2->type == Union){
 					return typeErrPtr;
+				}
 
 				// parameters should match in type
 				if (checkTypeEquality(t1, t2)->type == TypeErr) {
@@ -292,8 +286,9 @@ struct TypeArrayElement* findType(astNode* root,
 				t2 = formalOutput->datatype;
 
 				// passing union parameters not allowed
-				if (t1->type == Union || t2->type == Union)
+				if (t1->type == Union || t2->type == Union){
 					return typeErrPtr;
+				}
 
 				// parameters should match in type
 				if (checkTypeEquality(t1, t2)->type == TypeErr) {
@@ -312,19 +307,22 @@ struct TypeArrayElement* findType(astNode* root,
 			 * is completely type checked
 			 */
 			if (root->isLinkedListNode) {
-				if (root->next == NULL)
+				if (root->next == NULL){
 					return voidPtr;
+				}
 				return findType(root->next, localTable, baseTable);
-			}
+			} else {
+				/* type check all the children */
 
-			/* type check all the children */
-			else {
 				int children = MAX_PROD_LEN;
-				while (children > 0 && root->children[children-1] == NULL)
+				while (children > 0 && root->children[children-1] == NULL){
 					children--;
-				for (int i = 0; i <= children; i++)
-					if (findType(root->children[i], localTable, baseTable)->type == TypeErr)
+				}
+				for (int i = 0; i <= children; i++){
+					if (findType(root->children[i], localTable, baseTable)->type == TypeErr){
 						return typeErrPtr;
+					}
+				}
 				return voidPtr;
 			}
 	}
@@ -363,21 +361,22 @@ struct TypeArrayElement* findTypeField(astNode* root, struct Field* fieldLL) {
 		}
 
 		// the field is a primitive
-		if (entryType->type == Real || entryType->type == Integer)
-			if (root->next == NULL)
+		if (entryType->type == Real || entryType->type == Integer){
+			if (root->next == NULL){
 				return entryType;
-			else
+			}else{
 				return typeErrPtr; // a primitive can not have fields
+			}
+		}
 
-		if (root->next == NULL)
+		if (root->next == NULL){
 			return entryType;
+		}
 
 		/* replace the localTable here with the mini-table for record */
 		if (entryType->compositeVariableInfo != NULL) {
-				return findTypeField(root->next, entryType->compositeVariableInfo->listOfFields);
-		}
-
-		else {
+			return findTypeField(root->next, entryType->compositeVariableInfo->listOfFields);
+		} else {
 			printf("Empty record!\n");
 			return typeErrPtr;
 		}
@@ -390,8 +389,9 @@ struct TypeArrayElement* findTypeField(astNode* root, struct Field* fieldLL) {
 struct Field* searchInFieldLL(char* fieldLexeme, struct Field* fieldLL) {
 	Field* curr = fieldLL;
 	while (curr != NULL) {
-		if (strcmp(curr->identifier, fieldLexeme) == 0)
+		if (strcmp(curr->identifier, fieldLexeme) == 0){
 			return curr;
+		}
 		curr = curr->next;
 	}
 	return NULL;
@@ -414,9 +414,10 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 	astNode* funcNode = root->children[0];
 	while (funcNode != NULL) {
 		// name of the function
-		char* funcLexeme = funcNode->children[0]->entry.lexeme;
+		char* funcLexeme = funcNode->data->children[0]->entry.lexeme;
 
 		// obtain the symbol table for the current function
+		printf("function lexeme: %s\n", funcLexeme);
 		SymbolTableEntry* currFunc = lookupSymbolTable(baseTable, funcLexeme);
 		localTable = currFunc->tablePointer;
 
@@ -436,7 +437,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 		return -1;
 	}
 
-	printf("TYPE CHECKING SUCCESSFUL - ALL TESTS CLEARED!");
+	printf("TYPE CHECKING SUCCESSFUL - ALL TESTS CLEARED!\n");
 	return 0;
 }
 

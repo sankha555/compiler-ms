@@ -12,6 +12,7 @@
 #include "astGenerator.h"
 #include "symbolTableDef.h"
 #include "symbolTable.h"
+#include "TypeChecker.h"
 #include <time.h>
 #include <stdlib.h>
 
@@ -305,6 +306,31 @@ int main(int argc, char *argv[])
                     printf("%40s", "No globally visible records yet\n");
                 }
                 printf("==================================================\n");
+                break;
+
+            case 9:
+                buffer = init_lexer(argv[1]);
+                if (buffer == NULL)
+                {
+                    return globalSymbolTable;
+                }
+
+                FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+
+                populateRules();
+
+                createParseTable(FirstAndFollowAll, parseTable);
+
+                root = parseInputSourceCode(buffer);
+
+                astRoot = createAbstractSyntaxTree(root);
+
+                globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
+
+                globalSymbolTable = initializeSymbolTable(astRoot);
+                
+                int typeCheckingResult = typeCheck(astRoot, globalSymbolTable);
+                
                 break;
 
             default:
