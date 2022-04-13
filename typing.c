@@ -244,6 +244,12 @@ struct FunctionType *createFunctionType(char *identifier)
     strcpy(func->identifier, identifier);
     func->inputParameters = NULL;
     func->outputParameters = NULL;
+
+    func->inputParamsWidth = 0;
+    func->outputParamsWidth = 0;
+    func->outputParamsOffset = 0;
+    func->inputParamsOffset = 0;
+
     return func;
 }
 
@@ -324,6 +330,10 @@ void addToInputParameters(char *identifier, char *typeid, FunctionType *info)
 
     FunctionParameter *parameter = createParameter(identifier, typeid);
     FunctionParameter *trav = info->inputParameters;
+
+    info->inputParamsWidth += parameter->datatype->width;
+    info->inputParamsOffset += ((info->inputParamsWidth + RETURN_ADDRESS_NASM_SIZE) % NASM_CALLSTACK_PADDING) + RETURN_ADDRESS_NASM_SIZE;
+
     if (trav == NULL)
     {
         info->inputParameters = parameter;
@@ -343,6 +353,10 @@ void addToOutputParameters(char *identifier, char *typeid, FunctionType *info)
 
     FunctionParameter *parameter = createParameter(identifier, typeid);
     FunctionParameter *trav = info->outputParameters;
+
+    info->outputParamsWidth += parameter->datatype->width;
+    info->outputParamsOffset += (info->outputParamsWidth) % NASM_CALLSTACK_PADDING;
+
     if (trav == NULL)
     {
         info->outputParameters = parameter;

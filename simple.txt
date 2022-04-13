@@ -1,3 +1,20 @@
+_function1
+    input parameter list [int c2, int d2cd]
+    output parameter list [int b5d, int d3]; 
+        b5d<---c2+234-d2cd;
+        d3<---b5d+20;
+    return [b5d, d3]; 
+end
+
+_function2
+    input parameter list [int c2, int d2cd]
+    output parameter list [int b5d, int d3]; 
+        b5d<---c2+234-d2cd;
+        d3<---b5d+20;
+    return [b5d, d3]; 
+end
+
+
 _main
     type int : b5;
 

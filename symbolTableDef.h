@@ -45,6 +45,7 @@ typedef struct SymbolTable {
     char* tableID;          // should generally store the name of the function
     int currentOffset;
     int totalWidth;
+
     struct SymbolTable* returnTo;
 
     // actual table entries

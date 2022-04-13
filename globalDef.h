@@ -1,6 +1,15 @@
 #ifndef GLOBAL_DEF_H
 #define GLOBAL_DEF_H
 
+//maximum pentuples possible in the intermediate code
+#define MAX_PENTUPLES_POSSIBLE 1000
+
+//return address size required in nasm 
+#define RETURN_ADDRESS_NASM_SIZE 8
+
+//boundary padding modulus in nasm 
+#define NASM_CALLSTACK_PADDING 16
+
 /* total rules and nonterminals in the grammar */
 #define NUMBER_OF_TOKENS 58
 int numNonTerminals;

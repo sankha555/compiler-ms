@@ -54,6 +54,11 @@ typedef struct FunctionType
     char *identifier;                           // name of the function
     struct FunctionParameter *inputParameters;  // Parameter List of input parameters
     struct FunctionParameter *outputParameters; // Parameter List of output parameters
+    int inputParamsOffset; 
+    int outputParamsOffset;
+    int inputParamsWidth;
+    int outputParamsWidth;
+
 } FunctionType;
 
 // element of the dynamic type array
@@ -68,6 +73,7 @@ typedef struct TypeArrayElement
     struct FunctionType *functionInfo;               // points to the function type expression if Record/Union otherwise NULL
     struct TypeArrayElement *next;                   // used in the LinkedList in the hash table Implementation fo the type table
     int width;
+
 } TypeArrayElement;
 
 // the TypeArray will be implemented as a HashTable

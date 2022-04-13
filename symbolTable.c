@@ -150,6 +150,11 @@ SymbolTable *createSymbolTable(char *tableID, SymbolTable *returnTable)
     newTable->tableID = (char *)malloc(strlen(tableID) * sizeof(char));
     strcpy(newTable->tableID, tableID);
 
+    newTable->inputParamsOffset = 0;
+    newTable->outputParamsOffset = 0;
+    newTable->inputParamsWidth = 0;
+    newTable->outputParamsWidth = 0;
+
     newTable->returnTo = returnTable;
     newTable->totalWidth = 0;
 
