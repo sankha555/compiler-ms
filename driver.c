@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
                 }
 
                 if(!f){
-                    printf("%40s", "No globally visible records\n");
+                    printf("%40s", "No globally visible records yet\n");
                 }
                 printf("==================================================\n");
                 break;
