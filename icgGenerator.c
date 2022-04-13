@@ -15,6 +15,10 @@ SymbolTableEntry* getNewTemporary(SymbolTable* currentSymbolTable, TypeArrayElem
 
 }
 
+SymbolTableEntry* createRecordItemAlias(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
+
+}
+
 int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
 
     switch(root->type) {
@@ -80,7 +84,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
         case AssignmentOperation:
 
-            
+
             break;
 
         default: 
