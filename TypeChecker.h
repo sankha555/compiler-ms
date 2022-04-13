@@ -2,7 +2,7 @@
 # define TYPE_CHECKER_HEADER
 
 # include <stdio.h>
-# include "globaldef.h"
+//# include "globaldef.h"
 # include "astGenerator.h"
 # include "astDef.h"
 # include "parserDef.h"
@@ -12,10 +12,22 @@
 # include "symbolTableDef.h"
 # include "symbolTable.h"
 
-Type findType(astNode* root, SymbolTable* localTable, SymbolTable* globalTable, SymboleTable* baseTable);
+struct TypeArrayElement* findType(astNode* root, 
+		SymbolTable* localTable, SymbolTable* baseTable);
 
-Type findTypeField(astNode* root, SymbolTable* localTable, SymboleTable* baseTable)
+struct TypeArrayElement* findTypeField(astNode* root, 
+		struct Field* fieldLL);
 
-void typeCheck(astNode* root, SymbolTable* baseTable);
+struct Field* searchInFieldLL(char* fieldLexeme,
+		struct Field* fieldLL);
+
+int typeCheck(astNode* root, SymbolTable* baseTable);
+
+struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1, 
+		struct TypeArrayElement* t2);
+
+int findLengthFormal(FunctionParameter* head);
+
+int findLengthActual(astNode* head);
 
 # endif
