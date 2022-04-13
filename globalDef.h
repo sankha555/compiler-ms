@@ -1,6 +1,9 @@
 #ifndef GLOBAL_DEF_H
 #define GLOBAL_DEF_H
 
+//identifier for main function 
+#define MAIN_NAME "_main"
+
 //maximum pentuples possible in the intermediate code
 #define MAX_PENTUPLES_POSSIBLE 1000
 

@@ -1,5 +1,5 @@
 # include "TypeChecker.h"
-
+#include "globalDef.h"
 /* inputs:
  * the ast node that will serve as root for the subtree to traverse
  * pointer to the local function's symbol table or record table
@@ -429,7 +429,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 	}
 
 	/* traverse <mainFunction> */
-	char *mainLexeme = "_main";
+	char *mainLexeme = MAIN_NAME;
 	localTable = (lookupSymbolTable(baseTable, mainLexeme))->tablePointer;
 	if (findType(root->children[1], localTable, baseTable)->type != Void) {
 		printf("TYPE ERROR DETECTED IN MAIN.\n");

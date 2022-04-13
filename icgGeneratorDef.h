@@ -19,7 +19,10 @@ typedef enum ICGrule {
     ASSIGN_OP,  // copy from one memory location to another
     DEFINE_DS,  // define data segment, in code generation, adds function offsets
     DEFINE_CS,  // define code segment, add "global _start:" in code generation
-    EXIT_CODE,  //in the end of intermediate code generation, adds the exit syscall during code generation
+    EXIT_CODE,  // in the end of intermediate code generation, adds the exit syscall during code generation
+    FUNC_DEF,   // function label in the code segment, push EBP into stack, and move the function offset from constant DS into EBP
+    FUNC_DEF_END, // pop from stack into EBP, then return
+    FUNC_DEF_MAIN,
 } ICGrule;
 
 

@@ -14,9 +14,9 @@ SymbolTableEntry* getNewTemporary(SymbolTable* currentSymbolTable, TypeArrayElem
 /*
 *  
 */
-int generateCompleteICGcode(astNode* root);
+int generateCompleteICGcode(astNode* root, SymbolTable* globalSymbolTable);
 
 
-int parseICGcode(astNode* root);
+int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable);
 
 #endif ICG_GENERATOR_H

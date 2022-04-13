@@ -15,7 +15,7 @@ SymbolTableEntry* getNewTemporary(SymbolTable* currentSymbolTable, TypeArrayElem
 
 }
 
-int parseICGcode(astNode* root) {
+int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
 
     switch(root->type) {
         
@@ -24,15 +24,48 @@ int parseICGcode(astNode* root) {
             pentupleCode[numberOfPentuples].rule = DEFINE_CS;
             numberOfPentuples++;
 
-            parseICGcode(root->children[0]);
-            parseICGcode(root->children[1]);
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable);
 
             pentupleCode[numberOfPentuples].rule = DEFINE_DS;
             numberOfPentuples++;
 
-            pentupleCode[numberOfPentuples].rule = EXIT_CODE;
+            break;
+
+        case FuncLinkedListNode:
+
+            parseICGcode(root->data,currentSymbolTable,globalSymbolTable);
+            if(root->next != NULL) {
+                parseICGcode(root->next,currentSymbolTable,globalSymbolTable);
+            }
+            break;
+
+        case FuncDef:
+
+            // push EBP in stack, get current function's offsets and store them in EBP
+            pentupleCode[numberOfPentuples].rule = FUNC_DEF; 
+            SymbolTableEntry* funcSymbolTableEntry = lookupSymbolTable(globalSymbolTable,root->children[0]->entry.lexeme);
+            pentupleCode[numberOfPentuples].result = funcSymbolTableEntry;
             numberOfPentuples++;
 
+            parseICGcode(root->children[3],funcSymbolTableEntry,globalSymbolTable);
+
+            pentupleCode[numberOfPentuples].rule = FUNC_DEF_END;
+            numberOfPentuples++;
+
+            break;
+
+        case MainFunc:
+
+            pentupleCode[numberOfPentuples].rule = FUNC_DEF_MAIN;
+            SymbolTableEntry* funcSymbolTableEntry = lookupSymbolTable(globalSymbolTable,MAIN_NAME);
+
+            pentupleCode[numberOfPentuples].rule = EXIT_CODE;
+            numberOfPentuples++;
+            break;
+
+        default: 
+            //do nothing for the astTags not mentioned
             break;
 
     }
@@ -40,7 +73,7 @@ int parseICGcode(astNode* root) {
 }
 
 
-int generateCompleteICGcode(astNode* root) {
+int generateCompleteICGcode(astNode* root, SymbolTable* globalSymbolTable) {
 
     tempVariableNumber = 0;
     numberOfPentuples = 0;
@@ -53,6 +86,6 @@ int generateCompleteICGcode(astNode* root) {
         pentupleCode[i].argument[1] = NULL;
     }
 
-    return parseICGcode(root);
+    return parseICGcode(root,globalSymbolTable,globalSymbolTable);
 
 }
