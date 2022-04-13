@@ -40,8 +40,6 @@ int numRules;
 // passes for follow set computation
 # define EPOCHS 2
 
-
-
 //to denote false an true anywhere required
 typedef enum {
 	FALSE = 0,
@@ -52,5 +50,11 @@ typedef enum {
 
 //updated by lexical analyser whenever \n is encountered
 static int linenumber = 0;
+
+int numParseTreeNodes;
+int parseTreeMemory;
+
+int numASTNodes;
+int ASTMemory;
 
 #endif

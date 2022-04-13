@@ -14,8 +14,11 @@
  * @return astNode*
  */
 astNode *newASTnode(ASTtag tag)
-{
+{   
     astNode *ptr = (astNode *)malloc(sizeof(astNode));
+    numASTNodes++;
+    ASTMemory += sizeof(astNode);
+
     ptr->type = tag;
     ptr->isLeafNode = FALSE;
     ptr->next = NULL;

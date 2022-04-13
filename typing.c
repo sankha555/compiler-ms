@@ -111,10 +111,10 @@ int getWidth(Type type)
     switch (type)
     {
     case Integer:
-        width = 4;
+        width = 2;
         break;
     case Real:
-        width = 8;
+        width = 4;
         break;
     default:
         break;

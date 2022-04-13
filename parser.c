@@ -283,6 +283,9 @@ int inorderTraversalParseTree (FILE* fp, ParseTreeNode *root) {
 
 ParseTreeNode* newParseTreeNode() {
     ParseTreeNode* newNode = (ParseTreeNode*)malloc(sizeof(ParseTreeNode));
+    numParseTreeNodes++;
+    parseTreeMemory += sizeof(ParseTreeNode);
+
     // printf("okay\n");
     newNode->parent = NULL;
     newNode->isLeafNode = FALSE;
@@ -307,9 +310,9 @@ ParseTreeNode* newParseTreeNode() {
     return newNode;
 }
 
-int printParseTree(ParseTreeNode* root, char* filename) {
+int printParseTree(ParseTreeNode* root) {
 
-    FILE* fp = fopen(filename,"w");
+    FILE* fp = stdout;
 
     if(!fp) {
         printf("Could not open file for printing tree.\n");
@@ -320,7 +323,9 @@ int printParseTree(ParseTreeNode* root, char* filename) {
 
     int result = inorderTraversalParseTree(fp,root);
 
-    fclose(fp);
+    if(fp != stdout){
+        fclose(fp);
+    }
     return result;
 }
 

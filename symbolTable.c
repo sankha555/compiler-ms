@@ -10,7 +10,7 @@
 
 void printSymbolTableEntry(SymbolTable *symbolTable, SymbolTableEntry *entry, FILE *fp)
 {
-    fprintf(fp, "\t Name: %30s ; Scope: %30s ; Width: %d ; Offset: %d; Is Global: %3s\n", entry->identifier, symbolTable->tableID, entry->width, entry->offset, (!strcmp(symbolTable->tableID, "GLOBAL") ? "YES" : "NO"));
+    fprintf(fp, "\t Name: %30s ; Scope: %30s ; Width: %d ; Offset: %d ; Is Global: %3s\n", entry->identifier, symbolTable->tableID, entry->width, entry->offset, (!strcmp(symbolTable->tableID, "GLOBAL") ? "YES" : "NO"));
     fprintf(fp, "\t Type Name: %s\n", "TODO");
     fprintf(fp, "\t Type Expression: %s\n", "TODO");
     fprintf(fp, "\t Variable Usage: %s\n", entry->usage != NULL ? entry->usage : "undefined");
@@ -20,7 +20,7 @@ void printSymbolTableEntry(SymbolTable *symbolTable, SymbolTableEntry *entry, FI
 void printASingleSymbolTable(SymbolTable *symbolTable, FILE *fp)
 {
     fprintf(fp, "================ SYMBOL TABLE : %s ================\n", symbolTable->tableID);
-    fprintf(fp, "Total Width: %d\n", symbolTable->totalWidth);
+    fprintf(fp, "Total Width: %d Bytes\n", symbolTable->totalWidth);
     fprintf(fp, "*** Entries in Table: *** \n");
     for (int i = 0; i < K_MAP_SIZE; i++)
     {
@@ -552,9 +552,9 @@ SymbolTable *initializeSymbolTable(astNode *root)
 
         otherFunctions = otherFunctions->next;
     }
-    printSymbolTables(stdout);
+    // printSymbolTables(stdout);
 
-    printGlobalTypeTable(stdout);
+    // printGlobalTypeTable(stdout);
 
     return globalSymbolTable;
 }
