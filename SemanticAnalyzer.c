@@ -1,4 +1,5 @@
 # include "SemanticAnalyzer.h"
+# include "TypeChecker.h"
 
 /* 0: success
  * -1: failure

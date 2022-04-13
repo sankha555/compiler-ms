@@ -185,13 +185,13 @@ struct TypeTable *createTypeTable(char *tableID)
         newTable->tableEntries[i] = NULL;
     }
 
-    entry = createTypeArrayElement(Integer, "Int");
-    entry->width = 4;
+    TypeArrayElement* entry = createTypeArrayElement(Integer, "Int");
+    entry->width = getWidth(Integer);
 	intPtr = entry;
     insertintoTypeTable(newTable, entry);
 
     entry = createTypeArrayElement(Real, "Real");
-    entry->width = 8;
+    entry->width = getWidth(Real);
 	realPtr = entry;
     insertintoTypeTable(newTable, entry);
 
