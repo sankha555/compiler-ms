@@ -42,6 +42,9 @@ astNode *newASTnode(ASTtag tag)
 astNode *newASTleafNode(ASTtag tag)
 {
     astNode *ptr = (astNode *)malloc(sizeof(astNode));
+    numASTNodes++;
+    ASTMemory += sizeof(astNode);
+
     ptr->type = tag;
 
     ptr->isLinkedListNode = FALSE;
@@ -1218,7 +1221,7 @@ int preOrderTraversal(astNode *root, FILE* fp, astNode* parent, astNode* prev)
         return 0;
 
     if (root->isLeafNode) {
-        fprintf(fp, "Leaf: %40s\t Parent: %30s\t Lexeme: %40s\n", tagNames[root->type], tagNames[parent->type], root->entry.lexeme);
+        fprintf(fp, "Leaf: %40s\t Parent: %30s\t\n", tagNames[root->type], tagNames[parent->type]);
     } else if (root->isLinkedListNode) {
         fprintf(fp, "LinkedListNode: %30s\t Parent: %30s\t Prev:%30s\n", tagNames[root->type], parent ? tagNames[parent->type] : NULL, prev ? tagNames[prev->type] : "NULL");
         preOrderTraversal(root->data, fp, root, NULL);
