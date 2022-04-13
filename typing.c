@@ -185,17 +185,28 @@ struct TypeTable *createTypeTable(char *tableID)
         newTable->tableEntries[i] = NULL;
     }
 
-    // always insert Int and Real entries into the type Table
-    TypeArrayElement *entry;
-
-    entry = createTypeArrayElement(0, "Int");
-    entry->width = getWidth(Integer);
+    entry = createTypeArrayElement(Integer, "Int");
+    entry->width = 4;
+	intPtr = entry;
     insertintoTypeTable(newTable, entry);
-    //printf("Inserted into type table\n");
-    entry = createTypeArrayElement(1, "Real");
-    entry->width = getWidth(Real);
 
+    entry = createTypeArrayElement(Real, "Real");
+    entry->width = 8;
+	realPtr = entry;
     insertintoTypeTable(newTable, entry);
+
+	entry = createTypeArrayElement(Void, "Void");
+	voidPtr = entry;
+	insertintoTypeTable(newTable, voidPtr);
+
+	entry = createTypeArrayElement(Boolean, "Boolean");
+	booleanPtr = entry;
+	insertintoTypeTable(newTable, booleanPtr);
+
+	entry = createTypeArrayElement(TypeErr, "TypeErr");
+	typeErrPtr = entry;
+	insertintoTypeTable(newTable, typeErrPtr);
+
     return newTable;
 }
 
