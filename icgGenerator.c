@@ -48,7 +48,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             pentupleCode[numberOfPentuples].result = funcSymbolTableEntry;
             numberOfPentuples++;
 
-            parseICGcode(root->children[3],funcSymbolTableEntry,globalSymbolTable);
+            parseICGcode(root->children[3],funcSymbolTableEntry->tablePointer,globalSymbolTable);
 
             pentupleCode[numberOfPentuples].rule = FUNC_DEF_END;
             numberOfPentuples++;
@@ -59,9 +59,28 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
             pentupleCode[numberOfPentuples].rule = FUNC_DEF_MAIN;
             SymbolTableEntry* funcSymbolTableEntry = lookupSymbolTable(globalSymbolTable,MAIN_NAME);
+            pentupleCode[numberOfPentuples].result = funcSymbolTableEntry;
+            numberOfPentuples++;
+
+            parseICGcode(root->children[0],funcSymbolTableEntry->tablePointer,globalSymbolTable);
 
             pentupleCode[numberOfPentuples].rule = EXIT_CODE;
             numberOfPentuples++;
+
+            break;
+
+        case StmtLinkedListNode:
+
+            parseICGcode(root->data,currentSymbolTable,globalSymbolTable);
+            if(root->next!=NULL) {
+                parseICGcode(root->next,currentSymbolTable,globalSymbolTable);
+            }
+
+            break;
+
+        case AssignmentOperation:
+
+            
             break;
 
         default: 
