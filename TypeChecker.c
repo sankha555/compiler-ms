@@ -145,8 +145,8 @@ struct TypeArrayElement* findType(astNode* root,
 					|| (t1->type == Real && t2->type == Integer)
 					|| (t1->type == Real && t2->type == Real))
 				return realPtr;
-			else if (t1->type == Record)
-				return checkTypeEquality(t1, t2);
+			//else if (t1->type == Record)
+			//	return checkTypeEquality(t1, t2);
 			else {
 				printf("Multiplication: real or integer operands required.\n");
 				return typeErrPtr;
@@ -162,8 +162,8 @@ struct TypeArrayElement* findType(astNode* root,
 			if ((t1->type == Integer || t1->type == Real)
 					&& (t2->type == Integer || t2->type == Real))
 				return realPtr;
-			else if (t1->type == Record)
-				return checkTypeEquality(t1, t2);
+			//else if (t1->type == Record)
+			//	return checkTypeEquality(t1, t2);
 			else {
 				printf("Division: real or integer operands required.\n");
 				return typeErrPtr;
