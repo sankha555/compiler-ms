@@ -15,11 +15,11 @@
 #include <time.h>
 #include <stdlib.h>
 
-void performPrelims(twinBuffer* buffer, char* testcaseFile, ParseTreeNode *root, astNode *astRoot, SymbolTable* globalSymbolTable){
+SymbolTable* performPrelims(twinBuffer* buffer, char* testcaseFile, ParseTreeNode *root, astNode *astRoot, SymbolTable* globalSymbolTable){
     buffer = init_lexer(testcaseFile);
     if (buffer == NULL)
     {
-        return;
+        return globalSymbolTable;
     }
 
     FirstAndFollowElement *FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
@@ -35,6 +35,8 @@ void performPrelims(twinBuffer* buffer, char* testcaseFile, ParseTreeNode *root,
     globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
 
     globalSymbolTable = initializeSymbolTable(astRoot);
+
+    return globalSymbolTable;
 }
 
 int main(int argc, char *argv[])
@@ -224,14 +226,14 @@ int main(int argc, char *argv[])
                  * @brief Symbol Table
                  * 
                  */
-                performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
+                globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
 
                 printSymbolTables(stdout);
                 
                 break;
 
             case 6:
-                performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
+                globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
             
                 printf("============ LIST OF GLOBAL VARIABLES ============\n");
                 for(int i = 0; i < K_MAP_SIZE; i++){
@@ -247,36 +249,63 @@ int main(int argc, char *argv[])
                 break;
 
             case 7:
-                performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
+                globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
 
                 printf("============ FUNCTION ACTIVATION RECORD SIZES ============\n");
 
                 SymbolTable* head = listOfSymbolTables;
                 while(head != NULL){
-                    printf("%s %30d\n", head->tableID, head->totalWidth);
+                    if(strcmp(head->tableID, "GLOBAL")){    // do not print the global symbol table details
+                        printf("%s %30d\n", head->tableID, head->totalWidth);
+                    }
 
                     head = head->next;
                 }
 
                 printf("==========================================================\n");
+                break;
 
             case 8:
-                performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
+                globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
                 
                 printf("============ GLOBALLY VISIBLE RECORDS ============\n");
 
+                int f = 0;
                 for(int i = 0; i < K_MAP_SIZE; i++){
                     SymbolTableEntry* tableEntry = globalSymbolTable->tableEntries[i];
                     while(tableEntry != NULL){
                         if(tableEntry->type != NULL && tableEntry->type->type == RecordType){
-                            printf("%s %30s %10d\n", tableEntry->identifier, "TODO", tableEntry->width);
+                            f = 1;
+                            printf("%s \t\t<", tableEntry->type->identifier);
+                            // printing type expression
+                            UnionOrRecordInfo* info = tableEntry->type->compositeVariableInfo;
+                            Field* field = info->listOfFields;
+                            
+                            int first = 1;
+                            while(field != NULL){
+                                if(!first){
+                                    printf(", ");
+                                }else{
+                                    first = 0;
+                                }
+                                printf("%s", field->datatype->identifier);
+
+                                field = field->next;
+                            }
+                            // printing width
+                            printf("> %10d\n", tableEntry->width);
+
                         }
 
                         tableEntry = tableEntry->next;
                     }
                 }
 
+                if(!f){
+                    printf("%40s", "No globally visible records\n");
+                }
                 printf("==================================================\n");
+                break;
 
             default:
                 break;

@@ -130,20 +130,15 @@ int getWidth(Type type)
 int insertintoTypeTable(TypeTable *typeTable, TypeArrayElement *entry)
 {
     int hashTableIndex = hashFunctionSymbolTable(entry->identifier);
-    printf("hash index: %d\n", hashTableIndex);
 
     TypeArrayElement *pointer = typeTable->tableEntries[hashTableIndex];
-    printf("got to here\n");
     if (pointer == NULL)
     {
-        printf("pointer is null\n");
         typeTable->tableEntries[hashTableIndex] = entry;
-        printf("inserted\n");
         return 1;
     }
     while (pointer->next != NULL)
     {
-        printf("pointer is not null\n");
         if (strcmp(pointer->identifier, entry->identifier) == 0)
         {
             // entry already exists, update tag
@@ -194,11 +189,11 @@ struct TypeTable *createTypeTable(char *tableID)
     TypeArrayElement *entry;
 
     entry = createTypeArrayElement(0, "Int");
-    entry->width = 4;
+    entry->width = getWidth(Integer);
     insertintoTypeTable(newTable, entry);
     //printf("Inserted into type table\n");
     entry = createTypeArrayElement(1, "Real");
-    entry->width = 8;
+    entry->width = getWidth(Real);
 
     insertintoTypeTable(newTable, entry);
     return newTable;

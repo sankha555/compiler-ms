@@ -38,7 +38,6 @@ void printASingleSymbolTable(SymbolTable *symbolTable, FILE *fp)
 
 void printSymbolTables(FILE *fp)
 {
-    printf("Printing all symbol tables\n");
     SymbolTable *head = listOfSymbolTables;
     while (head != NULL)
     {
@@ -49,16 +48,13 @@ void printSymbolTables(FILE *fp)
 
 SymbolTable *addToListOfSymbolTables(SymbolTable *symbolTable)
 {
-    printf("this is called\n");
     if (listOfSymbolTables == NULL)
     {
-        printf("bruh\n");
         listOfSymbolTables = symbolTable;
         symbolTable->next = NULL;
     }
     else
     {
-        printf("bruh1\n");
         SymbolTable *head = listOfSymbolTables;
         while (head->next != NULL)
         {
@@ -162,9 +158,7 @@ SymbolTable *createSymbolTable(char *tableID, SymbolTable *returnTable)
     // we don't need to compute the offset for each new table, as each new table represents a function, and the offset of the variables = offset of start of stack frame + relative offset
     // we can just include the total width if required, to gauge the total memory required by the symbol table
 
-    printf("going to call addto list of stables\n");
     listOfSymbolTables = addToListOfSymbolTables(newTable);
-    // printf("Added to list of symbols \n");
 
     return newTable;
 }
@@ -276,8 +270,6 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
         case TypeRecord:
             typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
-            printf("identifier is %s\n", typeidentifier);
-            printf("lookup result is %s\n", lookupResult == NULL ? "NULL" : "NOT NULL");
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "output Parameter";
             insertintoSymbolTable(symbolTable, entry);
@@ -455,9 +447,7 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
             printf("parsing record\n");
             typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
-            printf("lookup result is %s\n", lookupResult->identifier);
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
-            printf("width is %d\n", lookupResult->width);
             if (isGlobal)
             {
                 entry->usage = "global Variable";
@@ -467,7 +457,6 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
             {
                 entry->usage = "local Variable";
                 insertintoSymbolTable(symbolTable, entry);
-                printf("inserting into symbol table\n");
             }
             break;
 
@@ -579,7 +568,6 @@ SymbolTable *initializeSymbolTable(astNode *root)
     astNode *mainFunction = root->children[1];
 
     SymbolTable *mainFunctionSymbolTable = createSymbolTable("_main", globalSymbolTable);
-    printf("Symbol table created for _main...\n");
 
     populateMainFunctionTable(mainFunction, globalSymbolTable, mainFunctionSymbolTable);
 
@@ -589,11 +577,6 @@ SymbolTable *initializeSymbolTable(astNode *root)
     entry->usage = "main function";
 
     insertintoSymbolTable(globalSymbolTable, entry);
-    printf("It has been inserted into global function table...\n");
-
-    printf("Main function has been populated \n");
-
-
 
     // go to otherFunc, it is a linked list of functions
     while (otherFunctions)
