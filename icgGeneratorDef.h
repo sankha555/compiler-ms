@@ -1,5 +1,5 @@
-#ifndef ICG_GENERATOR_H
-#define ICG_GENERATOR_H
+#ifndef ICG_GENERATOR_DEF_H
+#define ICG_GENERATOR_DEF_H
 
 #include "globalDef.h"
 #include "symbolTableDef.h"
@@ -16,7 +16,10 @@ typedef enum ICGrule {
     GOTO_L,     // unconditional jump to label
     IF_TRUE_GOTO_L, 
     IF_FALSE_GOTO_L,
-
+    ASSIGN_OP,  // copy from one memory location to another
+    DEFINE_DS,  // define data segment, in code generation, adds function offsets
+    DEFINE_CS,  // define code segment, add "global _start:" in code generation
+    EXIT_CODE,  //in the end of intermediate code generation, adds the exit syscall during code generation
 } ICGrule;
 
 
@@ -27,7 +30,8 @@ typedef struct pentuple {
     SymbolTableEntry* argument[2];
 } pentuple;
 
+int numberOfPentuples;
 
-pentuple IntermediateCode [MAX_PENTUPLES_POSSIBLE];
+pentuple pentupleCode [MAX_PENTUPLES_POSSIBLE];
 
-#endif ICG_GENERATOR_H
+#endif ICG_GENERATOR_DEF_H
