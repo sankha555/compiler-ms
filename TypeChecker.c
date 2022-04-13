@@ -14,7 +14,10 @@
  * uses preorder and linkedlist traversal of ast subtree
  */
 struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, SymbolTable* baseTable) {
+	
 	if (root == NULL){
+		// to remove
+		//printf("NULL node\n");
 		return voidPtr;
 	}
 
@@ -30,6 +33,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			 * <var> ===> TK_NUM
 			 */
 			case Num:
+				// to remove
+				printf("Entered.\n");
 				return intPtr;
 			
 			/* REAL LITERAL
@@ -65,6 +70,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		}
 	}
 
+	// to remove
+	//printf("%d", root->type);
 	switch (root->type) {
 		/* RELATIONAL OPERATORS
 		 * <booleanExpression> ===> <var> <relationalOp> <var> 
@@ -122,8 +129,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return intPtr;
 			}else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
 				return realPtr;
-			} else if (t1->type == Record && (t1 == t2)) {
-				return t1;
+			} else if (t1->type == Record) {
+				return checkTypeEquality(t1, t2);
 			} else {
 				printf("Addition/Subtraction: real or integer operands required.\n");
 				return typeErrPtr;
@@ -318,7 +325,11 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				while (children > 0 && root->children[children-1] == NULL){
 					children--;
 				}
+				// to remove
+				//printf("%d\n", children);
 				for (int i = 0; i <= children; i++){
+					// to remove
+					//printf("-%d-", root->children[i]->type);
 					if (findType(root->children[i], localTable, baseTable)->type == TypeErr){
 						return typeErrPtr;
 					}
