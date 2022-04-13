@@ -12,6 +12,9 @@ typedef enum Type
     RecordType,
     UnionType,
     Function,
+	Void,
+	Boolean,
+	TypeErr,
     Alias
 
 } Type;
@@ -105,5 +108,11 @@ void addToListofFieldsUnion(char *identifier, char* typeid, UnionOrRecordInfo* i
 void addToInputParameters(char *identifier, char *typeid, FunctionType *info);
 void addToOutputParameters(char *identifier, char *typeid, FunctionType *info);
 struct TypeTable *globalTypeTable;
+
+struct TypeArrayElement* intPtr;
+struct TypeArrayElement* realPtr;
+struct TypeArrayElement* voidPtr;
+struct TypeArrayElement* typeErrPtr;
+struct TypeArrayElement* booleanPtr;
 
 #endif
