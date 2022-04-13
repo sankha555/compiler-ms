@@ -7,6 +7,7 @@
 #include "astGenerator.h"
 #include "astDef.h"
 #include "typing.h"
+#include "globalDef.h"
 
 void printSymbolTableEntry(SymbolTable *symbolTable, SymbolTableEntry *entry, FILE *fp)
 {
@@ -532,8 +533,8 @@ void populateOtherFunctionTable(astNode *root, SymbolTable *globalSymbolTable, S
  */
 void populateMainFunctionTable(astNode *root, SymbolTable *globalSymbolTable, SymbolTable *functionSymbolTable)
 {
-    TypeArrayElement *typeElement = createTypeArrayElement(Function, "_main");
-    typeElement->functionInfo = createFunctionType("_main");
+    TypeArrayElement *typeElement = createTypeArrayElement(Function, MAIN_NAME);
+    typeElement->functionInfo = createFunctionType(MAIN_NAME);
     insertintoTypeTable(globalTypeTable, typeElement);
     printf("Populating main function table\n");
 
@@ -567,12 +568,12 @@ SymbolTable *initializeSymbolTable(astNode *root)
     astNode *otherFunctions = root->children[0];
     astNode *mainFunction = root->children[1];
 
-    SymbolTable *mainFunctionSymbolTable = createSymbolTable("_main", globalSymbolTable);
+    SymbolTable *mainFunctionSymbolTable = createSymbolTable(MAIN_NAME, globalSymbolTable);
 
     populateMainFunctionTable(mainFunction, globalSymbolTable, mainFunctionSymbolTable);
 
 
-    SymbolTableEntry *entry = createNewSymbolTableEntry("_main", true, mainFunctionSymbolTable, lookupTypeTable(globalTypeTable, "_main"), 0);
+    SymbolTableEntry *entry = createNewSymbolTableEntry(MAIN_NAME, true, mainFunctionSymbolTable, lookupTypeTable(globalTypeTable, MAIN_NAME), 0);
 
     entry->usage = "main function";
 
