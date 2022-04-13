@@ -15,7 +15,7 @@ void createParseTable();
 
 ParseTreeNode* parseInputSourceCode();
 
-int printParseTree(ParseTreeNode* root, char* filename);
+int printParseTree(ParseTreeNode* root);
 
 void printTreeNode(FILE* fp, ParseTreeNode* treeNode);
 
