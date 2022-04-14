@@ -13,8 +13,14 @@
 int tempVariableNumber;
 int tempLabelNumber;
 
-SymbolTableEntry* getNewTemporary(SymbolTable* currentSymbolTable, TypeArrayElement* typeToAdd) {
-    return NULL;
+SymbolTableEntry* getNewTemporary(SymbolTable* currentSymbolTable, Type type) {
+    char* temp = (char*)malloc(30);
+    sprintf(temp,"tempVariable_xvag_%d",tempVariableNumber);
+    tempVariableNumber++;
+    //SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTable* tablePointer, Type type);
+    SymbolTableEntry* newVar = createNewSymbolTableEntry(temp,FALSE,currentSymbolTable,type);
+    insertintoSymbolTable(currentSymbolTable,newVar);
+    return newVar;
 }
 
 char* generateNewLabel() {
@@ -394,6 +400,349 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
                 numberOfPentuples++;
 
             }
+
+            break;
+
+        case arithOp_PLUS:
+
+            /* The + operation is valid between :-
+            *  ->   int, int
+            *  ->   int, real
+            *  ->   real, int
+            *  ->   real, real
+            *  ->   record, record,  not yet handled
+            *  both the children of the node will have dataPlace field, which will 
+            *  contain the symbolTableEntry to the temporary holding the expression's
+            *  calculated value. Check for its type and work accordingly
+            */
+
+            //write ICG code calculating for both the children
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            //the variable which hold the value of the expression below
+            SymbolTableEntry* leftOperand = lookupSymbolTable(currentSymbolTable,root->children[0]->dataPlace);
+            SymbolTableEntry* rightOperand = lookupSymbolTable(currentSymbolTable,root->children[1]->dataPlace);
+
+            SymbolTableEntry* holder;
+            
+            //checking what type of operand pair
+            if(leftOperand->type->type == Integer && rightOperand->type->type == Integer) {
+
+                holder = getNewTemporary(currentSymbolTable,Integer);
+                pentupleCode[numberOfPentuples].rule = ADD_I;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Integer && rightOperand->type->type == Real) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //need to convert integer operand to real in a temporary
+                SymbolTableEntry* convertHolder = getNewTemporary(currentSymbolTable,Real);
+                pentupleCode[numberOfPentuples].rule = CONVERT_TO_REAL;
+                pentupleCode[numberOfPentuples].result = convertHolder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                numberOfPentuples++;
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = ADD_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = convertHolder;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Real && rightOperand->type->type == Integer) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //need to convert integer operand to real in a temporary
+                SymbolTableEntry* convertHolder = getNewTemporary(currentSymbolTable,Real);
+                pentupleCode[numberOfPentuples].rule = CONVERT_TO_REAL;
+                pentupleCode[numberOfPentuples].result = convertHolder;
+                pentupleCode[numberOfPentuples].argument[0] = rightOperand;
+                numberOfPentuples++;
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = ADD_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = convertHolder;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Real && rightOperand->type->type == Real) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = ADD_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } 
+
+            root->dataPlace = holder->identifier;
+
+            break;
+
+        case arithOp_MINUS:
+
+            /* The - operation is valid between :-
+            *  ->   int, int
+            *  ->   int, real
+            *  ->   real, int
+            *  ->   real, real
+            *  ->   record, record,  not yet handled
+            *  both the children of the node will have dataPlace field, which will 
+            *  contain the symbolTableEntry to the temporary holding the expression's
+            *  calculated value. Check for its type and work accordingly
+            */
+
+            //write ICG code calculating for both the children
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            //the variable which hold the value of the expression below
+            SymbolTableEntry* leftOperand = lookupSymbolTable(currentSymbolTable,root->children[0]->dataPlace);
+            SymbolTableEntry* rightOperand = lookupSymbolTable(currentSymbolTable,root->children[1]->dataPlace);
+
+            SymbolTableEntry* holder;
+            
+            //checking what type of operand pair
+            if(leftOperand->type->type == Integer && rightOperand->type->type == Integer) {
+
+                holder = getNewTemporary(currentSymbolTable,Integer);
+                pentupleCode[numberOfPentuples].rule = SUB_I;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Integer && rightOperand->type->type == Real) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //need to convert integer operand to real in a temporary
+                SymbolTableEntry* convertHolder = getNewTemporary(currentSymbolTable,Real);
+                pentupleCode[numberOfPentuples].rule = CONVERT_TO_REAL;
+                pentupleCode[numberOfPentuples].result = convertHolder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                numberOfPentuples++;
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = SUB_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = convertHolder;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Real && rightOperand->type->type == Integer) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //need to convert integer operand to real in a temporary
+                SymbolTableEntry* convertHolder = getNewTemporary(currentSymbolTable,Real);
+                pentupleCode[numberOfPentuples].rule = CONVERT_TO_REAL;
+                pentupleCode[numberOfPentuples].result = convertHolder;
+                pentupleCode[numberOfPentuples].argument[0] = rightOperand;
+                numberOfPentuples++;
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = SUB_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = convertHolder;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Real && rightOperand->type->type == Real) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = SUB_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } 
+
+            root->dataPlace = holder->identifier;
+
+            break;
+
+        case arithOp_MUL:
+
+            /* The * operation is valid between :-
+            *  ->   int, int
+            *  ->   int, real
+            *  ->   real, int
+            *  ->   real, real
+            *  ->   record, record,  not yet handled
+            *  both the children of the node will have dataPlace field, which will 
+            *  contain the symbolTableEntry to the temporary holding the expression's
+            *  calculated value. Check for its type and work accordingly
+            */
+
+            //write ICG code calculating for both the children
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            //the variable which hold the value of the expression below
+            SymbolTableEntry* leftOperand = lookupSymbolTable(currentSymbolTable,root->children[0]->dataPlace);
+            SymbolTableEntry* rightOperand = lookupSymbolTable(currentSymbolTable,root->children[1]->dataPlace);
+
+            SymbolTableEntry* holder;
+            
+            //checking what type of operand pair
+            if(leftOperand->type->type == Integer && rightOperand->type->type == Integer) {
+
+                holder = getNewTemporary(currentSymbolTable,Integer);
+                pentupleCode[numberOfPentuples].rule = MUL_I;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Integer && rightOperand->type->type == Real) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //need to convert integer operand to real in a temporary
+                SymbolTableEntry* convertHolder = getNewTemporary(currentSymbolTable,Real);
+                pentupleCode[numberOfPentuples].rule = CONVERT_TO_REAL;
+                pentupleCode[numberOfPentuples].result = convertHolder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                numberOfPentuples++;
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = MUL_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = convertHolder;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Real && rightOperand->type->type == Integer) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //need to convert integer operand to real in a temporary
+                SymbolTableEntry* convertHolder = getNewTemporary(currentSymbolTable,Real);
+                pentupleCode[numberOfPentuples].rule = CONVERT_TO_REAL;
+                pentupleCode[numberOfPentuples].result = convertHolder;
+                pentupleCode[numberOfPentuples].argument[0] = rightOperand;
+                numberOfPentuples++;
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = MUL_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = convertHolder;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Real && rightOperand->type->type == Real) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = MUL_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } 
+
+            root->dataPlace = holder->identifier; 
+
+            break;
+
+        case arithOp_DIV:
+
+            /* The - operation is valid between :-
+            *  ->   int, int
+            *  ->   int, real
+            *  ->   real, int
+            *  ->   real, real
+            *  both the children of the node will have dataPlace field, which will 
+            *  contain the symbolTableEntry to the temporary holding the expression's
+            *  calculated value. Check for its type and work accordingly
+            */
+
+            //write ICG code calculating for both the children
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            //the variable which hold the value of the expression below
+            SymbolTableEntry* leftOperand = lookupSymbolTable(currentSymbolTable,root->children[0]->dataPlace);
+            SymbolTableEntry* rightOperand = lookupSymbolTable(currentSymbolTable,root->children[1]->dataPlace);
+
+            SymbolTableEntry* holder;
+            
+            //checking what type of operand pair
+            if(leftOperand->type->type == Integer && rightOperand->type->type == Integer) {
+
+                holder = getNewTemporary(currentSymbolTable,Integer);
+                pentupleCode[numberOfPentuples].rule = DIV_I;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Integer && rightOperand->type->type == Real) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //need to convert integer operand to real in a temporary
+                SymbolTableEntry* convertHolder = getNewTemporary(currentSymbolTable,Real);
+                pentupleCode[numberOfPentuples].rule = CONVERT_TO_REAL;
+                pentupleCode[numberOfPentuples].result = convertHolder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                numberOfPentuples++;
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = DIV_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = convertHolder;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Real && rightOperand->type->type == Integer) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //need to convert integer operand to real in a temporary
+                SymbolTableEntry* convertHolder = getNewTemporary(currentSymbolTable,Real);
+                pentupleCode[numberOfPentuples].rule = CONVERT_TO_REAL;
+                pentupleCode[numberOfPentuples].result = convertHolder;
+                pentupleCode[numberOfPentuples].argument[0] = rightOperand;
+                numberOfPentuples++;
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = DIV_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = convertHolder;
+                numberOfPentuples++;
+
+            } else if (leftOperand->type->type == Real && rightOperand->type->type == Real) {
+                
+                holder = getNewTemporary(currentSymbolTable,Real);
+
+                //perform real addition
+                pentupleCode[numberOfPentuples].rule = DIV_R;
+                pentupleCode[numberOfPentuples].result = holder;
+                pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+                pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+                numberOfPentuples++;
+
+            } 
+
+            root->dataPlace = holder->identifier;
 
             break;
 
