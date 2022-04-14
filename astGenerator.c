@@ -738,6 +738,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
          */
 
         temp = newASTnode(StmtLinkedListNode);
+        temp->isLinkedListNode = TRUE;
         createAbstractSyntaxTree(root->children[5]);
         createAbstractSyntaxTree(root->children[6]);
         temp->data = root->children[5]->ptr;
@@ -761,6 +762,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
          */
 
         temp = newASTnode(StmtLinkedListNode);
+        temp->isLinkedListNode = TRUE;
         createAbstractSyntaxTree(root->children[1]);
         createAbstractSyntaxTree(root->children[2]);
         temp->data = root->children[1]->ptr;
@@ -1245,6 +1247,10 @@ char *tagNames[] = {
     "arithOp_MINUS"
 };
 
+char* getStatmType(int typeIndex){
+    return tagNames[typeIndex];
+}
+
 int preOrderTraversal(astNode *root, FILE* fp, astNode* parent, astNode* prev)
 {
     if (root == NULL)
@@ -1266,7 +1272,7 @@ int preOrderTraversal(astNode *root, FILE* fp, astNode* parent, astNode* prev)
             children--;
         }
 
-        for (int i = 0; i <= children; i++) {
+        for (int i = 0; i < children; i++) {
             preOrderTraversal(root->children[i], fp, root, NULL);
         }
     }

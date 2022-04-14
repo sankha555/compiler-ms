@@ -14,4 +14,6 @@ astNode *newASTleafNode(ASTtag tag);
 
 int freeChildren(ParseTreeNode *root, int low, int high);
 
+char* getStatmType(int typeIndex);
+
 #endif
