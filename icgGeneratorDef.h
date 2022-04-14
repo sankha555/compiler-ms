@@ -34,7 +34,9 @@ typedef enum ICGrule {
     INSERT_LABEL,
     READ,
     WRITE_IMMEDIATE,
-    WRITE_VAR
+    WRITE_VAR,
+    ASSIGN_IMMEDIATE_INT,
+    ASSIGN_IMMEDIATE_REAL
 } ICGrule;
 
 typedef struct immediateOrSTE {

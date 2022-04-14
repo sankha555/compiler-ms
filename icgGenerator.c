@@ -161,7 +161,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             break;
 
         case AssignmentOperation:
-            ;
+            
             SymbolTableEntry* result = createRecordItemAlias(root->children[0],currentSymbolTable,globalSymbolTable);
             
             parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable, areInputParams, functionCalledSte);
@@ -421,8 +421,8 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
 
             //the variable which hold the value of the expression below
-            SymbolTableEntry* leftOperand = lookupSymbolTable(currentSymbolTable,root->children[0]->dataPlace);
-            SymbolTableEntry* rightOperand = lookupSymbolTable(currentSymbolTable,root->children[1]->dataPlace);
+            SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
 
             SymbolTableEntry* holder;
             
@@ -507,8 +507,9 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
 
             //the variable which hold the value of the expression below
-            SymbolTableEntry* leftOperand = lookupSymbolTable(currentSymbolTable,root->children[0]->dataPlace);
-            SymbolTableEntry* rightOperand = lookupSymbolTable(currentSymbolTable,root->children[1]->dataPlace);
+            SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+
 
             SymbolTableEntry* holder;
             
@@ -593,8 +594,8 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
 
             //the variable which hold the value of the expression below
-            SymbolTableEntry* leftOperand = lookupSymbolTable(currentSymbolTable,root->children[0]->dataPlace);
-            SymbolTableEntry* rightOperand = lookupSymbolTable(currentSymbolTable,root->children[1]->dataPlace);
+            SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
 
             SymbolTableEntry* holder;
             
@@ -674,8 +675,8 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             */
 
             //write ICG code calculating for both the children
-            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
-            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
 
             //the variable which hold the value of the expression below
             SymbolTableEntry* leftOperand = lookupSymbolTable(currentSymbolTable,root->children[0]->dataPlace);
@@ -745,6 +746,55 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             root->dataPlace = holder->identifier;
 
             break;
+
+        case SingleOrRecIdLinkedListNode:
+
+            SymbolTableEntry* aliasTemp = createRecordItemAlias(root,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* realReplace = getNewTemporary(currentSymbolTable,aliasTemp->type->type);
+            
+            if(aliasTemp->type->type == Integer) {
+                
+                pentupleCode[numberOfPentuples].rule = ASSIGN_OP_INT;
+
+            } else if(aliasTemp->type->type == Real) {
+
+                pentupleCode[numberOfPentuples].rule = ASSIGN_OP_REAL;
+
+            }
+            
+            pentupleCode[numberOfPentuples].result = realReplace;
+            pentupleCode[numberOfPentuples].argument[0] = aliasTemp;
+            numberOfPentuples++;
+
+            root->dataPlace = realReplace->identifier;
+
+            break;
+
+        case Num:
+
+            SymbolTable* holder = getNewTemporary(currentSymbolTable,Integer);
+
+            pentupleCode[numberOfPentuples].rule = ASSIGN_IMMEDIATE_INT;
+            pentupleCode[numberOfPentuples].result = holder;
+            pentupleCode[numberOfPentuples].immVal = root->entry;
+            numberOfPentuples++;
+
+            root->dataPlace = holder->identifier;
+
+            break;
+
+        case RealNum:
+
+            SymbolTable* holder = getNewTemporary(currentSymbolTable,Real);
+
+            pentupleCode[numberOfPentuples].rule = ASSIGN_IMMEDIATE_REAL;
+            pentupleCode[numberOfPentuples].result = holder;
+            pentupleCode[numberOfPentuples].immVal = root->entry;
+            numberOfPentuples++;
+
+            root->dataPlace = holder->identifier;
+
+            break;        
 
         default: 
             //do nothing for the astTags not mentioned

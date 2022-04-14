@@ -3,6 +3,7 @@
 
 #include "globalDef.h"
 #include "lexerDef.h"
+#include "symbolTableDef.h"
 
 typedef enum ASTtag
 {
