@@ -315,8 +315,6 @@ int generateCompleteICGcode(astNode* root, SymbolTable* globalSymbolTable) {
         pentupleCode[i].result = NULL;
         pentupleCode[i].argument[0] = NULL;
         pentupleCode[i].argument[1] = NULL;
-        pentupleCode[i].intValue = 0;
-        pentupleCode[i].realValue = 0;
     }
 
     return parseICGcode(root,globalSymbolTable,globalSymbolTable,FALSE,NULL);
