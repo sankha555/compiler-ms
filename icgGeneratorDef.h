@@ -37,4 +37,4 @@ int numberOfPentuples;
 
 pentuple pentupleCode [MAX_PENTUPLES_POSSIBLE];
 
-#endif ICG_GENERATOR_DEF_H
+#endif
