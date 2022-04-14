@@ -176,9 +176,7 @@ SymbolTable *getSymbolTable(char *identifier)
 
 void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymbolTable, SymbolTable *symbolTable)
 {
-    TypeArrayElement *typeElement = createTypeArrayElement(Function, functionName);
-    FunctionType *newFuncType = createFunctionType(functionName);
-    typeElement->functionInfo = newFuncType;
+    FunctionType *funcType = lookupTypeTable(globalTypeTable, functionName)->functionInfo;
 
     while (root)
     {
@@ -197,7 +195,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
 
             insertintoSymbolTable(symbolTable, entry);
 
-            addToInputParameters(identifier, "Int", newFuncType);
+            addToInputParameters(identifier, "Int", funcType);
             break;
 
         case TypeReal:
@@ -206,7 +204,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
 
             insertintoSymbolTable(symbolTable, entry);
 
-            addToInputParameters(identifier, "Real", newFuncType);
+            addToInputParameters(identifier, "Real", funcType);
             break;
         case TypeRecord:
             typeidentifier = root->data->children[0]->entry.lexeme;
@@ -216,7 +214,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
 
             insertintoSymbolTable(symbolTable, entry);
 
-            addToInputParameters(identifier, typeidentifier, newFuncType);
+            addToInputParameters(identifier, typeidentifier, funcType);
             break;
         case TypeUnion:
             typeidentifier = root->data->children[0]->entry.lexeme;
@@ -226,7 +224,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
 
             insertintoSymbolTable(symbolTable, entry);
 
-            addToInputParameters(identifier, typeidentifier, newFuncType);
+            addToInputParameters(identifier, typeidentifier, funcType);
             break;
         default:
             break;
@@ -234,8 +232,6 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
 
         root = root->next;
     }
-
-    insertintoTypeTable(globalTypeTable, typeElement);
 }
 
 void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSymbolTable, SymbolTable *symbolTable)
@@ -294,7 +290,7 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
     }
 }
 
-void parseTypeDefinitions(astNode *root, SymbolTable *globalSymbolTable, SymbolTable *functionSymbolTable)
+void parseTypeDefinitions(astNode *root)
 {
     printf("parsing type definitions\n");
 
@@ -488,40 +484,29 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
 }
 
 /**
- * @brief Returns the symbol table entry for the given function root
- *
- * @param root of the current function
- * @param wrapper symbol table
- * @return SymbolTable*
+ * @brief populate the symbol tables functions other than main
+ * 
+ * @param root
+ * @param globalSymbolTable
+ * @param symbolTable
  */
-void populateOtherFunctionTable(astNode *root, SymbolTable *globalSymbolTable, SymbolTable *functionSymbolTable)
+void populateOtherFunctionTable(astNode *root, SymbolTable *globalSymbolTable, SymbolTable *symbolTable)
 {
-    printf("Populating function table\n");
-    // the 3 children of the function node are:
-    // 1. Input parameters
-    // 2. Output variables
-    // 3. Function Body Statements (Stmts)
-
     char *functionName = root->children[0]->entry.lexeme;
+
+    TypeArrayElement *typeElement = createTypeArrayElement(Function, functionName);
+    FunctionType *newFuncType = createFunctionType(functionName);
+
+    typeElement->functionInfo = newFuncType;
+    insertintoTypeTable(globalTypeTable, typeElement);
+
     astNode *inputParams = root->children[1];
     astNode *outputParams = root->children[2];
     astNode *stmts = root->children[3];
 
-    // 1. Input parameters
-    parseInputParams(functionName, inputParams, globalSymbolTable, functionSymbolTable);
-    printf("Input parameters parsed\n");
-
-    // 2. Output variables
-    parseOutputParams(functionName, outputParams, globalSymbolTable, functionSymbolTable);
-    printf("Output parameters parsed\n");
-
-    // 3. Function Body Statements
-    // <typeDefinitions> <declarations> <otherStmts> <returnStmt>
-    // we need to parse typeDefinitions and declarations to get the type of the variables
-    parseTypeDefinitions(stmts->children[0], globalSymbolTable, functionSymbolTable);
-    parseDeclarations(stmts->children[1], globalSymbolTable, functionSymbolTable);
-
-    // If we see a record or union type, it must go in wrapper table
+    parseInputParams(functionName, inputParams, globalSymbolTable, symbolTable);
+    parseOutputParams(functionName, outputParams, globalSymbolTable, symbolTable);
+    parseDeclarations(stmts->children[1], globalSymbolTable, symbolTable);
 }
 
 /**
@@ -536,24 +521,13 @@ void populateMainFunctionTable(astNode *root, SymbolTable *globalSymbolTable, Sy
     TypeArrayElement *typeElement = createTypeArrayElement(Function, MAIN_NAME);
     typeElement->functionInfo = createFunctionType(MAIN_NAME);
     insertintoTypeTable(globalTypeTable, typeElement);
-    printf("Populating main function table\n");
-
-    // Main does not have any input parameters, output variables
-    // Only the function body statements (Stmts) are there
 
     astNode *stmts = root->children[0];
-
-    // 1. Function Body Statements (Stmts)
-    // <typeDefinitions> <declarations> <otherStmts> <returnStmt>
-    // we need to parse typeDefinitions and declarations to get the type of the variables
-    parseTypeDefinitions(stmts->children[0], globalSymbolTable, functionSymbolTable);
     parseDeclarations(stmts->children[1], globalSymbolTable, functionSymbolTable);
-
-    // If we see a record or union type, it must go in wrapper table
 }
 
 /**
- * @brief returns the WRAPPER Symbol Table - function table pointers, global variables, etc.
+ * @brief returns the GLOBAL Symbol Table - function table pointers, global variables, etc.
  *
  * @param root of AST
  * @return SymbolTable*
@@ -563,38 +537,46 @@ SymbolTable *initializeSymbolTable(astNode *root)
     listOfSymbolTables = NULL;
     SymbolTable *globalSymbolTable = createSymbolTable("GLOBAL", NULL);
 
-    // AST ROOT is program
-    // first child is otherFunc, second is Main
     astNode *otherFunctions = root->children[0];
     astNode *mainFunction = root->children[1];
+
+    SymbolTableEntry *entry;
+
+    astNode *head = otherFunctions;
+
+    // go to otherFunc, it is a linked list of functions
+    while (head)
+    {
+        astNode *current = head->data;
+        astNode *stmts = current->children[3];
+        parseTypeDefinitions(stmts->children[0]);
+        head = head->next;
+    }
+
+    parseTypeDefinitions(mainFunction->children[0]->children[0]);
+
+    head = otherFunctions;
+
+    while (head)
+    {
+        astNode *current = head->data;
+        SymbolTable *functionTable = createSymbolTable(current->children[0]->entry.lexeme, globalSymbolTable);
+        populateOtherFunctionTable(current, globalSymbolTable, functionTable);
+        entry = createNewSymbolTableEntry(current->children[0]->entry.lexeme, true, functionTable, lookupTypeTable(globalTypeTable,current->children[0]->entry.lexeme), 0);
+        entry->usage = "function";
+        insertintoSymbolTable(globalSymbolTable, entry);
+        char *functionName = current->children[0]->entry.lexeme;
+        head = head->next;
+    }
 
     SymbolTable *mainFunctionSymbolTable = createSymbolTable(MAIN_NAME, globalSymbolTable);
 
     populateMainFunctionTable(mainFunction, globalSymbolTable, mainFunctionSymbolTable);
 
-
-    SymbolTableEntry *entry = createNewSymbolTableEntry(MAIN_NAME, true, mainFunctionSymbolTable, lookupTypeTable(globalTypeTable, MAIN_NAME), 0);
-
+    entry = createNewSymbolTableEntry(MAIN_NAME, true, mainFunctionSymbolTable, lookupTypeTable(globalTypeTable, MAIN_NAME), 0);
     entry->usage = "main function";
 
     insertintoSymbolTable(globalSymbolTable, entry);
-
-    // go to otherFunc, it is a linked list of functions
-    while (otherFunctions)
-    {
-        astNode *current = otherFunctions->data;
-        SymbolTable *functionTable = createSymbolTable(current->children[0]->entry.lexeme, globalSymbolTable);
-        // populate the symbol table for each function
-        populateOtherFunctionTable(current, globalSymbolTable, functionTable);
-
-        // TODO: add the function symbol table to the global symbol table
-        entry = createNewSymbolTableEntry(current->children[0]->entry.lexeme, true, functionTable, lookupTypeTable(globalTypeTable,current->children[0]->entry.lexeme), 0);
-        entry->usage = "function";
-
-        insertintoSymbolTable(globalSymbolTable, entry);
-
-        otherFunctions = otherFunctions->next;
-    }
     // printSymbolTables(stdout);
 
     // printGlobalTypeTable(stdout);
