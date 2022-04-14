@@ -3,6 +3,8 @@
 #include "parserDef.h"
 #include "lexerDef.h"
 #include "parser.h"
+#include "symbolTableDef.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -612,6 +614,12 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         ptr->next = root->children[1]->ptr;
         root->ptr = ptr;
         freeChildren(root, 0, 1);
+
+        if(aliasTemp == NULL){
+            aliasTemp = ptr;
+            printf("Alias ID: %s\n", aliasTemp->data->entry.lexeme);
+        }
+        
         return ptr;
     case 46:
         /**

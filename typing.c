@@ -5,6 +5,18 @@
 #include "typing.h"
 #include "globalDef.h"
 
+FunctionParameter* getFunctionParameters(char* identifier, boolean wantOutputParams) {
+    TypeArrayElement* funcElement = lookupTypeTable(globalTypeTable,identifier);
+    if(funcElement->type != Function) {
+        return NULL;
+    }
+    if(wantOutputParams == TRUE) {
+        return funcElement->functionInfo->outputParameters;
+    } else {
+        return funcElement->functionInfo->inputParameters;
+    }
+}
+
 void printUnionOrRecordInfo(FILE* fp, UnionOrRecordInfo *info)
 {
     if (info == NULL)
