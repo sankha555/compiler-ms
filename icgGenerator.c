@@ -8,7 +8,7 @@
 #include "typing.h"
 #include "icgGenerator.h"
 #include "icgGeneratorDef.h"
-#include "lexerdef.h"
+#include "lexerDef.h"
 
 int tempVariableNumber;
 

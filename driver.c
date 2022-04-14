@@ -13,7 +13,7 @@
 #include "symbolTableDef.h"
 #include "symbolTable.h"
 #include "TypeChecker.h"
-#include "icgGenerator.h"
+// #include "icgGenerator.h"
 #include <time.h>
 #include <stdlib.h>
 
@@ -355,47 +355,47 @@ int main(int argc, char *argv[])
 
                 break;
 
-            case 11:
-                buffer = init_lexer(argv[1]);
-                if (buffer == NULL)
-                {
-                    return 0;
-                }
+            // case 11:
+            //     buffer = init_lexer(argv[1]);
+            //     if (buffer == NULL)
+            //     {
+            //         return 0;
+            //     }
 
-                FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+            //     FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
 
-                populateRules();
+            //     populateRules();
 
-                createParseTable(FirstAndFollowAll, parseTable);
+            //     createParseTable(FirstAndFollowAll, parseTable);
 
-                root = parseInputSourceCode(buffer);
+            //     root = parseInputSourceCode(buffer);
 
-                aliasTemp = NULL;
-                astRoot = createAbstractSyntaxTree(root);
+            //     aliasTemp = NULL;
+            //     astRoot = createAbstractSyntaxTree(root);
 
-                globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
+            //     globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
 
-                globalSymbolTable = initializeSymbolTable(astRoot);
+            //     globalSymbolTable = initializeSymbolTable(astRoot);
 
-                head = listOfSymbolTables;
-                while(head != NULL){
-                    if(lookupSymbolTable(head, aliasTemp->data->entry.lexeme) != NULL){
-                        break;
-                    }
-                    head = head->next;
-                }
+            //     head = listOfSymbolTables;
+            //     while(head != NULL){
+            //         if(lookupSymbolTable(head, aliasTemp->data->entry.lexeme) != NULL){
+            //             break;
+            //         }
+            //         head = head->next;
+            //     }
 
-                SymbolTableEntry* newAliasSymbolTableEntry = createRecordItemAlias(aliasTemp, head, globalSymbolTable);
-                if(newAliasSymbolTableEntry == NULL){
-                    printf("Could not get a record alias\n");
-                }else{
-                    printf("Alias Record Info....\n");
-                    printf("Identifier: %s\n", newAliasSymbolTableEntry->identifier);
-                    printf("Offset: %d\n", newAliasSymbolTableEntry->offset);
-                    printf("Type: %d\n", newAliasSymbolTableEntry->type->type);
-                }
+            //     SymbolTableEntry* newAliasSymbolTableEntry = createRecordItemAlias(aliasTemp, head, globalSymbolTable);
+            //     if(newAliasSymbolTableEntry == NULL){
+            //         printf("Could not get a record alias\n");
+            //     }else{
+            //         printf("Alias Record Info....\n");
+            //         printf("Identifier: %s\n", newAliasSymbolTableEntry->identifier);
+            //         printf("Offset: %d\n", newAliasSymbolTableEntry->offset);
+            //         printf("Type: %d\n", newAliasSymbolTableEntry->type->type);
+            //     }
 
-                break;
+            //     break;
 
             default:
                 break;
