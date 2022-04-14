@@ -373,7 +373,28 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
         
         case Read:
 
+            pentupleCode[numberOfPentuples].rule = READ;
+            pentupleCode[numberOfPentuples].result = createRecordItemAlias(root->children[0],currentSymbolTable,globalSymbolTable);
+            numberOfPentuples++;
             
+            break;
+
+        case Write:
+
+            if(root->children[0]->type == Num || root->children[0]->type == RealNum) {
+                
+                pentupleCode[numberOfPentuples].rule = WRITE_IMMEDIATE;
+                pentupleCode[numberOfPentuples].immVal = root->children[0]->entry;
+                numberOfPentuples++;
+
+            } else {
+
+                pentupleCode[numberOfPentuples].rule = WRITE_VAR;
+                pentupleCode[numberOfPentuples].result = createRecordItemAlias(root->children[0],currentSymbolTable,globalSymbolTable);
+                numberOfPentuples++;
+
+            }
+
             break;
 
         default: 

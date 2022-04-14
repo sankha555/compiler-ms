@@ -32,7 +32,9 @@ typedef enum ICGrule {
     CALL_FUNC,
     POP_OUTPUT,
     INSERT_LABEL,
-    
+    READ,
+    WRITE_IMMEDIATE,
+    WRITE_VAR
 } ICGrule;
 
 typedef struct immediateOrSTE {
