@@ -8,6 +8,7 @@
 #include "typing.h"
 #include "icgGenerator.h"
 #include "icgGeneratorDef.h"
+#include "lexerdef.h"
 
 int tempVariableNumber;
 
@@ -150,15 +151,16 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             astNode* ptr = root;
             int i = 0;
 
-            while(ptr != NULL) {
-                
-                
-
-            }
-
             if(areInputParams == TRUE) {
 
-                
+                while(ptr != NULL) {
+                    if(ptr->data->entry.type == TK_NUM || ptr->data->entry.type == TK_RNUM) {
+                        
+                    } else {
+                        
+                    }
+
+            }                
 
             } else {
                 
