@@ -3,6 +3,7 @@
 
 #include "globalDef.h"
 #include "symbolTableDef.h"
+#include "lexerDef.h"
 
 typedef enum ICGrule {
     ADD_I,      // add two integers in memory
@@ -26,17 +27,24 @@ typedef enum ICGrule {
     FUNC_DEF_MAIN,
     CONVERT_TO_REAL,
     SETUP_FUNC_CALL_PARAM_TRANSFER,
-    PUSH_INPUT,
+    PUSH_INPUT_VAR,
+    PUSH_INPUT_IMMEDIATE,
     CALL_FUNC,
     POP_OUTPUT,
 } ICGrule;
 
+typedef struct immediateOrSTE {
+    SymbolTableEntry* ste;
+    token immediate;
+    boolean isSTE;
+} immediateOrSTE;
 
 typedef struct pentuple {
     char* label;
     ICGrule rule;
     SymbolTableEntry* result;
     SymbolTableEntry* argument[2];
+    token immVal;
 } pentuple;
 
 int numberOfPentuples;
