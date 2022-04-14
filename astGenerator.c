@@ -1103,7 +1103,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         freeChildren(root, 0, 1);
         return ptr;
 
-    case 91:
+    case 93:
         /* <more_ids> ===> TK_COMMA <idList> */
         createAbstractSyntaxTree(root->children[1]);
         ptr = root->children[1]->ptr;
@@ -1111,13 +1111,13 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         freeChildren(root, 0, 1);
         return ptr;
 
-    case 92:
+    case 94:
         /* <more_ids> ===> epsilon */
         root->ptr = NULL;
         freeChildren(root, 0, 0);
         return NULL;
 
-    case 93:
+    case 95:
         /* <definetypestmt> ===> TK_DEFINETYPE <A> TK_RUID TK_AS TK_RUID */
         ptr = newASTnode(DefineType);
         createAbstractSyntaxTree(root->children[1]);
@@ -1130,14 +1130,14 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         freeChildren(root, 0, 4);
         return ptr;
 
-    case 94:
+    case 96:
         /* <A> ===> TK_RECORD */
         ptr = newASTleafNode(Record);
         root->ptr = ptr;
         freeChildren(root, 0, 0);
         return ptr;
 
-    case 95:
+    case 97:
         /* <A> ===> TK_UNION */
         ptr = newASTleafNode(Union);
         root->ptr = ptr;
