@@ -1110,6 +1110,36 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         root->ptr = ptr;
         freeChildren(root, 0, 1);
         return ptr;
+    
+    case 91:
+    /**
+     * @brief <idList> ===> TK_NUM <more_ids>
+     * 
+     */
+        createAbstractSyntaxTree(root->children[1]);
+        ptr = newASTnode(IdLinkedListNode);
+        ptr->isLinkedListNode = TRUE;
+        ptr->data = newASTleafNode(Num);
+        ptr->data->entry = root->children[0]->terminal;
+        ptr->next = root->children[1]->ptr;
+        root->ptr = ptr;
+        freeChildren(root, 0, 1);
+        return ptr;
+    
+    case 92:
+    /**
+     * @brief <idList> ===> TK_RNUM <more_ids>
+     * 
+     */
+        createAbstractSyntaxTree(root->children[1]);
+        ptr = newASTnode(IdLinkedListNode);
+        ptr->isLinkedListNode = TRUE;
+        ptr->data = newASTleafNode(RealNum);
+        ptr->data->entry = root->children[0]->terminal;
+        ptr->next = root->children[1]->ptr;
+        root->ptr = ptr;
+        freeChildren(root, 0, 1);
+        return ptr;
 
     case 93:
         /* <more_ids> ===> TK_COMMA <idList> */
