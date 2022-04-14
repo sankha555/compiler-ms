@@ -60,6 +60,8 @@ typedef enum {
 
 #define STACK_SIZE 100
 
+#define MAX_ARGUMENTS 12
+
 //updated by lexical analyser whenever \n is encountered
 static int linenumber = 0;
 

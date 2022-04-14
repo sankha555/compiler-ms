@@ -19,7 +19,7 @@ SymbolTableEntry* createRecordItemAlias(astNode* root, SymbolTable* currentSymbo
 
 }
 
-int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
+int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable, boolean areInputParams) {
 
     switch(root->type) {
         
@@ -28,8 +28,8 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             pentupleCode[numberOfPentuples].rule = DEFINE_CS;
             numberOfPentuples++;
 
-            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable);
-            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable);
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable, areInputParams);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable, areInputParams);
 
             pentupleCode[numberOfPentuples].rule = DEFINE_DS;
             numberOfPentuples++;
@@ -38,9 +38,9 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
         case FuncLinkedListNode:
 
-            parseICGcode(root->data,currentSymbolTable,globalSymbolTable);
+            parseICGcode(root->data,currentSymbolTable,globalSymbolTable, areInputParams);
             if(root->next != NULL) {
-                parseICGcode(root->next,currentSymbolTable,globalSymbolTable);
+                parseICGcode(root->next,currentSymbolTable,globalSymbolTable, areInputParams);
             }
             break;
 
@@ -52,7 +52,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             pentupleCode[numberOfPentuples].result = funcSymbolTableEntry;
             numberOfPentuples++;
 
-            parseICGcode(root->children[3],funcSymbolTableEntry->tablePointer,globalSymbolTable);
+            parseICGcode(root->children[3],funcSymbolTableEntry->tablePointer,globalSymbolTable, areInputParams);
 
             pentupleCode[numberOfPentuples].rule = FUNC_DEF_END;
             numberOfPentuples++;
@@ -66,7 +66,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             pentupleCode[numberOfPentuples].result = funcSymbolTableEntry;
             numberOfPentuples++;
 
-            parseICGcode(root->children[0],funcSymbolTableEntry->tablePointer,globalSymbolTable);
+            parseICGcode(root->children[0],funcSymbolTableEntry->tablePointer,globalSymbolTable, areInputParams);
 
             pentupleCode[numberOfPentuples].rule = EXIT_CODE;
             numberOfPentuples++;
@@ -75,9 +75,9 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
         case StmtLinkedListNode:
 
-            parseICGcode(root->data,currentSymbolTable,globalSymbolTable);
+            parseICGcode(root->data,currentSymbolTable,globalSymbolTable, areInputParams);
             if(root->next!=NULL) {
-                parseICGcode(root->next,currentSymbolTable,globalSymbolTable);
+                parseICGcode(root->next,currentSymbolTable,globalSymbolTable, areInputParams);
             }
 
             break;
@@ -86,23 +86,87 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
             SymbolTableEntry* result = createRecordItemAlias(root->children[0],currentSymbolTable,globalSymbolTable);
             
-            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable);
-            
-            pentupleCode[numberOfPentuples].rule = ASSIGN_OP;
-            pentupleCode[numberOfPentuples].result = result;
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable, areInputParams);
             
             SymbolTableEntry* copier = lookupSymbolTable(currentSymbolTable,root->children[1]->dataPlace);
-            pentupleCode[numberOfPentuples].argument[0] = copier;
             
+            //check that RHS is int while LHS is real, if yes, need to typecast
+            if(result->type->type == Real && copier->type->type == Integer) {
+                    
+                pentupleCode[numberOfPentuples].rule = CONVERT_TO_REAL;
+                pentupleCode[numberOfPentuples].result = result;
+                pentupleCode[numberOfPentuples].argument[0] = copier;
+
+            } else if (result->type->type == Real && copier->type->type == Real) {
+
+                pentupleCode[numberOfPentuples].rule = ASSIGN_OP_REAL;
+                pentupleCode[numberOfPentuples].result = result;
+                pentupleCode[numberOfPentuples].argument[0] = copier;
+
+            } else {
+                
+                pentupleCode[numberOfPentuples].rule = ASSIGN_OP_INT;
+                pentupleCode[numberOfPentuples].result = result;
+                pentupleCode[numberOfPentuples].argument[0] = copier;
+
+            }
+
             numberOfPentuples++;
             
             break;
 
         case FuncCall:
 
-            //copying input parameters to function location
+            //figure out which function is being called
+            SymbolTableEntry* functionToBeCalled = lookupSymbolTable(globalSymbolTable,root->children[1]->entry.lexeme);
+
+            //setup edx pointer to transfer input parameters from current scope to called function scope
+            pentupleCode[numberOfPentuples].rule = SETUP_FUNC_CALL_PARAM_TRANSFER;
+            pentupleCode[numberOfPentuples].result = functionToBeCalled;
+            numberOfPentuples++;
+
+            //start copying input parameters into proper locations
+            parseICGcode(root->children[2],currentSymbolTable,globalSymbolTable, TRUE);
+
+            //call the function
+            pentupleCode[numberOfPentuples].rule = CALL_FUNC;
+            pentupleCode[numberOfPentuples].result = functionToBeCalled;
+            numberOfPentuples++;
+
+            //setup edx pointer to transfer output parameters from called function scope to current scope
+            pentupleCode[numberOfPentuples].rule = SETUP_FUNC_CALL_PARAM_TRANSFER;
+            pentupleCode[numberOfPentuples].result = functionToBeCalled;
+            numberOfPentuples++;
+
+            //start copying output params into proper locations
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable, FALSE);
 
             break;
+        
+        case IdLinkedListNode:
+
+            SymbolTableEntry* parasList[MAX_ARGUMENTS];
+
+            astNode* ptr = root;
+            int i = 0;
+
+            while(ptr != NULL) {
+                
+                
+
+            }
+
+            if(areInputParams == TRUE) {
+
+                
+
+            } else {
+                
+                
+
+            }
+            break;
+
         default: 
             //do nothing for the astTags not mentioned
             break;
@@ -125,6 +189,6 @@ int generateCompleteICGcode(astNode* root, SymbolTable* globalSymbolTable) {
         pentupleCode[i].argument[1] = NULL;
     }
 
-    return parseICGcode(root,globalSymbolTable,globalSymbolTable);
+    return parseICGcode(root,globalSymbolTable,globalSymbolTable,FALSE);
 
 }

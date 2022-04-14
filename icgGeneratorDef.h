@@ -16,13 +16,19 @@ typedef enum ICGrule {
     GOTO_L,     // unconditional jump to label
     IF_TRUE_GOTO_L, 
     IF_FALSE_GOTO_L,
-    ASSIGN_OP,  // copy from one memory location to another
+    ASSIGN_OP_INT,  // copy from one memory location 2 bytes to another
+    ASSIGN_OP_REAL, // copy from one mem 4 bytes to another mem
     DEFINE_DS,  // define data segment, in code generation, adds function offsets
     DEFINE_CS,  // define code segment, add "global _start:" in code generation
     EXIT_CODE,  // in the end of intermediate code generation, adds the exit syscall during code generation
     FUNC_DEF,   // function label in the code segment, push EBP into stack, and move the function offset from constant DS into EBP
     FUNC_DEF_END, // pop from stack into EBP, then return
     FUNC_DEF_MAIN,
+    CONVERT_TO_REAL,
+    SETUP_FUNC_CALL_PARAM_TRANSFER,
+    PUSH_INPUT,
+    CALL_FUNC,
+    POP_OUTPUT,
 } ICGrule;
 
 
