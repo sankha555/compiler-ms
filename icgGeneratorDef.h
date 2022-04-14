@@ -31,6 +31,8 @@ typedef enum ICGrule {
     PUSH_INPUT_IMMEDIATE,
     CALL_FUNC,
     POP_OUTPUT,
+    INSERT_LABEL,
+    
 } ICGrule;
 
 typedef struct immediateOrSTE {
@@ -45,6 +47,7 @@ typedef struct pentuple {
     SymbolTableEntry* result;
     SymbolTableEntry* argument[2];
     token immVal;
+    char* jumpLabel;
 } pentuple;
 
 int numberOfPentuples;

@@ -11,9 +11,17 @@
 #include "lexerdef.h"
 
 int tempVariableNumber;
+int tempLabelNumber;
 
 SymbolTableEntry* getNewTemporary(SymbolTable* currentSymbolTable, TypeArrayElement* typeToAdd) {
     return NULL;
+}
+
+char* generateNewLabel() {
+    char* temp = (char*)malloc(30);
+    sprintf(temp,"controlLabel_%d",tempLabelNumber);
+    tempLabelNumber++;
+    return temp;
 }
 
 SymbolTableEntry* createRecordItemAlias(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
@@ -293,6 +301,79 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
                 }
 
             }
+
+            break;
+
+        case While: 
+
+            //insert a label in the code
+            char* temp = generateNewLabel();
+            pentupleCode[numberOfPentuples].rule = INSERT_LABEL;
+            pentupleCode[numberOfPentuples].jumpLabel = temp;
+            numberOfPentuples++;
+
+            //add all the statements within the loop in the code
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            //add the label to jump
+            pentupleCode[numberOfPentuples].rule = IF_TRUE_GOTO_L;
+            pentupleCode[numberOfPentuples].result = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            pentupleCode[numberOfPentuples].jumpLabel = temp;
+            numberOfPentuples++;
+
+            break;
+
+        case If:
+
+            //there is no else part to the if
+            if(root->children[2] == NULL) {
+                
+                char* temp = generateNewLabel();
+                pentupleCode[numberOfPentuples].rule = IF_FALSE_GOTO_L;
+                pentupleCode[numberOfPentuples].result = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+                pentupleCode[numberOfPentuples].jumpLabel = temp;
+                numberOfPentuples++;
+
+                parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+                pentupleCode[numberOfPentuples].rule = INSERT_LABEL;
+                pentupleCode[numberOfPentuples].jumpLabel = temp;
+                numberOfPentuples++;
+                
+            } else {  //contains an else body
+
+                char* temp1 = generateNewLabel();
+                char* temp2 = generateNewLabel();
+
+                pentupleCode[numberOfPentuples].rule = IF_FALSE_GOTO_L;
+                pentupleCode[numberOfPentuples].result = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+                pentupleCode[numberOfPentuples].jumpLabel = temp1;
+                numberOfPentuples++;
+
+                parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+                pentupleCode[numberOfPentuples].rule = GOTO_L;
+                pentupleCode[numberOfPentuples].jumpLabel = temp2;
+                numberOfPentuples++;
+
+                pentupleCode[numberOfPentuples].rule = INSERT_LABEL;
+                pentupleCode[numberOfPentuples].jumpLabel = temp1;
+                numberOfPentuples++;
+
+                //write ICG code for statements within the else block
+                parseICGcode(root->children[2]->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+                pentupleCode[numberOfPentuples].rule = INSERT_LABEL;
+                pentupleCode[numberOfPentuples].jumpLabel = temp2;
+                numberOfPentuples++;
+
+
+            }
+            break;
+        
+        case Read:
+
+            
             break;
 
         default: 
@@ -308,6 +389,7 @@ int generateCompleteICGcode(astNode* root, SymbolTable* globalSymbolTable) {
 
     tempVariableNumber = 0;
     numberOfPentuples = 0;
+    tempLabelNumber = 0;
 
     for(int i = 0; i < MAX_PENTUPLES_POSSIBLE; i++) {
         pentupleCode[i].label = NULL;
@@ -315,6 +397,7 @@ int generateCompleteICGcode(astNode* root, SymbolTable* globalSymbolTable) {
         pentupleCode[i].result = NULL;
         pentupleCode[i].argument[0] = NULL;
         pentupleCode[i].argument[1] = NULL;
+        pentupleCode[i].jumpLabel = NULL;
     }
 
     return parseICGcode(root,globalSymbolTable,globalSymbolTable,FALSE,NULL);
