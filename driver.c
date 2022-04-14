@@ -228,7 +228,28 @@ int main(int argc, char *argv[])
                  * @brief Symbol Table
                  * 
                  */
-                globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
+                //globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
+                
+                buffer = init_lexer(argv[1]);
+                if (buffer == NULL)
+                {
+                    return 0;
+                }
+
+                FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+
+                populateRules();
+
+                createParseTable(FirstAndFollowAll, parseTable);
+
+                root = parseInputSourceCode(buffer);
+
+                aliasTemp = NULL;
+                astRoot = createAbstractSyntaxTree(root);
+
+                globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
+
+                globalSymbolTable = initializeSymbolTable(astRoot);
 
                 printSymbolTables(stdout);
                 

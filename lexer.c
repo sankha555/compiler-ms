@@ -151,6 +151,8 @@ token get_next_token(twinBuffer *buffer)
             case ' ':
             case '\t':
                 break;
+            case '\r':
+                break;
             case '\n':
                 linenumber++;
                 break;

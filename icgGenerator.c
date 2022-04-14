@@ -17,10 +17,14 @@ SymbolTableEntry* getNewTemporary(SymbolTable* currentSymbolTable, TypeArrayElem
 
 SymbolTableEntry* createRecordItemAlias(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
     astNode* curr = root;
+    
     char* recIdentifier = curr->data->entry.lexeme;
     printf("Rec Id: %s\n", recIdentifier);
 
     SymbolTableEntry* entry = lookupSymbolTable(currentSymbolTable, recIdentifier);
+    if(entry == NULL){
+        printf("Null entry...\n");
+    }
 
     int finalOffset = entry->offset;
     Type finalType = entry->type->type;
@@ -131,7 +135,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             break;
 
         case AssignmentOperation:
-
+            ;
             SymbolTableEntry* result = createRecordItemAlias(root->children[0],currentSymbolTable,globalSymbolTable);
             
             parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable);
