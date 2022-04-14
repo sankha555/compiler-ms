@@ -13,11 +13,63 @@
 int tempVariableNumber;
 
 SymbolTableEntry* getNewTemporary(SymbolTable* currentSymbolTable, TypeArrayElement* typeToAdd) {
-
+    return NULL;
 }
 
 SymbolTableEntry* createRecordItemAlias(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
+    astNode* curr = root;
+    
+    char* recIdentifier = curr->data->entry.lexeme;
+    printf("Rec Id: %s\n", recIdentifier);
 
+    SymbolTableEntry* entry = lookupSymbolTable(currentSymbolTable, recIdentifier);
+    if(entry == NULL){
+        printf("Null entry...\n");
+    }
+
+    int finalOffset = entry->offset;
+    Type finalType = entry->type->type;
+    char* finalIdentifier = recIdentifier;
+    int finalWidth = entry->width;
+
+    UnionOrRecordInfo* recInfo = entry->type->compositeVariableInfo;
+
+    while(curr->next != NULL){
+        Field* field = recInfo->listOfFields; // points to first field of the record
+
+        curr = curr->next;
+        recIdentifier = curr->data->entry.lexeme;   // now I know which field to search for in the list of fields
+
+        while(field != NULL){
+            if(!strcmp(field->identifier, recIdentifier)){
+                break;
+            }
+            field = field->next;
+        }
+
+        if(field == NULL){
+            printf("Bruh, field does not exist!\n");
+        }
+
+        finalIdentifier = field->identifier;
+        finalOffset += field->offset;
+        finalWidth = field->width;
+
+        if(field->datatype->compositeVariableInfo == NULL){
+            finalType = field->datatype->type;
+            break;
+        }
+
+        recInfo = field->datatype->compositeVariableInfo;
+    }
+    
+    SymbolTableEntry* finalAliasEntry = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
+    strcpy(finalAliasEntry->identifier, finalIdentifier);
+    finalAliasEntry->offset = finalOffset;
+    finalAliasEntry->type = createTypeArrayElement(finalType, finalAliasEntry->identifier);
+    finalAliasEntry->width = finalWidth;
+
+    return finalAliasEntry;
 }
 
 SymbolTableEntry* findVariable(char* identifier, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
@@ -74,7 +126,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
         case MainFunc:
 
             pentupleCode[numberOfPentuples].rule = FUNC_DEF_MAIN;
-            SymbolTableEntry* funcSymbolTableEntry = lookupSymbolTable(globalSymbolTable,MAIN_NAME);
+            funcSymbolTableEntry = lookupSymbolTable(globalSymbolTable,MAIN_NAME);
             pentupleCode[numberOfPentuples].result = funcSymbolTableEntry;
             numberOfPentuples++;
 
@@ -95,7 +147,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             break;
 
         case AssignmentOperation:
-
+            ;
             SymbolTableEntry* result = createRecordItemAlias(root->children[0],currentSymbolTable,globalSymbolTable);
             
             parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable, areInputParams, functionCalledSte);
@@ -248,7 +300,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             break;
 
     }
-
+    return -1;
 }
 
 

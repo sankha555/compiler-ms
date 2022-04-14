@@ -1,6 +1,8 @@
 #ifndef GLOBAL_DEF_H
 #define GLOBAL_DEF_H
 
+
+
 //identifier for main function 
 #define MAIN_NAME "_main"
 
@@ -22,7 +24,7 @@ int numRules;
 #define K_MAP_SIZE 31
 
 //buffer size for twin buffer
-#define BUFFER_SIZE 4096    // buffer size
+#define BUFFER_SIZE 8192    // buffer size
 
 //name of the file in which grammar is written
 #define GRAMMAR_FILE "finalgrammar.txt"

@@ -3,6 +3,7 @@
 
 #include "globalDef.h"
 #include "typing.h"
+#include "astDef.h"
 
 /* Aliases store information about definetype type declarations */
 typedef struct AliasEntry {
@@ -55,5 +56,7 @@ typedef struct SymbolTable {
 } SymbolTable;
 
 SymbolTable* listOfSymbolTables;    // a linked list of pointers to all symbol tables for the program
+
+astNode* aliasTemp;
 
 #endif

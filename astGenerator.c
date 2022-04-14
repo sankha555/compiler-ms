@@ -3,6 +3,8 @@
 #include "parserDef.h"
 #include "lexerDef.h"
 #include "parser.h"
+#include "symbolTableDef.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -612,6 +614,12 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         ptr->next = root->children[1]->ptr;
         root->ptr = ptr;
         freeChildren(root, 0, 1);
+
+        if(aliasTemp == NULL){
+            aliasTemp = ptr;
+            printf("Alias ID: %s\n", aliasTemp->data->entry.lexeme);
+        }
+        
         return ptr;
     case 46:
         /**
@@ -1102,8 +1110,38 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         root->ptr = ptr;
         freeChildren(root, 0, 1);
         return ptr;
-
+    
     case 91:
+    /**
+     * @brief <idList> ===> TK_NUM <more_ids>
+     * 
+     */
+        createAbstractSyntaxTree(root->children[1]);
+        ptr = newASTnode(IdLinkedListNode);
+        ptr->isLinkedListNode = TRUE;
+        ptr->data = newASTleafNode(Num);
+        ptr->data->entry = root->children[0]->terminal;
+        ptr->next = root->children[1]->ptr;
+        root->ptr = ptr;
+        freeChildren(root, 0, 1);
+        return ptr;
+    
+    case 92:
+    /**
+     * @brief <idList> ===> TK_RNUM <more_ids>
+     * 
+     */
+        createAbstractSyntaxTree(root->children[1]);
+        ptr = newASTnode(IdLinkedListNode);
+        ptr->isLinkedListNode = TRUE;
+        ptr->data = newASTleafNode(RealNum);
+        ptr->data->entry = root->children[0]->terminal;
+        ptr->next = root->children[1]->ptr;
+        root->ptr = ptr;
+        freeChildren(root, 0, 1);
+        return ptr;
+
+    case 93:
         /* <more_ids> ===> TK_COMMA <idList> */
         createAbstractSyntaxTree(root->children[1]);
         ptr = root->children[1]->ptr;
@@ -1111,13 +1149,13 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         freeChildren(root, 0, 1);
         return ptr;
 
-    case 92:
+    case 94:
         /* <more_ids> ===> epsilon */
         root->ptr = NULL;
         freeChildren(root, 0, 0);
         return NULL;
 
-    case 93:
+    case 95:
         /* <definetypestmt> ===> TK_DEFINETYPE <A> TK_RUID TK_AS TK_RUID */
         ptr = newASTnode(DefineType);
         createAbstractSyntaxTree(root->children[1]);
@@ -1130,14 +1168,14 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         freeChildren(root, 0, 4);
         return ptr;
 
-    case 94:
+    case 96:
         /* <A> ===> TK_RECORD */
         ptr = newASTleafNode(Record);
         root->ptr = ptr;
         freeChildren(root, 0, 0);
         return ptr;
 
-    case 95:
+    case 97:
         /* <A> ===> TK_UNION */
         ptr = newASTleafNode(Union);
         root->ptr = ptr;
