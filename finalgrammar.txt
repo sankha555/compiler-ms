@@ -88,6 +88,8 @@
 <optionalReturn> ===> TK_SQL <idList> TK_SQR
 <optionalReturn> ===> epsilon
 <idList> ===> TK_ID <more_ids>
+<idList> ===> TK_NUM <more_ids>
+<idList> ===> TK_RNUM <more_ids>
 <more_ids> ===> TK_COMMA <idList>
 <more_ids> ===> epsilon
 <definetypestmt> ===> TK_DEFINETYPE <A> TK_RUID TK_AS TK_RUID
