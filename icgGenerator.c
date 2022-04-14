@@ -132,9 +132,25 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
         case AssignmentOperation:
 
-
+            SymbolTableEntry* result = createRecordItemAlias(root->children[0],currentSymbolTable,globalSymbolTable);
+            
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable);
+            
+            pentupleCode[numberOfPentuples].rule = ASSIGN_OP;
+            pentupleCode[numberOfPentuples].result = result;
+            
+            SymbolTableEntry* copier = lookupSymbolTable(currentSymbolTable,root->children[1]->dataPlace);
+            pentupleCode[numberOfPentuples].argument[0] = copier;
+            
+            numberOfPentuples++;
+            
             break;
 
+        case FuncCall:
+
+            //copying input parameters to function location
+
+            break;
         default: 
             //do nothing for the astTags not mentioned
             break;
