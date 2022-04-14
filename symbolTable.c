@@ -292,15 +292,12 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
 
 void parseTypeDefinitions(astNode *root)
 {
-    printf("parsing type definitions\n");
-
     while (root != NULL)
     {
         TypeArrayElement *entry;
         if (root->data->type == TypeRecordDefinition)
         {
             entry = createTypeArrayElement(RecordType, root->data->children[0]->entry.lexeme);
-            printf("parsing record definition\n");
             // record
             astNode *recordInfo = root->data->children[0];
             char *recordName = recordInfo->entry.lexeme;
@@ -394,7 +391,6 @@ void parseTypeDefinitions(astNode *root)
 
 void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTable *symbolTable)
 {
-    printf("parsing declarations\n");
     while (root)
     {
         ASTtag dataType = root->data->children[0]->type;
@@ -441,7 +437,6 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
 
             break;
         case TypeRecord:
-            printf("parsing record\n");
             typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
@@ -458,7 +453,6 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
             break;
 
         case TypeUnion:
-            printf("parsing union\n");
             typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
@@ -480,7 +474,6 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
 
         root = root->next;
     }
-    printf("parsing declarations successful\n");
 }
 
 /**
@@ -560,12 +553,18 @@ SymbolTable *initializeSymbolTable(astNode *root)
     while (head)
     {
         astNode *current = head->data;
-        SymbolTable *functionTable = createSymbolTable(current->children[0]->entry.lexeme, globalSymbolTable);
+        char *functionName = current->children[0]->entry.lexeme;
+
+        // check if the function is already in the global table
+        if (lookupSymbolTable(globalSymbolTable, functionName))
+        {
+            printf("Error Line %d: Function %s already defined\n", current->children[0]->entry.linenumber, functionName);
+        }
+        SymbolTable *functionTable = createSymbolTable(functionName, globalSymbolTable);
         populateOtherFunctionTable(current, globalSymbolTable, functionTable);
-        entry = createNewSymbolTableEntry(current->children[0]->entry.lexeme, true, functionTable, lookupTypeTable(globalTypeTable,current->children[0]->entry.lexeme), 0);
+        entry = createNewSymbolTableEntry(functionName, true, functionTable, lookupTypeTable(globalTypeTable,current->children[0]->entry.lexeme), 0);
         entry->usage = "function";
         insertintoSymbolTable(globalSymbolTable, entry);
-        char *functionName = current->children[0]->entry.lexeme;
         head = head->next;
     }
 
