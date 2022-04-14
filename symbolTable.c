@@ -187,6 +187,12 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
         SymbolTableEntry *entry;
         TypeArrayElement *lookupResult;
 
+        // check if the identifier is already in the symbol table
+        if (lookupSymbolTable(symbolTable, identifier))
+        {
+            printf("Line %d: Error: Parameter %s already declared in function %s\n", root->data->children[1]->entry.linenumber, identifier, functionName);
+        }
+
         switch (dataType)
         {
         case TypeInt:
@@ -246,6 +252,12 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
 
         SymbolTableEntry *entry;
         TypeArrayElement *lookupResult;
+
+        // check if the identifier is already in the symbol table
+        if (lookupSymbolTable(symbolTable, identifier))
+        {
+            printf("Line %d: Error: Parameter %s already declared in function %s\n", root->data->children[1]->entry.linenumber, identifier, functionName);
+        }
 
         switch (dataType)
         {
@@ -401,6 +413,23 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
         SymbolTableEntry *entry;
 
         bool isGlobal = root->data->children[2] ? true : false;
+
+        if (isGlobal)
+        {
+            // check if the identifier is already in global symbol table
+            if (lookupSymbolTable(globalSymbolTable, identifier))
+            {
+                printf("Line %d: Error: %s already declared in global scope\n", variable->entry.linenumber, identifier);
+            }
+        }
+        else
+        {
+            // check if the identifier is already in symbol table
+            if (lookupSymbolTable(symbolTable, identifier))
+            {
+                printf("Line %d: Error: %s already declared in this scope\n", variable->entry.linenumber, identifier);
+            }
+        }
 
         TypeArrayElement *intTypeElement = lookupTypeTable(globalTypeTable, "Int");
 
