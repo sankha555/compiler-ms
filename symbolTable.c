@@ -193,6 +193,12 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
             printf("Line %d: Error: Parameter %s already declared in function %s\n", root->data->children[1]->entry.linenumber, identifier, functionName);
         }
 
+        // check if the identifier is already in the global symbol table
+        if (lookupSymbolTable(globalSymbolTable, identifier))
+        {
+            printf("Line %d: Error: Parameter %s already declared in global scope\n", root->data->children[1]->entry.linenumber, identifier);
+        }
+
         switch (dataType)
         {
         case TypeInt:
@@ -257,6 +263,12 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
         if (lookupSymbolTable(symbolTable, identifier))
         {
             printf("Line %d: Error: Parameter %s already declared in function %s\n", root->data->children[1]->entry.linenumber, identifier, functionName);
+        }
+
+        // check if the identifier is already in the global symbol table
+        if (lookupSymbolTable(globalSymbolTable, identifier))
+        {
+            printf("Line %d: Error: Parameter %s already declared in global scope\n", root->data->children[1]->entry.linenumber, identifier);
         }
 
         switch (dataType)
@@ -429,6 +441,12 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
             {
                 printf("Line %d: Error: %s already declared in this scope\n", variable->entry.linenumber, identifier);
             }
+
+            // check if the identifier is already in global symbol table
+            if (lookupSymbolTable(globalSymbolTable, identifier))
+            {
+                printf("Line %d: Error: %s already declared in global scope\n", variable->entry.linenumber, identifier);
+            }
         }
 
         TypeArrayElement *intTypeElement = lookupTypeTable(globalTypeTable, "Int");
@@ -507,7 +525,7 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
 
 /**
  * @brief populate the symbol tables functions other than main
- * 
+ *
  * @param root
  * @param globalSymbolTable
  * @param symbolTable
@@ -591,7 +609,7 @@ SymbolTable *initializeSymbolTable(astNode *root)
         }
         SymbolTable *functionTable = createSymbolTable(functionName, globalSymbolTable);
         populateOtherFunctionTable(current, globalSymbolTable, functionTable);
-        entry = createNewSymbolTableEntry(functionName, true, functionTable, lookupTypeTable(globalTypeTable,current->children[0]->entry.lexeme), 0);
+        entry = createNewSymbolTableEntry(functionName, true, functionTable, lookupTypeTable(globalTypeTable, current->children[0]->entry.lexeme), 0);
         entry->usage = "function";
         insertintoSymbolTable(globalSymbolTable, entry);
         head = head->next;
