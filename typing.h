@@ -44,6 +44,7 @@ typedef struct UnionOrRecordInfo
     Field *listOfFields; // is a linkedList of the fields, data structure defines above
     int totalWidth;      // stores the total width of the record/union -> data occupied in memory
 } UnionOrRecordInfo;
+
 typedef struct FunctionParameter
 {
     struct TypeArrayElement *datatype; // stores the type of the parameter as an index of the type array
@@ -107,6 +108,7 @@ void addToListofFieldsRecord(char *identifier, char* typeid, UnionOrRecordInfo* 
 void addToListofFieldsUnion(char *identifier, char* typeid, UnionOrRecordInfo* info);
 void addToInputParameters(char *identifier, char *typeid, FunctionType *info);
 void addToOutputParameters(char *identifier, char *typeid, FunctionType *info);
+FunctionParameter* getFunctionParameters(char* identifier, boolean wantOutputParams);
 struct TypeTable *globalTypeTable;
 
 struct TypeArrayElement* intPtr;

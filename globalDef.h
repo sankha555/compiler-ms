@@ -1,6 +1,8 @@
 #ifndef GLOBAL_DEF_H
 #define GLOBAL_DEF_H
 
+
+
 //identifier for main function 
 #define MAIN_NAME "_main"
 
@@ -59,6 +61,8 @@ typedef enum {
 } boolean;
 
 #define STACK_SIZE 100
+
+#define MAX_ARGUMENTS 12
 
 //updated by lexical analyser whenever \n is encountered
 static int linenumber = 0;
