@@ -34,7 +34,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			 */
 			case Num:
 				// to remove
-				printf("Entered.\n");
+				//printf("Entered.\n");
 				return intPtr;
 			
 			/* REAL LITERAL
@@ -46,9 +46,12 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			// likely redundant case
 			/* a VARIABLE IDENTIFIER */
 			case VariableId:
+			case Id:
+				// to remove
+				//printf("Entered Id.");
 				// check in function's local symbol table
 				entry = lookupSymbolTable(localTable, root->entry.lexeme);
-
+				//printf("%s %s\n", entry->identifier, entry->type->identifier);
 				// check in global table
 				if (entry == NULL){
 					entry = lookupSymbolTable(baseTable, root->entry.lexeme);
@@ -60,7 +63,9 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 					return typeErrPtr;
 				}
 
+				//printf("Exiting id\n");
 				return entry->type->type != Union ? entry->type : typeErrPtr;
+				break;
 			
 			/* all other leaves assumed typeless
 			 * TypeErr used only for erroneous leaves
@@ -83,6 +88,9 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case relOp_GT:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[2], localTable, baseTable);
+			if (t1->type == TypeErr || t2->type == TypeErr) {
+				return typeErrPtr;
+			}
 			if (t1->type == t2->type && (t1->type == Integer || t1->type == Real)){
 				return t1;
 			} else if (t1->type == Record && (t1 == t2)) {
@@ -99,6 +107,9 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case logOp_OR:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[1], localTable, baseTable);
+			if (t1->type == TypeErr || t2->type == TypeErr) {
+				return typeErrPtr;
+			}
 			if (t1->type == Boolean && t2->type == Boolean){
 				return booleanPtr;
 			} else {
@@ -110,9 +121,14 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		 * <booleanExpression> ===> TK_NOT TK_OP <booleanExpression> TK_CL
 		 */
 		case logOp_NOT:
-			if ((findType(root->children[0], localTable, baseTable))->type == Boolean){
+			t1 = findType(root->children[0], localTable, baseTable);
+			if (t1->type == Boolean){
 				return booleanPtr;
-			} else {
+			}
+			if (t1->type == TypeErr) {
+				return typeErrPtr;
+			} 
+			else {
 				printf("Complementation: boolean operand required.\n");
 				return typeErrPtr;
 			}
@@ -125,6 +141,9 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case arithOp_MINUS:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[2], localTable, baseTable);
+			if (t1->type == TypeErr || t2->type == TypeErr) {
+				return typeErrPtr;
+			}
 			if (t1->type == Integer && t2->type == Integer){
 				return intPtr;
 			}else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
@@ -143,6 +162,9 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case arithOp_MUL:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[2], localTable, baseTable);
+			if (t1->type == TypeErr || t2->type == TypeErr) {
+				return typeErrPtr;
+			}
 			if (t1->type == Integer && t2->type == Integer){
 				return intPtr;
 			} else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
@@ -161,6 +183,9 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case arithOp_DIV:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[2], localTable, baseTable);
+			if (t1->type == TypeErr || t2->type == TypeErr) {
+				return typeErrPtr;
+			}
 			if ((t1->type == Integer || t1->type == Real) && (t2->type == Integer || t2->type == Real)){
 				return realPtr;
 				//else if (t1->type == Record)
@@ -176,6 +201,9 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case AssignmentOperation:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[1], localTable, baseTable);
+			if (t1->type == TypeErr || t2->type == TypeErr) {
+				return typeErrPtr;
+			}
 			if ((t1->type == Integer && t2->type == Integer) || (t1->type == Real && (t2->type == Integer || t2->type == Real))){
 				return voidPtr;
 				/*--TO DO: assignment for whole records?--*/
@@ -231,7 +259,10 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case FuncCall:
 			// function identifier should be present in the symbol table
 			entry = lookupSymbolTable(baseTable, root->children[1]->entry.lexeme);
-			if (entry == NULL || entry->isFunction != 0) {
+			printf("%s\n", root->children[1]->entry.lexeme);
+			//printf("%s\n", baseTable->tableID);
+			
+			if (entry == NULL || entry->isFunction == 0) {
 				printf("Function not defined.\n");
 				return typeErrPtr;
 			}
@@ -257,6 +288,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			struct FunctionParameter* formalInput = funcInfo->inputParameters;
 			// output parameters linked list from function prototype
 			struct FunctionParameter* formalOutput = funcInfo->outputParameters;
+		
 			
 			// actual input and output parameters used
 			astNode* actualInput = root->children[2];
@@ -268,11 +300,18 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return typeErrPtr;
 			}
 
-			// checking the input parameters
-			while (actualInput != NULL) {
+			int actualInputLen = findLengthActual(actualInput),
+				actualOutputLen = findLengthActual(actualOutput);
+			for (int i = 0; i < actualInputLen; i++) {
+				//printf("Entered input loop.\n");
 				t1 = findType(actualInput->data, localTable, baseTable);
+				//printf("Returned back to funct loop.\n");
 				t2 = formalInput->datatype;
 				
+				if (t1->type == TypeErr || t2->type == TypeErr) {
+					return typeErrPtr;
+				}
+
 				// passing union parameters not allowed
 				if (t1->type == Union || t2->type == Union){
 					return typeErrPtr;
@@ -280,17 +319,26 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 
 				// parameters should match in type
 				if (checkTypeEquality(t1, t2)->type == TypeErr) {
-					printf("Input parameter mismatch.\n");
+					printf("%s %s\n", t1->identifier, t2->identifier);
+					printf("%s: Input parameter mismatch.\n", formalInput->identifier);
 					return typeErrPtr;
 				}
+				/*else {
+					printf("Type correct.\n");
+				}*/
 				actualInput = actualInput->next;
 				formalInput = formalInput->next;
 			}
 
 			// checking the output parameters
-			while (actualOutput != NULL) {
+			for (int i = 0; i < actualOutputLen; i++) {
+
 				t1 = findType(actualOutput->data, localTable, baseTable);
 				t2 = formalOutput->datatype;
+
+				if (t1->type == TypeErr || t2->type == TypeErr) {
+					return typeErrPtr;
+				}
 
 				// passing union parameters not allowed
 				if (t1->type == Union || t2->type == Union){
@@ -299,11 +347,11 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 
 				// parameters should match in type
 				if (checkTypeEquality(t1, t2)->type == TypeErr) {
-					printf("Output parameter mismatch.\n");
+					printf("%s: Output parameter mismatch.\n", formalOutput->identifier);
 					return typeErrPtr;
 				}
-				actualInput = actualOutput->next;
-				formalInput = formalOutput->next;
+				actualOutput = actualOutput->next;
+				formalOutput = formalOutput->next;
 			}
 
 			return voidPtr;
@@ -314,6 +362,11 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			 * is completely type checked
 			 */
 			if (root->isLinkedListNode) {
+				// earlier root->next
+				if (root->data != NULL) {
+					if (findType(root->data, localTable, baseTable)->type == TypeErr)
+						return typeErrPtr;
+				}
 				if (root->next == NULL){
 					return voidPtr;
 				}
@@ -432,7 +485,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 		SymbolTableEntry* currFunc = lookupSymbolTable(baseTable, funcLexeme);
 		localTable = currFunc->tablePointer;
 
-		if (findType(funcNode, localTable, baseTable)->type != Void) {
+		if (findType(funcNode->data, localTable, baseTable)->type != Void) {
 			printf("TYPE ERROR DETECTED IN %s.\n", funcLexeme);
 			return -1;
 		}
@@ -479,8 +532,9 @@ struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1,
 		struct TypeArrayElement* t2) {
 	if (t1 == typeErrPtr || t2 == typeErrPtr)
 		return typeErrPtr;
-	if (t1 == t2)
+	if (t1 == t2) {
 		return t1;
+	}
 	else if (t1->aliasTypeInfo != NULL && t1->aliasTypeInfo == t2)
 		return t2;
 	else if (t2->aliasTypeInfo != NULL && t1 == t2->aliasTypeInfo)
