@@ -399,7 +399,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return typeErrPtr;
 			}
 
-			int actualInputLen = findLengthActual(actualInput), actualOutputLen = findLengthActual(actualOutput);
+			int actualInputLen = findLengthActual(actualInput),
+				actualOutputLen = findLengthActual(actualOutput);
 			for (int i = 0; i < actualInputLen; i++) {
 				//printf("Entered input loop.\n");
 				t1 = findType(actualInput->data, localTable, baseTable);
@@ -467,6 +468,66 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 
 			return voidPtr;
 			break;
+
+		// -----
+		// please Return case ke braces mat hatana
+		// otherwise declarations lambi padengi
+		// -----
+		case Return: {
+			SymbolTableEntry* currFuncEntry = lookupSymbolTable(baseTable, localTable->tableID);
+
+			// information about the input and output parameters
+			struct FunctionType* currFuncInfo = currFuncEntry->type->functionInfo;
+
+			if (currFuncInfo == NULL) {
+				printf("Erroneous function entry in symbol table.\n");
+				return typeErrPtr;
+			}
+
+			
+			// output parameters linked list from function prototype
+			struct FunctionParameter* expectedOutput = currFuncInfo->outputParameters;
+
+			// idList for the output vars the function is returning
+			astNode* returnList = root->children[0];
+			
+			int expectedOutputLen = findLengthFormal(expectedOutput);
+			int returnListLen = findLengthActual(returnList);
+			
+			if (expectedOutputLen != returnListLen){
+				printf("Function %s should return %d values, but returns %d values.\n", 
+						currFuncEntry->identifier, expectedOutputLen, returnListLen);
+				return typeErrPtr;
+			}
+
+			for (int i = 0; i < returnListLen; i++) {
+				t1 = findType(returnList->data, localTable, baseTable);
+
+				t2 = expectedOutput->datatype;
+
+				if (t1->type == TypeErr || t2->type == TypeErr) {
+					return typeErrPtr;
+				}
+
+				// passing union parameters not allowed
+				if (t1->type == Union || t2->type == Union){
+					printf("Line %d : Passing unions not allowed.\n", 
+							root->children[1]->entry.linenumber);
+					return typeErrPtr;
+				}
+
+				// parameters should match in type
+				if (checkTypeEquality(t1, t2)->type == TypeErr) {
+					printf("%s: Mismatch in the return list.\n", expectedOutput->identifier);
+					return typeErrPtr;
+				}
+				expectedOutput = expectedOutput->next;
+				returnList = returnList->next;
+			}
+			
+			return voidPtr;
+			break;
+		}
 
 		default:
 			/* advance ahead on the linkedlist to ensure it

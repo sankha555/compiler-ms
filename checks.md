@@ -4,7 +4,7 @@
 
 [N] An identifier declared globally cannot be declared anywhere else in function definitions
 
-[] The types and the number of parameters returned by a function must be the same as that of the parameters used in invoking the function.
+[Y] The types and the number of parameters returned by a function must be the same as that of the parameters used in invoking the function.
 
 [Y] The parameter passed of union data type is reported as error
 
@@ -14,7 +14,7 @@
 
 [] The parameters being returned by a function must be assigned a value. If a parameter does not get a value assigned within the function definition, it should be reported as an error
 
-[] The function that does not retum any value, must be invoked appropriately
+[Y] The function that does not retum any value, must be invoked appropriately
 
 [Y] The types of formal and actual parameters must be same. Number of actual parameters must be same as that of formal parameters
 
