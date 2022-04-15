@@ -96,6 +96,7 @@ typedef struct TypeTable
 
 } TypeTable;
 
+void printGlobalTypeTableRecordsAndUnions(FILE* fp);
 void printGlobalTypeTable(FILE *fp);
 void printTypeArrayElement(FILE* fp, TypeArrayElement *t);
 

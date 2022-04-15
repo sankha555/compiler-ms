@@ -9,22 +9,169 @@
 #include "typing.h"
 #include "globalDef.h"
 
+char* getRecordOrUnionTypeExpression(UnionOrRecordInfo* info){
+    if (info == NULL)
+    {
+        return "NULL";
+    }
+
+    Field *field = info->listOfFields;
+    // printing type expression
+    int first = 1;
+
+    char* typeExpr = (char*) malloc(1000*sizeof(char));
+
+    strcat(typeExpr, "<");
+    while(field != NULL){
+        if(!first){
+            char* delim = (info->isRecord) ? ", " : "| ";
+            strcat(typeExpr, delim);
+        }else{
+            first = 0;
+        }
+        strcat(typeExpr, field->datatype->identifier);
+
+        field = field->next;
+    }
+    strcat(typeExpr, ">");
+    
+    return typeExpr;
+}
+
+char* getFunctionTypeExpression(FunctionType* funcInfo){
+    char* typeExpr = (char*) malloc(2000*sizeof(char));
+
+    FunctionParameter* inputParamHead = funcInfo->inputParameters;
+
+    strcat(typeExpr, "<");
+
+    int first = 1;
+    while(inputParamHead != NULL){
+        if(!first){
+            strcat(typeExpr, ", ");
+        }else{
+            first = 0;
+        }
+        strcat(typeExpr, inputParamHead->datatype->identifier);
+
+        inputParamHead = inputParamHead->next;
+    }
+    strcat(typeExpr, "> ---> <");
+    
+    first = 1;
+    FunctionParameter* outputParamHead = funcInfo->outputParameters;
+    while(outputParamHead != NULL){
+        if(!first){
+            strcat(typeExpr, ", ");
+        }else{
+            first = 0;
+        }
+        strcat(typeExpr, outputParamHead->datatype->identifier);
+
+        outputParamHead = outputParamHead->next;
+    }
+    strcat(typeExpr, ">");
+
+    return typeExpr;
+}
+
+char* getAliasTypeExpr(TypeArrayElement* info){
+    char* typeExpr = (char*) malloc(2000*sizeof(char));
+    strcat(typeExpr, "Alias of ");
+    strcat(typeExpr, info->identifier);
+
+    return typeExpr;
+}
+
+char* getTypeExpression(SymbolTableEntry* entry){
+    switch (entry->type->type)
+    {
+        case Integer:
+            return "Integer";
+            break;
+
+        case Real:
+            return "Real";
+            break;
+
+        case UnionType:
+        case RecordType:
+            return getRecordOrUnionTypeExpression(entry->type->compositeVariableInfo);
+            break;
+
+        case Function:
+            return getFunctionTypeExpression(entry->type->functionInfo);
+            break;
+
+        case Alias:
+            return getAliasTypeExpr(entry->type->aliasTypeInfo);
+            break;
+
+        default:
+            break;
+    }
+
+    return "";
+}
+
+char* getType(SymbolTableEntry* entry){
+    switch (entry->type->type)
+    {
+        case Integer:
+            return "Integer";
+            break;
+
+        case Real:
+            return "Real";
+            break;
+
+        case UnionType:
+            ;
+            char* typeStr = (char*) malloc(500*sizeof(char));
+            strcat(typeStr, "union ");
+            strcat(typeStr, entry->identifier);
+            return typeStr;
+            break;
+
+        case RecordType:
+            ;
+            typeStr = (char*) malloc(500*sizeof(char));
+            strcat(typeStr, "record ");
+            strcat(typeStr, entry->identifier);
+            return typeStr;
+            break;
+
+        case Function:
+            return "Function";
+            break;
+
+        case Alias:
+            return "Type Definition";
+            break;
+
+        default:
+            break;
+    }
+
+    return "";
+}
+
 void printSymbolTableEntry(SymbolTable *symbolTable, SymbolTableEntry *entry, FILE *fp)
 {
-    fprintf(fp, "\t Name: %30s ; Scope: %30s ; Width: %d ; Offset: %d; Is Global: %3s\n", entry->identifier, symbolTable->tableID, entry->width, entry->offset, (!strcmp(symbolTable->tableID, "GLOBAL") ? "YES" : "NO"));
-    // printf("Entry Type: %d\n", entry->type);
-    // fprintf(fp, "\t Type Name: %s\n", entry->type->identifier);
-    fprintf(fp, "\t Type Expression:\n");
-    printTypeArrayElement(stdout, entry->type);
-    fprintf(fp, "\t Variable Usage: %s\n", entry->usage != NULL ? entry->usage : "undefined");
-    fprintf(fp, "------------------------------------------------------------------\n");
+    char* type = getType(entry);
+    char* typeExpression = getTypeExpression(entry);
+    char* isGlobal = (!strcmp(symbolTable->tableID, "GLOBAL") ? "YES" : "NO");
+
+    fprintf(fp, "%15s%15s%20s%40s%20d%10s%10d%20s\n", entry->identifier, symbolTable->tableID, type, typeExpression, entry->width, isGlobal, entry->offset, entry->usage);
+    fprintf(fp, "-------------------------------------------------------------------------------------------------------------------------------------------------------\n");
 }
 
 void printASingleSymbolTable(SymbolTable *symbolTable, FILE *fp)
 {
-    fprintf(fp, "================ SYMBOL TABLE : %s ================\n", symbolTable->tableID);
-    fprintf(fp, "Total Width: %d Bytes\n", symbolTable->totalWidth);
-    fprintf(fp, "*** Entries in Table: *** \n");
+    fprintf(fp, "================================================== SYMBOL TABLE : %s (Total Width: %d Bytes)========================================================\n\n", symbolTable->tableID, symbolTable->totalWidth);
+
+    fprintf(fp, "%15s%15s%20s%40s%20s%13s%10s%10s\n", "NAME", "SCOPE", "TYPE", "TYPE EXPRESSION", "WIDTH", "IS GLOBAL", "OFFSET", "USAGE");
+    fprintf(fp, "-------------------------------------------------------------------------------------------------------------------------------------------------------\n");   
     for (int i = 0; i < K_MAP_SIZE; i++)
     {
         SymbolTableEntry *head = symbolTable->tableEntries[i];
@@ -34,7 +181,7 @@ void printASingleSymbolTable(SymbolTable *symbolTable, FILE *fp)
             head = head->next;
         }
     }
-    fprintf(fp, "================================================\n\n\n");
+    fprintf(fp, "========================================================================================================================================================\n\n\n");
 }
 
 void printSymbolTables(FILE *fp)
@@ -699,10 +846,6 @@ void parseTypeDefinitionsPass1(astNode *root)
 
 
 int populateWidthandOffset(char *typeId){
-
-
-    printf("%s\n", typeId);
-
     struct TypeArrayElement* type = lookupTypeTable(globalTypeTable, typeId);
     if(type == NULL) {
         printf("Type not found \n");

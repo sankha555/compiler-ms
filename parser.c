@@ -319,9 +319,13 @@ int printParseTree(ParseTreeNode* root) {
         return -1;
     }
 
-    fprintf(fp,"%20s%10s%15s%15s%30s%20s%30s\n\n\n","Lexeme","Line no.","TOKEN_NAME","valueIfNum","ParentSymbol","isLeafNode","NodeSymbol");
+    fprintf(fp, "============================================================ PARSE TREE ======================================================================\n\n");
+    fprintf(fp,"%20s%10s%15s%15s%30s%20s%30s\n","LEXEME","LINE NO.","TOKEN NAME","VALUE IF NUM","PARENT SYMBOL","IS LEAF NODE","NODE SYMBOL");
+    fprintf(fp, "----------------------------------------------------------------------------------------------------------------------------------------------\n");
 
     int result = inorderTraversalParseTree(fp,root);
+
+    fprintf(fp, "==============================================================================================================================================\n\n\n");
 
     if(fp != stdout){
         fclose(fp);
@@ -380,7 +384,7 @@ ParseTreeNode* createTreeNodesFromRule(GrammarRule gRule, ParseTreeNode* parentN
     return parentNode;
 }  
 
-ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
+ParseTreeNode* parseInputSourceCode(twinBuffer* buffer, int printStatus){
     // initialize stack
     Stack* inputStack = newStack();
 
@@ -504,7 +508,7 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer){
             }
         }
     }
-    if(currentInputToken.type == TK_EOF && topOfStack->terminal == TK_EOF) {
+    if(currentInputToken.type == TK_EOF && topOfStack->terminal == TK_EOF && printStatus) {
         printf("\nSource code is syntactically correct.\n");
     } else if(currentInputToken.type != TK_EOF) {
         printf("Line %4d Error: Invalid token %s encountered with value \"%s\", stack top -> $\n",currentInputToken.linenumber,tokenNames[currentInputToken.type],currentInputToken.lexeme);

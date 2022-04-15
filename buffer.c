@@ -9,7 +9,7 @@ void reloadBuffer(twinBuffer *tBuffer, int bufferID)
     fread((tBuffer->buffer)[bufferID], sizeof(char), BUFFER_SIZE, tBuffer->fp);
     tBuffer->forward = 0;
     tBuffer->currentBufferID = bufferID;
-    printf("reloaded buffer\n");
+    // printf("reloaded buffer\n");
 }
 
 twinBuffer *init_buffer(FILE *fp)
