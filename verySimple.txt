@@ -6,7 +6,7 @@ _function1
         c2 <--- d2cd;
         b5d <--- d3;
         write(d3);
-        %call _function2 with parameters [c2, d2cd];
+        call _function2 with parameters [c2, d2cd];
 
     return [b5d, 3]; 
 end

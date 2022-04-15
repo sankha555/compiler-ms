@@ -98,7 +98,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				//else printf("%s %s\n",root->entry.lexeme,entry->type->identifier );
 
 				//printf("Exiting id\n");
-				return entry->type->type != Union ? entry->type : typeErrPtr;
+				return entry->type->type != UnionType ? entry->type : typeErrPtr;
 				break;
 			
 			/* all other leaves assumed typeless
@@ -460,7 +460,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				// }
 
 				// passing union parameters not allowed
-				if (t1->type == Union || t2->type == Union){
+				if (t1->type == UnionType || t2->type == UnionType){
 					printf("Line %d : Output parameter cannot be of type union\n", root->children[1]->entry.linenumber);
 					return typeErrPtr;
 				}
@@ -518,7 +518,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				}
 
 				// passing union parameters not allowed
-				if (t1->type == Union || t2->type == Union){
+				if (t1->type == UnionType || t2->type == UnionType){
 					printf("Line %d : Passing unions not allowed.\n", 
 							root->children[1]->entry.linenumber);
 					return typeErrPtr;
