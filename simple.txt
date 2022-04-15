@@ -1,39 +1,39 @@
-%_function1
-%    input parameter list [int c2, int d2cd]
-%    output parameter list [int b5d, int d3]; 
-%        b5d<---c2+234-d2cd;
-%        d3<---b5d+20;
-%    return [b5d, d3]; 
-%end
+_function1
+    input parameter list [int c2, int d2cd]
+    output parameter list [int b5d, int d3]; 
+        b5d<---c2+234-d2cd;
+        d3<---b5d+20;
+    return [b5d, d3]; 
+end
 
-%_function2
-%    input parameter list [int c2, int d2cd]
-%    output parameter list [int b5d, int d3];
-%		[b5d, d3] <--- call _function1 with parameters [c2, d2cd];
-%        %if (6 > 7 || 7.7 < 8)
-%        %then
-%        %    write(b5d);
-%        %endif
-%        b5d<---c2+234-d2cd;
-%        d3<---b5d+20;
-%    return [b5d, d3]; 
-% end
+_function2
+    input parameter list [int c2, int d2cd]
+    output parameter list [int b5d, int d3];
+		[b5d, d3] <--- call _function1 with parameters [c2, d2cd];
+        %if (6 > 7 || 7.7 < 8)
+        %then
+        %    write(b5d);
+        %endif
+        b5d<---c2+234-d2cd;
+        d3<---b5d+20;
+    return [b5d, d3]; 
+end
 
 
 _main
     
 
-    record #marks
-		type real : maths; 
-		type real: physics; 
-		type real: chemistry;
-	endrecord
+    %record #marks
+	%	type real : maths; 
+	%	type real: physics; 
+	%	type real: chemistry;
+	%endrecord
 
-    type record #marks : d2;
+    %type record #marks : d2;
     type real : b5;
 	type real: c5;
 	type real: d5;
-	type real: c2;
+	type int: c2;
 
 
     %while ((b5 == c5) &&& (d5 < c2))
@@ -42,7 +42,8 @@ _main
     %        read(b5);
     %    endif
     %endwhile
-
-    b5 <--- c2 + 1;
+    c2 <--- 2;
+    d5 <--- 1.54;
+    b5 <--- c2 + d5;
     return;
 end

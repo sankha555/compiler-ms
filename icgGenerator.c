@@ -57,7 +57,7 @@ void printICG(FILE* fp) {
         "FUNC_DEF_END", // pop from stack into EBP, then return
         "FUNC_DEF_MAIN",
         "CONVERT_TO_REAL",
-        "SETUP_FUNC_CALL_PARAM_TRANSFER",
+        "SETUP_CALL_TRANS",
         "PUSH_INPUT_VAR",
         "PUSH_INPUT_IMMEDIATE",
         "CALL_FUNC",
@@ -85,7 +85,7 @@ void printICG(FILE* fp) {
         "REL_NEQ_REAL"
     };
 
-    fprintf(fp,"\n\n%20s%20s%20s%20s%30s%20s\n","ICG Function Name","Result","Argument_1","Argument_2","Immediate_token_val","jump label");
+    fprintf(fp,"\n\n%25s%25s%25s%25s%20s%20s\n","ICG Function Name","Result","Argument_1","Argument_2","Immediate_val","jump label");
 
     for(int i = 0; i < numberOfPentuples; i++) {
         pentuple* temp = &pentupleCode[i];
@@ -125,7 +125,7 @@ void printICG(FILE* fp) {
             sprintf(tempLabel,"%s",temp->jumpLabel);
         }
         
-        fprintf(fp,"%20s%20s%20s%20s%30s%20s\n",icgNames[temp->rule],tempResult,tempArg1,tempArg2,tempLexeme,tempLabel);
+        fprintf(fp,"%25s%25s%25s%25s%20s%20s\n",icgNames[temp->rule],tempResult,tempArg1,tempArg2,tempLexeme,tempLabel);
         // fprintf(fp,"%20s%20s%20s%20s%30s%20s\n",icgNames[temp->rule],temp->result->identifier,temp->argument[0]->identifier,temp->argument[1]->identifier,temp->immVal.lexeme,temp->jumpLabel);
     }
 
@@ -345,7 +345,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             SymbolTableEntry* functionToBeCalled = lookupSymbolTable(globalSymbolTable,root->children[1]->entry.lexeme);
 
             //setup edx pointer to transfer input parameters from current scope to called function scope
-            pentupleCode[numberOfPentuples].rule = SETUP_FUNC_CALL_PARAM_TRANSFER;
+            pentupleCode[numberOfPentuples].rule = SETUP_CALL_TRANS;
             pentupleCode[numberOfPentuples].result = functionToBeCalled;
             numberOfPentuples++;
 
@@ -358,7 +358,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             numberOfPentuples++;
 
             //setup edx pointer to transfer output parameters from called function scope to current scope
-            pentupleCode[numberOfPentuples].rule = SETUP_FUNC_CALL_PARAM_TRANSFER;
+            pentupleCode[numberOfPentuples].rule = SETUP_CALL_TRANS;
             pentupleCode[numberOfPentuples].result = functionToBeCalled;
             numberOfPentuples++;
 
@@ -370,56 +370,76 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
         case IdLinkedListNode:
             
             ;
-            immediateOrSTE* parasList[MAX_ARGUMENTS];
+            immediateOrSTE parasList[MAX_ARGUMENTS];
             FunctionParameter* functionParameters;
 
             if(areInputParams == TRUE) {
 
                 astNode* ptr = root;
                 int i = 0;
+
+                // printf("collecting all input params.\n");
                 
                 //get all actual parameters present in the currentSymbolTable or immediate values
                 while(ptr != NULL) {
-                    parasList[i] = (immediateOrSTE*)malloc(sizeof(immediateOrSTE));
                     if(ptr->data->entry.type == TK_NUM || ptr->data->entry.type == TK_RNUM) {
-                        parasList[i]->isSTE = FALSE;
-                        parasList[i]->immediate = ptr->data->entry;
+                        // printf("Its a constant ffs.\n");
+                        parasList[i].isSTE = FALSE;
+                        parasList[i].immediate = ptr->data->entry;
                     } else {
-                        parasList[i]->ste = findVariable(ptr->data->entry.lexeme, currentSymbolTable, globalSymbolTable);
-                        parasList[i]->isSTE = TRUE;
+                        // printf("Its a variable ffs.\n");
+                        parasList[i].ste = findVariable(ptr->data->entry.lexeme, currentSymbolTable, globalSymbolTable);
+                        // printf("%s\n.",parasList[i].ste->identifier);
+                        parasList[i].isSTE = TRUE;
                     }
                     i++;
                     ptr = ptr->next;
                 }
 
+                // printf("Collected all input params.\n");
+
                 //get all function parameters symbolTableEntries in the functionSymbolTable
                 functionParameters = getFunctionParameters(functionCalledSte->identifier,FALSE);
+
+                // printf("Got the functional parameters.\n");
 
                 FunctionParameter* temp = functionParameters;
                 int j = 0;
 
+                // printf("Adding copy code.\n");
+
                 while(temp != NULL) {
+                    
+                    // printf("Fetching input param location of %s\n",temp->identifier);
+
                     SymbolTableEntry* tempVar = lookupSymbolTable(functionCalledSte->tablePointer,temp->identifier);
 
-                    if(parasList[i]->isSTE == FALSE) {
+                    // printf("Fetched input param location of %s\n",temp->identifier);
+
+                    if(parasList[j].isSTE == FALSE) {
                         
+                        // printf("Actual param is an immediate value.\n");
                         pentupleCode[numberOfPentuples].rule = PUSH_INPUT_IMMEDIATE;
                         pentupleCode[numberOfPentuples].result = tempVar;
-                        pentupleCode[numberOfPentuples].immVal = parasList[i]->immediate;
+                        pentupleCode[numberOfPentuples].immVal = parasList[j].immediate;
                         numberOfPentuples++;
 
                     } else {
-
+                        
+                        // printf("Actual param is a variable.\n");
                         pentupleCode[numberOfPentuples].rule = PUSH_INPUT_VAR;
                         pentupleCode[numberOfPentuples].result = tempVar;
-                        pentupleCode[numberOfPentuples].argument[0] = parasList[i]->ste;
+                        pentupleCode[numberOfPentuples].argument[0] = parasList[j].ste;
                         numberOfPentuples++;
 
                     }
 
+                    // printf("Added input transfer for %s.\n",temp->identifier);
                     j++;
                     temp = temp->next;
                 }
+
+                // printf("added all copy statements.\n");
 
             } else {
                 
@@ -428,9 +448,8 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
                 //get all actual parameters present in the currentSymbolTable or immediate values
                 while(ptr != NULL) {
-                    parasList[i] = (immediateOrSTE*)malloc(sizeof(immediateOrSTE));
-                    parasList[i]->ste = findVariable(ptr->data->entry.lexeme, currentSymbolTable, globalSymbolTable);
-                    parasList[i]->isSTE = TRUE;
+                    parasList[i].ste = findVariable(ptr->data->entry.lexeme, currentSymbolTable, globalSymbolTable);
+                    parasList[i].isSTE = TRUE;
                     i++;
                     ptr = ptr->next;
                 }
@@ -445,7 +464,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
                     SymbolTableEntry* tempVar = lookupSymbolTable(functionCalledSte->tablePointer,temp->identifier);
 
                     pentupleCode[numberOfPentuples].rule = POP_OUTPUT;
-                    pentupleCode[numberOfPentuples].result = parasList[i]->ste;
+                    pentupleCode[numberOfPentuples].result = parasList[j].ste;
                     pentupleCode[numberOfPentuples].argument[0] = tempVar;
                     numberOfPentuples++;
 
