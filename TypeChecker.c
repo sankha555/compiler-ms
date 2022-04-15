@@ -32,22 +32,24 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 
 	// check to see if the looping variables
 	// in a while loop are changed in the while body
-	/*
+	
 	if (root->type == While) {
 		VariableVisitedNode* toVisitLL = NULL;
 		toVisitLL = extractVariablesFromBoolean(root->children[0], toVisitLL);
 
+		/*
 		VariableVisitedNode* head = toVisitLL;
 		while (head != NULL) {
+			printf("to visit: %s\n", head->lexeme);
 			head = head->next;
 		}
+		*/
 
 		if (checkVariableChanges(root->children[1], toVisitLL) == FALSE) {
-			printf("Error : Looping variables in while not changed.\n");
+			printf("Error: Looping variables in while not changed.\n");
 			return typeErrPtr;
 		}
 	}
-	*/
 
 	// for storing types of operands
 	struct TypeArrayElement *t1, *t2;
@@ -810,7 +812,7 @@ VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedN
 		case arithOp_MUL:
 			//printf("In operator\n");
 			toVisitLL = extractVariablesFromBoolean(root->children[0], toVisitLL);
-			toVisitLL = extractVariablesFromBoolean(root->children[2], toVisitLL);
+			toVisitLL = extractVariablesFromBoolean(root->children[1], toVisitLL);
 			break;
 
 		case logOp_NOT:
@@ -840,19 +842,19 @@ boolean checkVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 }
 
 boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
-	printf("in mark changes\n");
+	//printf("in mark changes\n");
 
 	VariableVisitedNode *curr, *toVisitLLNested;
 	astNode* actualOutput;
 	char* lhsName;
 	astNode* readVariable;
 
-	printf("Statement type: %s\n", getStatmType(root->type));
+	//printf("Statement type: %s\n", getStatmType(root->type));
 
 	switch (root->type) {
 		case While:
 			toVisitLLNested = NULL;
-			extractVariablesFromBoolean(root->children[0], toVisitLLNested);
+			toVisitLLNested = extractVariablesFromBoolean(root->children[0], toVisitLLNested);
 			//printf("Here in default 0\n");
 			if (checkVariableChanges(root->children[1], toVisitLLNested) == FALSE) {
 				return FALSE;
@@ -884,7 +886,9 @@ boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 						return TRUE;
 					}
 					curr = curr->next;
+					
 				}
+				actualOutput = actualOutput->next;
 			}
 			return FALSE;
 		
@@ -922,7 +926,7 @@ boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 				// earlier root->next
 				if (root->data != NULL) {
 					//printf("Here in default 1\n");
-					printf("ASTNode var: %s\n", root->data->entry.lexeme);
+					//printf("ASTNode var: %s\n", root->data->entry.lexeme);
 					if (markVariableChanges(root->data, toVisitLL) == TRUE)
 						return TRUE;
 				}
