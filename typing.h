@@ -32,6 +32,8 @@ typedef struct Field
     // used in the symbol table
 
     struct Field *next; // for the Field LinkedList
+    char *tempTypeName; //used to handle the nested records issue
+
 } Field;
 
 typedef struct UnionOrRecordInfo
@@ -78,7 +80,8 @@ typedef struct TypeArrayElement
     struct FunctionType *functionInfo;               // points to the function type expression if Record/Union otherwise NULL
     struct TypeArrayElement *next;                   // used in the LinkedList in the hash table Implementation fo the type table
     int width;
-    boolean widthPopulated;
+    boolean widthPopulated; //used to handle the nested records problem
+    char* aliasActualName;
 
 } TypeArrayElement;
 
@@ -120,4 +123,11 @@ struct TypeArrayElement* typeErrPtr;
 struct TypeArrayElement* booleanPtr;
 int funcSeqNum;
 
+
+
+//new temp functions
+
+void addToListofFieldsRecordOnlyName(char *identifier, char *typeid, UnionOrRecordInfo *info);
+void addToListofFieldsUnionOnlyName(char *identifier, char *typeid, UnionOrRecordInfo *info);
+struct Field *createFieldOnlyName(char *identifier, char *typeid);
 #endif

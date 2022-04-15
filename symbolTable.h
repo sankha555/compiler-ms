@@ -11,7 +11,14 @@ SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction
 SymbolTable* createSymbolTable(char* tableID, SymbolTable* returnTable);
 SymbolTable* getSymbolTable(char* identifier);
 SymbolTable* initializeSymbolTable(astNode* root);
-void parseTypeDefinitionsPass2(astNode *root);
-void parseTypeDefinitionsPass1(astNode *root);
+void parseTypeDefinitions(astNode *root);
+
+
+//new temp functions added
+SymbolTable *initializeSymbolTableNew(astNode *root);
+int populateWidthandOffset(char *typeId);
+void parseTypeDefinitionsPass2(char *typeId);
+void parseTypeDefinitionsPass1(char *typeId);
+
 
 #endif

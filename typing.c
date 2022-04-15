@@ -166,23 +166,27 @@ int insertintoTypeTable(TypeTable *typeTable, TypeArrayElement *entry)
 // returns the entry is found in the symbol table, else returns NULL
 struct TypeArrayElement *lookupTypeTable(TypeTable *typeTable, char *identifier)
 {
+    //printf("Entered lookupTypeTable\n");
     int hashTableIndex = hashFunctionSymbolTable(identifier);
 
     TypeArrayElement *entry = typeTable->tableEntries[hashTableIndex];
     while (entry != NULL)
     {
         if (strcmp(entry->identifier, identifier) == 0)
-        {   
+        {
             // check if entry is alias
-            if (entry->type == Alias)
-            {
-                return entry;
-            }
-            
+            // if (entry->type == Alias)
+            // {
+            //     return lookupTypeTable(typeTable, entry->aliasTypeInfo->identifier);
+            // }
+            //printf("Exited LookupTypeTable normally\n");
+
             return entry;
+        
         }
         entry = entry->next;
     }
+    
     return NULL;
 }
 
@@ -200,23 +204,28 @@ struct TypeTable *createTypeTable(char *tableID)
 
     TypeArrayElement* entry = createTypeArrayElement(Integer, "Int");
     entry->width = getWidth(Integer);
+    entry->widthPopulated = TRUE;
 	intPtr = entry;
     insertintoTypeTable(newTable, entry);
 
     entry = createTypeArrayElement(Real, "Real");
     entry->width = getWidth(Real);
+    entry->widthPopulated = TRUE;
 	realPtr = entry;
     insertintoTypeTable(newTable, entry);
 
 	entry = createTypeArrayElement(Void, "Void");
-	voidPtr = entry;
+	entry->widthPopulated = TRUE;
+    voidPtr = entry;
 	insertintoTypeTable(newTable, voidPtr);
 
 	entry = createTypeArrayElement(Boolean, "Boolean");
-	booleanPtr = entry;
+	entry->widthPopulated = TRUE;
+    booleanPtr = entry;
 	insertintoTypeTable(newTable, booleanPtr);
 
 	entry = createTypeArrayElement(TypeErr, "TypeErr");
+    entry->widthPopulated = TRUE;
 	typeErrPtr = entry;
 	insertintoTypeTable(newTable, typeErrPtr);
 
@@ -264,9 +273,6 @@ struct FunctionType *createFunctionType(char *identifier)
     strcpy(func->identifier, identifier);
     func->inputParameters = NULL;
     func->outputParameters = NULL;
-    
-    funcSeqNum++;
-    func->declarationSeqNum = funcSeqNum;
 
     func->inputParamsWidth = 0;
     func->outputParamsWidth = 0;
@@ -306,8 +312,8 @@ struct FunctionParameter *createParameter(char *identifier, char *typeid)
 
 void addToListofFieldsRecord(char *identifier, char *typeid, UnionOrRecordInfo *info)
 {
-    Field *field = createField(identifier, typeid);
 
+    Field *field = createField(identifier, typeid);
     field->offset = info->totalWidth;
     Field *trav = info->listOfFields;
     if (trav == NULL)
@@ -394,7 +400,15 @@ void addToOutputParameters(char *identifier, char *typeid, FunctionType *info)
     }
 }
 
-/*
+
+
+
+
+
+
+
+
+
 void addToListofFieldsRecordOnlyName(char *identifier, char *typeid, UnionOrRecordInfo *info)
 {
 
@@ -417,20 +431,43 @@ void addToListofFieldsRecordOnlyName(char *identifier, char *typeid, UnionOrReco
     //info->totalWidth += field->width;
 }
 
+void addToListofFieldsUnionOnlyName(char *identifier, char *typeid, UnionOrRecordInfo *info)
+{
 
-struct Field *createField(char *identifier, char *typeid)
+    Field *field = createFieldOnlyName(identifier, typeid);
+    //field->offset = info->totalWidth;
+    Field *trav = info->listOfFields;
+    if (trav == NULL)
+    {
+        info->listOfFields = field;
+    }
+    else
+    {
+        while (trav->next != NULL)
+        {
+            trav = trav->next;
+        }
+        trav->next = field;
+    }
+
+    //info->totalWidth += field->width;
+}
+
+struct Field *createFieldOnlyName(char *identifier, char *typeid)
 {
 
     Field *field = (Field *)malloc(sizeof(Field));
 
     field->identifier = (char *)malloc(strlen(identifier) * sizeof(char));
     strcpy(field->identifier, identifier);
+    field->tempTypeName = (char *)malloc(strlen(typeid) * sizeof(char));
+    strcpy(field->tempTypeName, typeid);
 
-    field->datatype = NULL;
+    field->datatype = NULL; //for now as we are only populating fields right now, the width and offset calculation will be done in the next pass
     //lookupTypeTable(globalTypeTable, typeid);
     field->width = 0;
     field->offset = 0;
     field->next = NULL;
     return field;
 }
-*/
+

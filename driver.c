@@ -36,7 +36,7 @@ SymbolTable* performPrelims(twinBuffer* buffer, char* testcaseFile, ParseTreeNod
 
     globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
 
-    globalSymbolTable = initializeSymbolTable(astRoot);
+    globalSymbolTable = initializeSymbolTableNew(astRoot); //made a change
 
     return globalSymbolTable;
 }
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 
                 globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
 
-                globalSymbolTable = initializeSymbolTable(astRoot);
+                globalSymbolTable = initializeSymbolTableNew(astRoot);
 
                 printSymbolTables(stdout);
                 
