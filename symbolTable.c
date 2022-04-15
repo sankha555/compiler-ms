@@ -897,13 +897,7 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     // printf("Pass 2 for other functions completed\n");
     parseTypeDefinitionsPass2(mainFunction->children[0]->children[0]);
-<<<<<<< HEAD
     // printf("Pass 2 completed\n");
-=======
-    printf("Pass 2 completed\n");
-
-    // now parse declarations for globals
->>>>>>> 733d95b5dd46a6e66ef7b1a33a34c1fadeb9fb7e
     head = otherFunctions;
     while (head)
     {
@@ -950,19 +944,3 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     return globalSymbolTable;
 }
-<<<<<<< HEAD
-
-
-/**
- * @brief returns the GLOBAL Symbol Table - function table pointers, global variables, etc.
- *
- * @param root of AST
- * @return SymbolTable*
- */
-
-
-
-
-
-=======
->>>>>>> 733d95b5dd46a6e66ef7b1a33a34c1fadeb9fb7e
