@@ -1,7 +1,7 @@
 #ifndef GLOBAL_DEF_H
 #define GLOBAL_DEF_H
 
-
+#define MAX_RECORD_NESTING 10
 
 //identifier for main function 
 #define MAIN_NAME "_main"
