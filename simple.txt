@@ -25,7 +25,6 @@ _main
 	type real: c5;
 	type real: d5;
 	type real: c2;
-    type real: c2;
 
     b5 <--- 1;
 

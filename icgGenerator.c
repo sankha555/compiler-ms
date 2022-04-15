@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "astDef.h"
+#include "astGenerator.h"
 #include "globalDef.h"
 #include "symbolTable.h"
 #include "symbolTableDef.h"
@@ -14,11 +15,21 @@ int tempVariableNumber;
 int tempLabelNumber;
 
 SymbolTableEntry* getNewTemporary(SymbolTable* currentSymbolTable, Type type) {
+    TypeArrayElement* desiredTypePtr;
+    if(type == Integer) {
+        desiredTypePtr = intPtr;
+    }
+    if(type == Real) {
+        desiredTypePtr = realPtr;
+    }
+    if(type == Boolean) {
+        desiredTypePtr = booleanPtr;
+    }
     char* temp = (char*)malloc(30);
     sprintf(temp,"tempVariable_xvag_%d",tempVariableNumber);
     tempVariableNumber++;
     //SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTable* tablePointer, Type type);
-    SymbolTableEntry* newVar = createNewSymbolTableEntry(temp,FALSE,currentSymbolTable,type);
+    SymbolTableEntry* newVar = createNewSymbolTableEntry(temp,FALSE,currentSymbolTable,desiredTypePtr,type);
     insertintoSymbolTable(currentSymbolTable,newVar);
     return newVar;
 }
@@ -74,11 +85,48 @@ void printICG(FILE* fp) {
         "REL_NEQ_REAL"
     };
 
-    fprintf(fp,"%30s%30s%30s%30s%30s%30s\n","ICG Function Name","Result","Argument_1","Argument_2","Immediate_token_val","jump label");
+    fprintf(fp,"\n\n%20s%20s%20s%20s%30s%20s\n","ICG Function Name","Result","Argument_1","Argument_2","Immediate_token_val","jump label");
 
     for(int i = 0; i < numberOfPentuples; i++) {
         pentuple* temp = &pentupleCode[i];
-        fprintf(fp,"%30s%30s%30s%30s%30s%30s\n",icgNames[temp->rule],temp->result->identifier,temp->argument[0]->identifier,temp->argument[1]->identifier,temp->immVal.lexeme,temp->jumpLabel);
+        
+        char tempResult[30];
+        if(temp->result == NULL) {
+            sprintf(tempResult,"NULL");
+        } else {
+            sprintf(tempResult,"%s",temp->result->identifier);
+        }
+        
+        char tempArg1[30];
+        if(temp->argument[0] == NULL) {
+            sprintf(tempArg1,"NULL");
+        } else {
+            sprintf(tempArg1,"%s",temp->argument[0]->identifier);
+        }
+        
+        char tempArg2[30];
+        if(temp->argument[1] == NULL) {
+            sprintf(tempArg2,"NULL");
+        } else {
+            sprintf(tempArg2,"%s",temp->argument[1]->identifier);
+        }
+
+        char tempLexeme[30];
+        if(temp->immVal.lexeme == NULL) {
+            sprintf(tempLexeme,"NULL");
+        } else {
+            sprintf(tempLexeme,"%s",temp->immVal.lexeme);
+        }
+
+        char tempLabel[30];
+        if(temp->jumpLabel == NULL) {
+            sprintf(tempLabel,"NULL");
+        } else {
+            sprintf(tempLabel,"%s",temp->jumpLabel);
+        }
+        
+        fprintf(fp,"%20s%20s%20s%20s%30s%20s\n",icgNames[temp->rule],tempResult,tempArg1,tempArg2,tempLexeme,tempLabel);
+        // fprintf(fp,"%20s%20s%20s%20s%30s%20s\n",icgNames[temp->rule],temp->result->identifier,temp->argument[0]->identifier,temp->argument[1]->identifier,temp->immVal.lexeme,temp->jumpLabel);
     }
 
     return;
@@ -91,61 +139,61 @@ char* generateNewLabel() {
     return temp;
 }
 
-SymbolTableEntry* createRecordItemAlias(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
-    astNode* curr = root;
+// SymbolTableEntry* createRecordItemAlias(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
+//     astNode* curr = root;
     
-    char* recIdentifier = curr->data->entry.lexeme;
-    printf("Rec Id: %s\n", recIdentifier);
+//     char* recIdentifier = curr->data->entry.lexeme;
+//     printf("Rec Id: %s\n", recIdentifier);
 
-    SymbolTableEntry* entry = lookupSymbolTable(currentSymbolTable, recIdentifier);
-    if(entry == NULL){
-        printf("Null entry...\n");
-    }
+//     SymbolTableEntry* entry = lookupSymbolTable(currentSymbolTable, recIdentifier);
+//     if(entry == NULL){
+//         printf("Null entry...\n");
+//     }
 
-    int finalOffset = entry->offset;
-    Type finalType = entry->type->type;
-    char* finalIdentifier = recIdentifier;
-    int finalWidth = entry->width;
+//     int finalOffset = entry->offset;
+//     Type finalType = entry->type->type;
+//     char* finalIdentifier = recIdentifier;
+//     int finalWidth = entry->width;
 
-    UnionOrRecordInfo* recInfo = entry->type->compositeVariableInfo;
+//     UnionOrRecordInfo* recInfo = entry->type->compositeVariableInfo;
 
-    while(curr->next != NULL){
-        Field* field = recInfo->listOfFields; // points to first field of the record
+//     while(curr->next != NULL){
+//         Field* field = recInfo->listOfFields; // points to first field of the record
 
-        curr = curr->next;
-        recIdentifier = curr->data->entry.lexeme;   // now I know which field to search for in the list of fields
+//         curr = curr->next;
+//         recIdentifier = curr->data->entry.lexeme;   // now I know which field to search for in the list of fields
 
-        while(field != NULL){
-            if(!strcmp(field->identifier, recIdentifier)){
-                break;
-            }
-            field = field->next;
-        }
+//         while(field != NULL){
+//             if(!strcmp(field->identifier, recIdentifier)){
+//                 break;
+//             }
+//             field = field->next;
+//         }
 
-        if(field == NULL){
-            printf("Bruh, field does not exist!\n");
-        }
+//         if(field == NULL){
+//             printf("Bruh, field does not exist!\n");
+//         }
 
-        finalIdentifier = field->identifier;
-        finalOffset += field->offset;
-        finalWidth = field->width;
+//         finalIdentifier = field->identifier;
+//         finalOffset += field->offset;
+//         finalWidth = field->width;
 
-        if(field->datatype->compositeVariableInfo == NULL){
-            finalType = field->datatype->type;
-            break;
-        }
+//         if(field->datatype->compositeVariableInfo == NULL){
+//             finalType = field->datatype->type;
+//             break;
+//         }
 
-        recInfo = field->datatype->compositeVariableInfo;
-    }
+//         recInfo = field->datatype->compositeVariableInfo;
+//     }
     
-    SymbolTableEntry* finalAliasEntry = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
-    strcpy(finalAliasEntry->identifier, finalIdentifier);
-    finalAliasEntry->offset = finalOffset;
-    finalAliasEntry->type = createTypeArrayElement(finalType, finalAliasEntry->identifier);
-    finalAliasEntry->width = finalWidth;
+//     SymbolTableEntry* finalAliasEntry = (SymbolTableEntry*) malloc(sizeof(SymbolTableEntry));
+//     strcpy(finalAliasEntry->identifier, finalIdentifier);
+//     finalAliasEntry->offset = finalOffset;
+//     finalAliasEntry->type = createTypeArrayElement(finalType, finalAliasEntry->identifier);
+//     finalAliasEntry->width = finalWidth;
 
-    return finalAliasEntry;
-}
+//     return finalAliasEntry;
+// }
 
 SymbolTableEntry* findVariable(char* identifier, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
     
@@ -158,9 +206,32 @@ SymbolTableEntry* findVariable(char* identifier, SymbolTable* currentSymbolTable
 
 }
 
+SymbolTableEntry* createRecordItemAlias(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable) {
+
+    SymbolTableEntry* retResult = NULL;
+
+    if(root->next == NULL) { //it is a single instance variable id
+        retResult = findVariable(root->data->entry.lexeme,currentSymbolTable,globalSymbolTable);
+        return retResult;
+    }
+
+    return retResult;
+
+}
+
+
 int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* globalSymbolTable, boolean areInputParams, SymbolTableEntry* functionCalledSte) {
 
-    SymbolTableEntry *leftOperand, *rightOperand, *holder, *boolResult;
+    SymbolTableEntry *leftOperand;
+    SymbolTableEntry *rightOperand;
+    SymbolTableEntry *holder;
+    SymbolTableEntry *boolResult;
+    
+    if(root == NULL){
+        printf("Bruh\n");
+    }
+
+    printf("Root type: %s\n", getStatmType(root->type));
 
     switch(root->type) {
         
@@ -169,7 +240,9 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             pentupleCode[numberOfPentuples].rule = DEFINE_CS;
             numberOfPentuples++;
 
-            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable, areInputParams, functionCalledSte);
+            if(root->children[0] != NULL) {
+                parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable, areInputParams, functionCalledSte);
+            }
             parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable, areInputParams, functionCalledSte);
 
             pentupleCode[numberOfPentuples].rule = DEFINE_DS;
@@ -214,6 +287,11 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
             break;
 
+        case Stmts:
+
+            parseICGcode(root->children[2],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            break;
+
         case StmtLinkedListNode:
 
             parseICGcode(root->data,currentSymbolTable,globalSymbolTable, areInputParams, functionCalledSte);
@@ -229,9 +307,12 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             SymbolTableEntry* result = createRecordItemAlias(root->children[0],currentSymbolTable,globalSymbolTable);
             
             parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable, areInputParams, functionCalledSte);
-            
+
             SymbolTableEntry* copier = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
             
+            // printf("%s\n",root->children[1]->dataPlace);
+            // printf("%s\n",copier->identifier);
+            // printf("%d\t\n",copier->type->type);
             //check that RHS is int while LHS is real, if yes, need to typecast
             if(result->type->type == Real && copier->type->type == Integer) {
                     
@@ -834,13 +915,18 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
             holder = getNewTemporary(currentSymbolTable,Integer);
 
+            // printf("returned from temporary.\n");
+
             pentupleCode[numberOfPentuples].rule = ASSIGN_IMMEDIATE_INT;
             pentupleCode[numberOfPentuples].result = holder;
             pentupleCode[numberOfPentuples].immVal = root->entry;
             numberOfPentuples++;
 
+            // printf("why\n");
+
             root->dataPlace = holder->identifier;
 
+            // printf("parsing num correctly\n");
             break;
 
         case RealNum:
@@ -1100,6 +1186,7 @@ int generateCompleteICGcode(astNode* root, SymbolTable* globalSymbolTable) {
         pentupleCode[i].immVal.type = -1;
     }
 
-    return parseICGcode(root,globalSymbolTable,globalSymbolTable,FALSE,NULL);
+    parseICGcode(root,globalSymbolTable,globalSymbolTable,FALSE,NULL);
 
+    return 1;
 }
