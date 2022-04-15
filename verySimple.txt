@@ -33,7 +33,7 @@ _main
     type int: b4: global;
     type real: c5;
     type real: c4;
-    type union #student d5;
+    type union #student: d5;
     
     b5 <--- b4 + b5 - 1.56;
 	b5 <--- 4.67;
