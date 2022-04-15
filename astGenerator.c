@@ -990,7 +990,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         createAbstractSyntaxTree(root->children[2]);
         ptr = newASTnode(root->children[1]->ptr->type);
         ptr->children[0] = root->children[0]->ptr;
-        ptr->children[2] = root->children[2]->ptr;
+        ptr->children[1] = root->children[2]->ptr;
         root->ptr = ptr;
         freeChildren(root, 0, 2);
         return ptr;

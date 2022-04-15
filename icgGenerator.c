@@ -675,12 +675,12 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             */
 
             //write ICG code calculating for both the children
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            
+            //the variable which hold the value of the expression below
             SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
             SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
-
-            //the variable which hold the value of the expression below
-            SymbolTableEntry* leftOperand = lookupSymbolTable(currentSymbolTable,root->children[0]->dataPlace);
-            SymbolTableEntry* rightOperand = lookupSymbolTable(currentSymbolTable,root->children[1]->dataPlace);
 
             SymbolTableEntry* holder;
             
@@ -796,6 +796,224 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
             break;        
 
+        case logOp_NOT:
+
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            pentupleCode[numberOfPentuples].rule = BOOLEAN_NOT;
+            pentupleCode[numberOfPentuples].result = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            numberOfPentuples++;
+
+            root->dataPlace = root->children[0]->dataPlace;
+
+            break;
+
+        case logOp_AND:
+
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            SymbolTableEntry* boolResult = getNewTemporary(currentSymbolTable,Boolean);
+
+            pentupleCode[numberOfPentuples].rule = BOOLEAN_AND;
+            pentupleCode[numberOfPentuples].result = boolResult;
+            pentupleCode[numberOfPentuples].argument[0] = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            pentupleCode[numberOfPentuples].argument[1] = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+
+            root->dataPlace = boolResult;
+
+            break;
+
+        case logOp_OR:
+
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            SymbolTableEntry* boolResult = getNewTemporary(currentSymbolTable,Boolean);
+
+            pentupleCode[numberOfPentuples].rule = BOOLEAN_OR;
+            pentupleCode[numberOfPentuples].result = boolResult;
+            pentupleCode[numberOfPentuples].argument[0] = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            pentupleCode[numberOfPentuples].argument[1] = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+
+            root->dataPlace = boolResult;
+
+            break;
+
+        case relOp_EQ:
+
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            SymbolTableEntry* boolResult = getNewTemporary(currentSymbolTable,Boolean);
+
+            SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+            
+            if(leftOperand->type->type == Integer && rightOperand->type->type == Integer) {
+                
+                pentupleCode[numberOfPentuples].rule = REL_EQ_INT;
+
+            } else {
+
+                pentupleCode[numberOfPentuples].rule = REL_EQ_REAL;
+
+            }
+
+            pentupleCode[numberOfPentuples].result = boolResult;
+            pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+            pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+            numberOfPentuples++;
+
+            root->dataPlace = boolResult;
+
+            break;
+
+        case relOp_GE:
+
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            SymbolTableEntry* boolResult = getNewTemporary(currentSymbolTable,Boolean);
+
+            SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+            
+            if(leftOperand->type->type == Integer && rightOperand->type->type == Integer) {
+                
+                pentupleCode[numberOfPentuples].rule = REL_GEQ_INT;
+
+            } else {
+
+                pentupleCode[numberOfPentuples].rule = REL_GEQ_REAL;
+
+            }
+
+            pentupleCode[numberOfPentuples].result = boolResult;
+            pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+            pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+            numberOfPentuples++;
+
+            root->dataPlace = boolResult;
+
+            break;
+
+        case relOp_GT:
+
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            SymbolTableEntry* boolResult = getNewTemporary(currentSymbolTable,Boolean);
+
+            SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+            
+            if(leftOperand->type->type == Integer && rightOperand->type->type == Integer) {
+                
+                pentupleCode[numberOfPentuples].rule = REL_GT_INT;
+
+            } else {
+
+                pentupleCode[numberOfPentuples].rule = REL_GT_REAL;
+
+            }
+
+            pentupleCode[numberOfPentuples].result = boolResult;
+            pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+            pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+            numberOfPentuples++;
+
+            root->dataPlace = boolResult;
+
+            break;
+
+        case relOp_LE:
+
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            SymbolTableEntry* boolResult = getNewTemporary(currentSymbolTable,Boolean);
+
+            SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+            
+            if(leftOperand->type->type == Integer && rightOperand->type->type == Integer) {
+                
+                pentupleCode[numberOfPentuples].rule = REL_LEQ_INT;
+
+            } else {
+
+                pentupleCode[numberOfPentuples].rule = REL_LEQ_REAL;
+
+            }
+
+            pentupleCode[numberOfPentuples].result = boolResult;
+            pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+            pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+            numberOfPentuples++;
+
+            root->dataPlace = boolResult;
+
+            break;
+
+        case relOp_LT:
+
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            SymbolTableEntry* boolResult = getNewTemporary(currentSymbolTable,Boolean);
+
+            SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+            
+            if(leftOperand->type->type == Integer && rightOperand->type->type == Integer) {
+                
+                pentupleCode[numberOfPentuples].rule = REL_LT_INT;
+
+            } else {
+
+                pentupleCode[numberOfPentuples].rule = REL_LT_REAL;
+
+            }
+
+            pentupleCode[numberOfPentuples].result = boolResult;
+            pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+            pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+            numberOfPentuples++;
+
+            root->dataPlace = boolResult;
+
+            break;
+
+        case relOp_NE:
+
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
+            SymbolTableEntry* boolResult = getNewTemporary(currentSymbolTable,Boolean);
+
+            SymbolTableEntry* leftOperand = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
+            SymbolTableEntry* rightOperand = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+            
+            if(leftOperand->type->type == Integer && rightOperand->type->type == Integer) {
+                
+                pentupleCode[numberOfPentuples].rule = REL_NEQ_INT;
+
+            } else {
+
+                pentupleCode[numberOfPentuples].rule = REL_NEQ_REAL;
+
+            }
+
+            pentupleCode[numberOfPentuples].result = boolResult;
+            pentupleCode[numberOfPentuples].argument[0] = leftOperand;
+            pentupleCode[numberOfPentuples].argument[1] = rightOperand;
+            numberOfPentuples++;
+
+            root->dataPlace = boolResult;
+
+            break;
+        
         default: 
             //do nothing for the astTags not mentioned
             break;
