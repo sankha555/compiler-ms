@@ -729,7 +729,7 @@ void parseTypeDefinitions(astNode *root)
     }
 }
 
-/*
+
 void parseTypeDefinitionsPass1(astNode *root)
 {
     while (root != NULL)

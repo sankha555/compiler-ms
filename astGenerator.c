@@ -615,10 +615,10 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         root->ptr = ptr;
         freeChildren(root, 0, 1);
 
-        if(aliasTemp == NULL){
-            aliasTemp = ptr;
-            printf("Alias ID: %s\n", aliasTemp->data->entry.lexeme);
-        }
+        // if(aliasTemp == NULL){
+        //     aliasTemp = ptr;
+        //     printf("Alias ID: %s\n", aliasTemp->data->entry.lexeme);
+        // }
         
         return ptr;
     case 46:

@@ -599,7 +599,7 @@ struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1,
 
 VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedNode* toVisitLL) {
 	if (root == NULL)
-		return;
+		return NULL;
 	switch(root->type) {
 		case SingleOrRecIdLinkedListNode:
 			toVisitLL = extractVariablesFromBoolean(root->data, toVisitLL);

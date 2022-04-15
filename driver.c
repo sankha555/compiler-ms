@@ -244,8 +244,8 @@ int main(int argc, char *argv[])
 
                 root = parseInputSourceCode(buffer);
 
-                aliasTemp = NULL;
-                astRoot = createAbstractSyntaxTree(root);
+                // aliasTemp = NULL;
+                // astRoot = createAbstractSyntaxTree(root);
 
                 globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
 
