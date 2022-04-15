@@ -334,6 +334,7 @@ int main(int argc, char *argv[])
                 break;
 
             case 9:
+                
                 funcSeqNum = 0;
 
                 buffer = init_lexer(argv[1]);
@@ -354,7 +355,7 @@ int main(int argc, char *argv[])
 
                 globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
 
-                globalSymbolTable = initializeSymbolTable(astRoot);
+                globalSymbolTable = initializeSymbolTableNew(astRoot);
                 
                 int typeCheckingResult = typeCheck(astRoot, globalSymbolTable);
 

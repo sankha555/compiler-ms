@@ -21,12 +21,20 @@
 
 
 _main
+    
+
+    record #marks
+		type real : maths; 
+		type real: physics; 
+		type real: chemistry;
+	endrecord
+
+    type record #marks : d2;
     type real : b5;
 	type real: c5;
 	type real: d5;
 	type real: c2;
 
-    b5 <--- 1;
 
     %while ((b5 == c5) &&& (d5 < c2))
     %    if (b5 > d5)
