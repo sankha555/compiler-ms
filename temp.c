@@ -318,6 +318,139 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
     }
 }
 
+void parseTypeDefinitionsPass1(astNode *root){
+
+    while (root != NULL)
+    {
+        TypeArrayElement *entry;
+        if (root->data->type == TypeRecordDefinition)
+        {
+            entry = createTypeArrayElement(RecordType, root->data->children[0]->entry.lexeme);
+            // records
+            insertintoTypeTable(globalTypeTable, entry);
+        }
+        else if (root->data->type == TypeUnionDefinition)
+        {
+            // union
+            entry = createTypeArrayElement(UnionType, root->data->children[0]->entry.lexeme);
+            insertintoTypeTable(globalTypeTable, entry);
+        }
+        else if (root->data->type == DefineType)
+        {
+            char *actualName = root->data->children[1]->entry.lexeme;
+            char *newName = root->data->children[2]->entry.lexeme;
+
+            TypeArrayElement *alias = createTypeArrayElement(Alias, newName);
+            insertintoTypeTable(globalTypeTable, alias);
+        }
+
+        root = root->next;
+    }
+    
+}
+
+void parseTypeDefinitionsPass2(astNode *root)
+{
+    while (root != NULL)
+    {
+        TypeArrayElement *entry;
+        if (root->data->type == TypeRecordDefinition)
+        {
+            entry = lookupTypeTable(globalTypeTable,root->data->children[0]->entry.lexeme);
+            
+            // record
+            astNode *recordInfo = root->data->children[0];
+            char *recordName = recordInfo->entry.lexeme;
+
+            UnionOrRecordInfo *record = createUnionOrRecordinfo(recordName);
+            record->isRecord = TRUE;
+            entry->compositeVariableInfo = record;
+
+            astNode *fieldsList = root->data->children[1];
+            astNode *head = fieldsList;
+            while (head != NULL)
+            {
+                astNode *field = head->data;
+
+                char *fieldName = field->children[1]->entry.lexeme;
+
+                astNode *fieldTypeInfo = field->children[0];
+
+                switch (fieldTypeInfo->type)
+                {
+                    case TypeInt:
+                        addToListofFieldsRecord(fieldName, "Int", record);
+                        break;
+
+                    case TypeReal:
+                        addToListofFieldsRecord(fieldName, "Real", record);
+                        break;
+
+                    case FieldTypeRUID:
+                        addToListofFieldsRecord(fieldName, fieldTypeInfo->entry.lexeme, record);
+                        break;
+                    default: 
+                        break;
+                }
+
+                head = head->next;
+            }
+            entry->width = record->totalWidth;
+        }
+        else if (root->data->type == TypeUnionDefinition)
+        {
+            // union
+            entry = lookupTypeTable(globalTypeTable,root->data->children[0]->entry.lexeme);
+            astNode *unionInfo = root->data->children[0];
+            char *unionName = unionInfo->entry.lexeme;
+
+            UnionOrRecordInfo *newUnion = createUnionOrRecordinfo(unionName);
+            newUnion->isRecord = TRUE;
+            entry->compositeVariableInfo = newUnion;
+
+            astNode *fieldsList = root->data->children[1];
+            astNode *head = fieldsList;
+            while (head != NULL)
+            {
+                astNode *field = head->data;
+
+                char *fieldName = field->children[1]->entry.lexeme;
+
+                astNode *fieldTypeInfo = field->children[0];
+                switch (fieldTypeInfo->type)
+                {
+                case TypeInt:
+                    addToListofFieldsUnion(fieldName, "Int", newUnion);
+                    break;
+
+                case TypeReal:
+                    addToListofFieldsUnion(fieldName, "Real", newUnion);
+                    break;
+
+                case FieldTypeRUID:
+                    addToListofFieldsUnion(fieldName, fieldTypeInfo->entry.lexeme, newUnion);
+                    break;
+                default: break;
+                }
+
+                head = head->next;
+            }
+            entry->width = newUnion->totalWidth;
+
+        }
+        else if (root->data->type == DefineType)
+        {
+            char *actualName = root->data->children[1]->entry.lexeme;
+            char *newName = root->data->children[2]->entry.lexeme;
+            TypeArrayElement *alias = lookupTypeTable(globalTypeTable,newName);
+            alias->aliasTypeInfo = lookupTypeTable(globalTypeTable, actualName);
+            alias->width = alias->aliasTypeInfo->width;
+            
+        }
+
+        root = root->next;
+    }
+}
 
 void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTable *symbolTable)
 {
@@ -472,93 +605,6 @@ void populateMainFunctionTable(astNode *root, SymbolTable *globalSymbolTable, Sy
     parseDeclarations(stmts->children[1], globalSymbolTable, functionSymbolTable);
 }
 
-
-
-
-void parseTypeDefinitions(astNode *root)
-{
-    while (root != NULL)
-    {
-        TypeArrayElement *entry;
-        if (root->data->type == TypeRecordDefinition)
-        {
-            entry = createTypeArrayElement(RecordType, root->data->children[0]->entry.lexeme);
-            // record
-            astNode *recordInfo = root->data->children[0];
-            char *recordName = recordInfo->entry.lexeme;
-            UnionOrRecordInfo *record = createUnionOrRecordinfo(recordName);
-            record->isRecord = TRUE;
-            entry->compositeVariableInfo = record;
-            astNode *fieldsList = root->data->children[1];
-            astNode *head = fieldsList;
-            while (head != NULL)
-            {
-                astNode *field = head->data;
-                char *fieldName = field->children[1]->entry.lexeme;
-                astNode *fieldTypeInfo = field->children[0];
-                switch (fieldTypeInfo->type)
-                {
-                case TypeInt:
-                    addToListofFieldsRecord(fieldName, "Int", record);
-                    break;
-                case TypeReal:
-                    addToListofFieldsRecord(fieldName, "Real", record);
-                    break;
-                case FieldTypeRUID:
-                    addToListofFieldsRecord(fieldName, fieldTypeInfo->entry.lexeme, record);
-                    break;
-                }
-                head = head->next;
-            }
-            entry->width = record->totalWidth;
-            insertintoTypeTable(globalTypeTable, entry);
-        }
-        else if (root->data->type == TypeUnionDefinition)
-        {
-            // union
-            entry = createTypeArrayElement(UnionType, root->data->children[0]->entry.lexeme);
-            astNode *unionInfo = root->data->children[0];
-            char *unionName = unionInfo->entry.lexeme;
-            UnionOrRecordInfo *newUnion = createUnionOrRecordinfo(unionName);
-            newUnion->isRecord = TRUE;
-            entry->compositeVariableInfo = newUnion;
-            astNode *fieldsList = root->data->children[1];
-            astNode *head = fieldsList;
-            while (head != NULL)
-            {
-                astNode *field = head->data;
-                char *fieldName = field->children[1]->entry.lexeme;
-                astNode *fieldTypeInfo = field->children[0];
-                switch (fieldTypeInfo->type)
-                {
-                case TypeInt:
-                    addToListofFieldsUnion(fieldName, "Int", newUnion);
-                    break;
-                case TypeReal:
-                    addToListofFieldsUnion(fieldName, "Real", newUnion);
-                    break;
-                case FieldTypeRUID:
-                    addToListofFieldsUnion(fieldName, fieldTypeInfo->entry.lexeme, newUnion);
-                    break;
-                }
-                head = head->next;
-            }
-            entry->width = newUnion->totalWidth;
-            insertintoTypeTable(globalTypeTable, entry);
-        }
-        else if (root->data->type == DefineType)
-        {
-            char *actualName = root->data->children[1]->entry.lexeme;
-            char *newName = root->data->children[2]->entry.lexeme;
-            TypeArrayElement *alias = createTypeArrayElement(Alias, newName);
-            alias->aliasTypeInfo = lookupTypeTable(globalTypeTable, actualName);
-            insertintoTypeTable(globalTypeTable, alias);
-        }
-        root = root->next;
-    }
-}
-
-
 /**
  * @brief returns the GLOBAL Symbol Table - function table pointers, global variables, etc.
  *
@@ -582,15 +628,26 @@ SymbolTable *initializeSymbolTable(astNode *root)
     {
         astNode *current = head->data;
         astNode *stmts = current->children[3];
-        parseTypeDefinitions(stmts->children[0]);
+        parseTypeDefinitionsPass1(stmts->children[0]);
         head = head->next;
     }
 
-    parseTypeDefinitions(mainFunction->children[0]->children[0]);
+    parseTypeDefinitionsPass1(mainFunction->children[0]->children[0]);
 
     head = otherFunctions;
 
-    
+    while (head)
+    {
+        astNode *current = head->data;
+        astNode *stmts = current->children[3];
+        parseTypeDefinitionsPass2(stmts->children[0]);
+        head = head->next;
+    }
+
+    parseTypeDefinitionsPass2(mainFunction->children[0]->children[0]);
+
+    head = otherFunctions;
+
     while (head)
     {
         astNode *current = head->data;
@@ -736,10 +793,9 @@ void parseTypeDefinitionsPass1(astNode *root)
 int populateWidthandOffset(char *typeId){
 
 
-    printf("%s\n", typeId);
 
     struct TypeArrayElement* type = lookupTypeTable(globalTypeTable, typeId);
-    if(type == NULL) {
+    if(typeId == NULL) {
         printf("Type not found \n");
     }
 
@@ -802,25 +858,9 @@ int populateWidthandOffset(char *typeId){
 
 void parseTypeDefinitionsPass2(astNode *root)
 {
-    int width;
     while (root != NULL)
-    {   if(root->data->type == TypeRecordDefinition)
-        {
-
-            width = populateWidthandOffset(root->data->children[0]->entry.lexeme);
-            printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
-        }
-        else if(root->data->type == TypeUnionDefinition)
-        {
-            width = populateWidthandOffset(root->data->children[0]->entry.lexeme);
-            printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
-        }
-        else if(root->data->type == DefineType){
-
-            width = populateWidthandOffset(root->data->children[2]->entry.lexeme);
-            printf("%s size : %d\n", root->data->children[2]->entry.lexeme, width);
-        }
-        
+    {
+        populateWidthandOffset(root->data->children[0]->entry.lexeme);
         root = root->next;
     }
 }
@@ -841,7 +881,6 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     astNode *head = otherFunctions;
 
-    printf("Going to start Pass 1\n");
     // go to otherFunc, it is a linked list of functions
     while (head)
     {
@@ -850,14 +889,10 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
         parseTypeDefinitionsPass1(stmts->children[0]);
         head = head->next;
     }
-    printf("Pass 1 for otherFunctions Completed\n");
 
     parseTypeDefinitionsPass1(mainFunction->children[0]->children[0]);
 
-    printf("Pass1 completed\n");
     head = otherFunctions;
-
-    printf("Going to start Pass 2\n");
     while (head)
     {
         astNode *current = head->data;
@@ -866,9 +901,8 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
         head = head->next;
     }
 
-    printf("Pass 2 for other functions completed\n");
     parseTypeDefinitionsPass2(mainFunction->children[0]->children[0]);
-    printf("Pass 2 completed\n");
+
     head = otherFunctions;
 
 
@@ -904,20 +938,3 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     return globalSymbolTable;
 }
-
-
-
-
-
-
-/**
- * @brief returns the GLOBAL Symbol Table - function table pointers, global variables, etc.
- *
- * @param root of AST
- * @return SymbolTable*
- */
-
-
-
-
-

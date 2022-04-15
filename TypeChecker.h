@@ -13,6 +13,7 @@
 # include "symbolTableDef.h"
 # include "symbolTable.h"
 
+
 typedef struct VariableVisitedNode {
 	char* lexeme;
 	boolean visited;
@@ -24,7 +25,6 @@ boolean checkVariableChanges(astNode* root, VariableVisitedNode* toVisitLL);
 boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL);
 
 VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedNode* toVisitLL);
-
 struct TypeArrayElement* findType(astNode* root, 
 		SymbolTable* localTable, SymbolTable* baseTable);
 

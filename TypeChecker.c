@@ -27,6 +27,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 
 	// check to see if the looping variables
 	// in a while loop are changed in the while body
+	/*
 	if (root->type == While) {
 		VariableVisitedNode* toVisitLL = NULL;
 		toVisitLL = extractVariablesFromBoolean(root->children[0], toVisitLL);
@@ -41,6 +42,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			return typeErrPtr;
 		}
 	}
+	*/
 
 	// for storing types of operands
 	struct TypeArrayElement *t1, *t2;

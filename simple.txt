@@ -35,6 +35,6 @@ _main
         endif
     endwhile
 
-    b5 <--- c + 1;
+    b5 <--- c2 + 1;
     return;
 end
