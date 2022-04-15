@@ -98,7 +98,7 @@ void printTypeArrayElement(FILE* fp, TypeArrayElement *t)
         printAliasInfo(fp, t->aliasTypeInfo);
         break;
     default:
-        fprintf(fp, "Unknown");
+        fprintf(fp, "Unknown tag : %d\n", t->type);
         break;
     }
 }

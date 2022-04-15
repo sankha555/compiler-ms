@@ -251,6 +251,8 @@ int main(int argc, char *argv[])
 
                 globalSymbolTable = initializeSymbolTableNew(astRoot);
 
+                printGlobalTypeTable(stdout);
+
                 printSymbolTables(stdout);
                 
                 break;
