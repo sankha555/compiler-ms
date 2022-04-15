@@ -164,6 +164,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case arithOp_MINUS:
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[2], localTable, baseTable);
+			printf("Line %d : %s %s\n",root->children[0]->data->entry.linenumber, t1->identifier, t2->identifier);
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
