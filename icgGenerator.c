@@ -13,6 +13,7 @@
 
 int tempVariableNumber;
 int tempLabelNumber;
+int tempNameNumber;
 
 SymbolTableEntry* getNewTemporary(SymbolTable* currentSymbolTable, Type type) {
     TypeArrayElement* desiredTypePtr;
@@ -215,7 +216,66 @@ SymbolTableEntry* createRecordItemAlias(astNode* root, SymbolTable* currentSymbo
         return retResult;
     }
 
-    // printf("weird as to why this is.\n");
+    retResult = (SymbolTableEntry*)malloc(sizeof(SymbolTableEntry));
+    
+    retResult->isFunction = FALSE;
+    retResult->tablePointer = NULL;
+    retResult->usage = NULL;
+    retResult->next = NULL;
+
+    char tempString[30];
+    sprintf(tempString,"aliasName_DJaTr_%d",tempNameNumber);
+    tempNameNumber++;
+
+    retResult->identifier = (char*)malloc(strlen(tempString)+1);
+    sprintf(retResult->identifier,"%s",tempString);
+
+    char *fields[MAX_RECORD_NESTING];
+
+    astNode* curr = root->next;
+
+    int fieldDepth = 0;
+    SymbolTableEntry* rootRecord = findVariable(root->data->entry.lexeme,currentSymbolTable,globalSymbolTable);
+    int totalOffset = rootRecord->offset;
+    int finalWidth = rootRecord->width;
+    TypeArrayElement* finalType = rootRecord->type;
+
+    while(curr != NULL) {
+        fields[fieldDepth] = curr->data->entry.lexeme;
+        printf("%d: %s\n",fieldDepth,fields[fieldDepth]);
+        fieldDepth++;
+        curr = curr->next;
+    }
+
+    TypeArrayElement* rootRecordType = rootRecord->type;
+
+    for(int i = 0; i < fieldDepth; i++) {
+
+        if(rootRecordType->type == Alias) {
+            rootRecordType = rootRecordType->aliasTypeInfo;
+        }
+
+        Field* rootRecordFieldsPtr = rootRecordType->compositeVariableInfo->listOfFields;
+
+        Field* tempFieldPtr = rootRecordFieldsPtr;
+
+        while(tempFieldPtr != NULL) {
+            if(strcmp(tempFieldPtr->identifier,fields[i]) == 0) {   //the subfield in the record matches
+                totalOffset += tempFieldPtr->offset;
+                finalWidth = tempFieldPtr->width;
+                finalType = tempFieldPtr->datatype;
+                rootRecordType = tempFieldPtr->datatype;
+                break;
+            }
+            tempFieldPtr = tempFieldPtr->next;
+        }
+
+    }
+    
+    retResult->offset = totalOffset;
+    retResult->type = finalType;
+    retResult->width = finalWidth;
+
     return retResult;
 
 }
@@ -1211,6 +1271,7 @@ int generateCompleteICGcode(astNode* root, SymbolTable* globalSymbolTable) {
     tempVariableNumber = 0;
     numberOfPentuples = 0;
     tempLabelNumber = 0;
+    tempNameNumber = 0;
 
     for(int i = 0; i < MAX_PENTUPLES_POSSIBLE; i++) {
         pentupleCode[i].rule = -1;
