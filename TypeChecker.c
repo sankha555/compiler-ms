@@ -127,9 +127,9 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return typeErrPtr;
 			}
 			if (t1->type == t2->type && (t1->type == Integer || t1->type == Real)){
-				return t1;
+				return booleanPtr;
 			} else if (t1->type == RecordType && (t1 == t2)) {
-				return t1;
+				return booleanPtr;
 			} else {
 				printf("Line %d : Relational operator - incompatible operands.\n", root->children[0]->data->entry.linenumber);
 				return typeErrPtr;
@@ -144,6 +144,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[1], localTable, baseTable);
+			//printf("logical print: %s %s\n", t1->identifier, t2->identifier);
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
@@ -651,6 +652,7 @@ struct TypeArrayElement* findTypeField(astNode* root, struct Field* fieldLL) {
 
 		/* replace the localTable here with the mini-table for record */
 		if (entryType->compositeVariableInfo != NULL) {
+			printf("Entered here.\n");
 			return findTypeField(root->next, entryType->compositeVariableInfo->listOfFields);
 		} else {
 			printf("Empty record!\n");
