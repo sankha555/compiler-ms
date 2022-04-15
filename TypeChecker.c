@@ -16,14 +16,19 @@
  */
 struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, SymbolTable* baseTable) {
 
-
+	int numNodesinLinkedList;
 	astNode *trav ;
 	int error_flag;
 	
+	
 	if (root == NULL){
 		// to remove
+		printf(" Root is Null\n");
 		return voidPtr;
 	}
+
+	if (root->type == Return ) printf("return!\n");
+
 
 	// check to see if the looping variables
 	// in a while loop are changed in the while body
@@ -70,13 +75,16 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			/* a VARIABLE IDENTIFIER */
 			case VariableId:
 			case Id:
+
+
 				// to remove
-				//printf("Entered Id.");
+				printf("Entered Id.");
 				// check in function's local symbol table
 				entry = lookupSymbolTable(localTable, root->entry.lexeme);
 				//printf("%s %s\n", entry->identifier, entry->type->identifier);
 				// check in global table
 				if (entry == NULL){
+					printf("The entry was not found in Symbol Table\n");
 					entry = lookupSymbolTable(baseTable, root->entry.lexeme);
 				}
 
@@ -85,6 +93,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 					printf("Line %d : Identifier %s unrecognized - undeclared or unaccessible.\n", root->entry.linenumber, root->entry.lexeme);
 					return typeErrPtr;
 				}
+				else printf("%s %s\n",root->entry.lexeme,entry->type->identifier );
 
 				//printf("Exiting id\n");
 				return entry->type->type != Union ? entry->type : typeErrPtr;
@@ -110,7 +119,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case relOp_GE:
 		case relOp_GT:
 			t1 = findType(root->children[0], localTable, baseTable);
-			t2 = findType(root->children[2], localTable, baseTable);
+			t2 = findType(root->children[1], localTable, baseTable);
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
@@ -163,7 +172,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case arithOp_PLUS:
 		case arithOp_MINUS:
 			t1 = findType(root->children[0], localTable, baseTable);
-			t2 = findType(root->children[2], localTable, baseTable);
+			t2 = findType(root->children[1], localTable, baseTable);
+			printf("%d Hello! :%s %s\n",root->type,t1->identifier, t2->identifier);
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
@@ -184,7 +194,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		 */
 		case arithOp_MUL:
 			t1 = findType(root->children[0], localTable, baseTable);
-			t2 = findType(root->children[2], localTable, baseTable);
+			t2 = findType(root->children[1], localTable, baseTable);
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
@@ -436,10 +446,29 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			 * is completely type checked
 			 */
 			if (root->isLinkedListNode) {
+				
+				// if(root->type == )
+				numNodesinLinkedList =0;
+				trav = root;
 
+
+				while(trav!= NULL){
+					numNodesinLinkedList++;
+					trav = trav->next;
+				}
+				if(numNodesinLinkedList==1) {
+					if(trav->data != NULL){
+
+						return findType(trav->data, localTable, baseTable);
+
+					}
+					else return voidPtr;
+
+				}
 				trav = root;
 				error_flag =0;
 				while(trav!= NULL){
+					
 				// earlier root->next
 					if (trav->data != NULL) {
 						if (findType(trav->data, localTable, baseTable)->type == TypeErr)
@@ -458,6 +487,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			else {
 				/* type check all the children */
 
+
 				int children = MAX_PROD_LEN;
 				while (children > 0 && root->children[children-1] == NULL){
 					children--;
@@ -465,6 +495,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				// to remove
 				//printf("%d\n", children);
 				for (int i = 0; i < children; i++){
+
 					// to remove
 					//printf("-%d-", root->children[i]->type);
 					if (findType(root->children[i], localTable, baseTable)->type == TypeErr){
