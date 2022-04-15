@@ -680,3 +680,205 @@ SymbolTable *initializeSymbolTable(astNode *root)
 
     return globalSymbolTable;
 }
+/*
+void parseTypeDefinitions(astNode *root)
+{
+    while (root != NULL)
+    {
+        TypeArrayElement *entry;
+        if (root->data->type == TypeRecordDefinition)
+        {
+            entry = createTypeArrayElement(RecordType, root->data->children[0]->entry.lexeme);
+            // record
+            astNode *recordInfo = root->data->children[0];
+            char *recordName = recordInfo->entry.lexeme;
+
+            UnionOrRecordInfo *record = createUnionOrRecordinfo(recordName);
+            record->isRecord = TRUE;
+            entry->compositeVariableInfo = record;
+
+            astNode *fieldsList = root->data->children[1];
+            astNode *head = fieldsList;
+            while (head != NULL)
+            {
+                astNode *field = head->data;
+
+                char *fieldName = field->children[1]->entry.lexeme;
+
+                astNode *fieldTypeInfo = field->children[0];
+                switch (fieldTypeInfo->type)
+                {
+                case TypeInt:
+                    addToListofFieldsRecord(fieldName, "Int", record);
+                    break;
+
+                case TypeReal:
+                    addToListofFieldsRecord(fieldName, "Real", record);
+                    break;
+
+                case FieldTypeRUID:
+                    addToListofFieldsRecord(fieldName, fieldTypeInfo->entry.lexeme, record);
+                    break;
+                }
+
+                head = head->next;
+            }
+            entry->width = record->totalWidth;
+            insertintoTypeTable(globalTypeTable, entry);
+        }
+        else if (root->data->type == TypeUnionDefinition)
+        {
+            // union
+            entry = createTypeArrayElement(UnionType, root->data->children[0]->entry.lexeme);
+            astNode *unionInfo = root->data->children[0];
+            char *unionName = unionInfo->entry.lexeme;
+
+            UnionOrRecordInfo *newUnion = createUnionOrRecordinfo(unionName);
+            newUnion->isRecord = TRUE;
+            entry->compositeVariableInfo = newUnion;
+
+            astNode *fieldsList = root->data->children[1];
+            astNode *head = fieldsList;
+            while (head != NULL)
+            {
+                astNode *field = head->data;
+
+                char *fieldName = field->children[1]->entry.lexeme;
+
+                astNode *fieldTypeInfo = field->children[0];
+                switch (fieldTypeInfo->type)
+                {
+                case TypeInt:
+                    addToListofFieldsUnion(fieldName, "Int", newUnion);
+                    break;
+
+                case TypeReal:
+                    addToListofFieldsUnion(fieldName, "Real", newUnion);
+                    break;
+
+                case FieldTypeRUID:
+                    addToListofFieldsUnion(fieldName, fieldTypeInfo->entry.lexeme, newUnion);
+                    break;
+                }
+
+                head = head->next;
+            }
+            entry->width = newUnion->totalWidth;
+
+            insertintoTypeTable(globalTypeTable, entry);
+        }
+        else if (root->data->type == DefineType)
+        {
+            char *actualName = root->data->children[1]->entry.lexeme;
+            char *newName = root->data->children[2]->entry.lexeme;
+            TypeArrayElement *alias = createTypeArrayElement(Alias, newName);
+            alias->aliasTypeInfo = lookupTypeTable(globalTypeTable, actualName);
+            insertintoTypeTable(globalTypeTable, alias);
+        }
+
+        root = root->next;
+    }
+}
+
+/*
+void parseTypeDefinitionsPass1(astNode *root)
+{
+    while (root != NULL)
+    {
+        TypeArrayElement *entry;
+        if (root->data->type == TypeRecordDefinition)
+        {
+            entry = createTypeArrayElement(RecordType, root->data->children[0]->entry.lexeme);
+            // record
+            astNode *recordInfo = root->data->children[0];
+            char *recordName = recordInfo->entry.lexeme;
+
+            UnionOrRecordInfo *record = createUnionOrRecordinfo(recordName);
+            record->isRecord = TRUE;
+            entry->compositeVariableInfo = record;
+
+            astNode *fieldsList = root->data->children[1];
+            astNode *head = fieldsList;
+            
+            while (head != NULL)
+            {
+                astNode *field = head->data;
+
+                char *fieldName = field->children[1]->entry.lexeme;
+
+                astNode *fieldTypeInfo = field->children[0];
+                switch (fieldTypeInfo->type)
+                {
+                case TypeInt:
+                    addToListofFieldsRecord(fieldName, "Int", record);
+                    break;
+
+                case TypeReal:
+                    addToListofFieldsRecord(fieldName, "Real", record);
+                    break;
+
+                case FieldTypeRUID:
+                    addToListofFieldsRecord(fieldName, fieldTypeInfo->entry.lexeme, record);
+                    break;
+                }
+
+                head = head->next;
+            }
+            entry->width = record->totalWidth;
+            insertintoTypeTable(globalTypeTable, entry);
+        }
+        else if (root->data->type == TypeUnionDefinition)
+        {
+            // union
+            entry = createTypeArrayElement(UnionType, root->data->children[0]->entry.lexeme);
+            astNode *unionInfo = root->data->children[0];
+            char *unionName = unionInfo->entry.lexeme;
+
+            UnionOrRecordInfo *newUnion = createUnionOrRecordinfo(unionName);
+            newUnion->isRecord = TRUE;
+            entry->compositeVariableInfo = newUnion;
+
+            astNode *fieldsList = root->data->children[1];
+            astNode *head = fieldsList;
+            while (head != NULL)
+            {
+                astNode *field = head->data;
+
+                char *fieldName = field->children[1]->entry.lexeme;
+
+                astNode *fieldTypeInfo = field->children[0];
+                switch (fieldTypeInfo->type)
+                {
+                case TypeInt:
+                    addToListofFieldsUnion(fieldName, "Int", newUnion);
+                    break;
+
+                case TypeReal:
+                    addToListofFieldsUnion(fieldName, "Real", newUnion);
+                    break;
+
+                case FieldTypeRUID:
+                    addToListofFieldsUnion(fieldName, fieldTypeInfo->entry.lexeme, newUnion);
+                    break;
+                }
+
+                head = head->next;
+            }
+            entry->width = newUnion->totalWidth;
+
+            insertintoTypeTable(globalTypeTable, entry);
+        }
+        else if (root->data->type == DefineType)
+        {
+            char *actualName = root->data->children[1]->entry.lexeme;
+            char *newName = root->data->children[2]->entry.lexeme;
+            TypeArrayElement *alias = createTypeArrayElement(Alias, newName);
+            alias->aliasTypeInfo = lookupTypeTable(globalTypeTable, actualName);
+            insertintoTypeTable(globalTypeTable, alias);
+        }
+
+        root = root->next;
+    }
+}
+*/
+

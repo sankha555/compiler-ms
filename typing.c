@@ -237,6 +237,7 @@ struct TypeArrayElement *createTypeArrayElement(Type type, char *identifier)
     entry->functionInfo = NULL;
     entry->next = NULL;
     entry->width = 0;
+    entry->widthPopulated = FALSE;
     return entry;
 }
 
@@ -392,3 +393,44 @@ void addToOutputParameters(char *identifier, char *typeid, FunctionType *info)
         trav->next = parameter;
     }
 }
+
+/*
+void addToListofFieldsRecordOnlyName(char *identifier, char *typeid, UnionOrRecordInfo *info)
+{
+
+    Field *field = createFieldOnlyName(identifier, typeid);
+    //field->offset = info->totalWidth;
+    Field *trav = info->listOfFields;
+    if (trav == NULL)
+    {
+        info->listOfFields = field;
+    }
+    else
+    {
+        while (trav->next != NULL)
+        {
+            trav = trav->next;
+        }
+        trav->next = field;
+    }
+
+    //info->totalWidth += field->width;
+}
+
+
+struct Field *createField(char *identifier, char *typeid)
+{
+
+    Field *field = (Field *)malloc(sizeof(Field));
+
+    field->identifier = (char *)malloc(strlen(identifier) * sizeof(char));
+    strcpy(field->identifier, identifier);
+
+    field->datatype = NULL;
+    //lookupTypeTable(globalTypeTable, typeid);
+    field->width = 0;
+    field->offset = 0;
+    field->next = NULL;
+    return field;
+}
+*/
