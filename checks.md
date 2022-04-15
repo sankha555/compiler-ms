@@ -2,7 +2,7 @@
 
 [Y] An identifier must be declared before its use
 
-[N] An identifier declared globally cannot be declared anywhere else in function definitions
+[Y] An identifier declared globally cannot be declared anywhere else in function definitions
 
 [Y] The types and the number of parameters returned by a function must be the same as that of the parameters used in invoking the function.
 

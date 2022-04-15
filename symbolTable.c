@@ -334,25 +334,19 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
 
         if (isGlobal)
         {
-            // check if the identifier is already in global symbol table
-            if (lookupSymbolTable(globalSymbolTable, identifier))
-            {
-                printf("Line %d: Error - %s already declared in global scope\n", variable->entry.linenumber, identifier);
-            }
+            root = root->next;
+            continue;
         }
-        else
+        // check if the identifier is already in symbol table
+        if (lookupSymbolTable(symbolTable, identifier))
         {
-            // check if the identifier is already in symbol table
-            if (lookupSymbolTable(symbolTable, identifier))
-            {
-                printf("Line %d: Error - %s already declared in this scope\n", variable->entry.linenumber, identifier);
-            }
+            printf("Line %d: Error - %s already declared in this scope\n", variable->entry.linenumber, identifier);
+        }
 
-            // check if the identifier is already in global symbol table
-            if (lookupSymbolTable(globalSymbolTable, identifier))
-            {
-                printf("Line %d: Error - %s already declared in global scope\n", variable->entry.linenumber, identifier);
-            }
+        // check if the identifier is already in global symbol table
+        if (lookupSymbolTable(globalSymbolTable, identifier))
+        {
+            printf("Line %d: Error - %s already declared in global scope\n", variable->entry.linenumber, identifier);
         }
 
         TypeArrayElement *intTypeElement = lookupTypeTable(globalTypeTable, "Int");
@@ -363,62 +357,29 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
         {
         case TypeInt:
             entry = createNewSymbolTableEntry(identifier, false, NULL, intTypeElement, getWidth(Integer));
-            if (isGlobal)
-            {
-                entry->usage = "global Variable";
-                insertintoSymbolTable(globalSymbolTable, entry);
-            }
-            else
-            {
-                entry->usage = "local Variable";
-                insertintoSymbolTable(symbolTable, entry);
-            }
+            entry->usage = "local Variable";
+            insertintoSymbolTable(symbolTable, entry);
 
             break;
         case TypeReal:
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(globalTypeTable, "Real"), getWidth(Real));
-            if (isGlobal)
-            {
-                entry->usage = "global Variable";
-                insertintoSymbolTable(globalSymbolTable, entry);
-            }
-            else
-            {
-                entry->usage = "local Variable";
-                insertintoSymbolTable(symbolTable, entry);
-            }
-
+            entry->usage = "local Variable";
+            insertintoSymbolTable(symbolTable, entry);
             break;
         case TypeRecord:
             typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
-            if (isGlobal)
-            {
-                entry->usage = "global Variable";
-                insertintoSymbolTable(globalSymbolTable, entry);
-            }
-            else
-            {
-                entry->usage = "local Variable";
-                insertintoSymbolTable(symbolTable, entry);
-            }
+            entry->usage = "local Variable";
+            insertintoSymbolTable(symbolTable, entry);
             break;
 
         case TypeUnion:
             typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
-            if (isGlobal)
-            {
-                entry->usage = "global Variable";
-                insertintoSymbolTable(globalSymbolTable, entry);
-            }
-            else
-            {
-                entry->usage = "local Variable";
-                insertintoSymbolTable(symbolTable, entry);
-            }
+            entry->usage = "local Variable";
+            insertintoSymbolTable(symbolTable, entry);
             break;
 
         default:
@@ -629,13 +590,6 @@ SymbolTable *initializeSymbolTable(astNode *root)
     return globalSymbolTable;
 }
 
-
-
-
-
-
-
-
 //only does name based population, i.e. only populates the names of the records and their fields 
 void parseTypeDefinitionsPass1(astNode *root)
 {
@@ -838,7 +792,70 @@ void parseTypeDefinitionsPass2(astNode *root)
 }
 
 
+void parseGlobalDeclarations(astNode *root, SymbolTable *globalSymbolTable)
+{
+    while (root)
+    {
+        ASTtag dataType = root->data->children[0]->type;
+        char *typeidentifier;
+        astNode *variable = root->data->children[1];
 
+        char *identifier = variable->entry.lexeme;
+        SymbolTableEntry *entry;
+
+        bool isGlobal = root->data->children[2] ? true : false;
+
+        if (!isGlobal)
+        {
+            root = root->next;
+            continue;
+        }
+
+        // check if the identifier is already in global symbol table
+        if (lookupSymbolTable(globalSymbolTable, identifier))
+        {
+            printf("Line %d: Error - %s already declared in global scope\n", variable->entry.linenumber, identifier);
+        }
+
+        TypeArrayElement *intTypeElement = lookupTypeTable(globalTypeTable, "Int");
+
+        TypeArrayElement *lookupResult;
+
+        switch (dataType)
+        {
+        case TypeInt:
+            entry = createNewSymbolTableEntry(identifier, false, NULL, intTypeElement, getWidth(Integer));
+            entry->usage = "global variable";
+            insertintoSymbolTable(globalSymbolTable, entry);
+            break;
+        case TypeReal:
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupTypeTable(globalTypeTable, "Real"), getWidth(Real));
+            entry->usage = "global variable";
+            insertintoSymbolTable(globalSymbolTable, entry);
+            break;
+        case TypeRecord:
+            typeidentifier = root->data->children[0]->entry.lexeme;
+            lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
+            entry->usage = "global variable";
+            insertintoSymbolTable(globalSymbolTable, entry);
+            break;
+
+        case TypeUnion:
+            typeidentifier = root->data->children[0]->entry.lexeme;
+            lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
+            entry->usage = "global variable";
+            insertintoSymbolTable(globalSymbolTable, entry);
+            break;
+
+        default:
+            break;
+        }
+
+        root = root->next;
+    }
+}
 
 
 SymbolTable *initializeSymbolTableNew(astNode *root)
@@ -880,10 +897,27 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     // printf("Pass 2 for other functions completed\n");
     parseTypeDefinitionsPass2(mainFunction->children[0]->children[0]);
+<<<<<<< HEAD
     // printf("Pass 2 completed\n");
+=======
+    printf("Pass 2 completed\n");
+
+    // now parse declarations for globals
+>>>>>>> 733d95b5dd46a6e66ef7b1a33a34c1fadeb9fb7e
     head = otherFunctions;
+    while (head)
+    {
+        astNode *current = head->data;
+        astNode *stmts = current->children[3];
+        parseGlobalDeclarations(stmts->children[1], globalSymbolTable);
+        head = head->next;
+    }
 
+    parseGlobalDeclarations(mainFunction->children[0]->children[1], globalSymbolTable);
 
+    printASingleSymbolTable(globalSymbolTable, stdout);
+
+    head = otherFunctions;
     while (head)
     {
         astNode *current = head->data;
@@ -916,6 +950,7 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     return globalSymbolTable;
 }
+<<<<<<< HEAD
 
 
 /**
@@ -929,3 +964,5 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
 
 
+=======
+>>>>>>> 733d95b5dd46a6e66ef7b1a33a34c1fadeb9fb7e

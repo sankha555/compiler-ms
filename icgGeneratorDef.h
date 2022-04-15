@@ -26,7 +26,7 @@ typedef enum ICGrule {
     FUNC_DEF_END, // pop from stack into EBP, then return
     FUNC_DEF_MAIN,
     CONVERT_TO_REAL,
-    SETUP_FUNC_CALL_PARAM_TRANSFER,
+    SETUP_CALL_TRANS,
     PUSH_INPUT_VAR,
     PUSH_INPUT_IMMEDIATE,
     CALL_FUNC,
