@@ -57,6 +57,10 @@ typedef struct SymbolTable {
 
 SymbolTable* listOfSymbolTables;    // a linked list of pointers to all symbol tables for the program
 
+<<<<<<< HEAD
 //astNode* aliasTemp;
+=======
+// astNode* aliasTemp;
+>>>>>>> 0e3267e9a7d15f40e2a4b75a3c764498129ad81b
 
 #endif
