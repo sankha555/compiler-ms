@@ -77,6 +77,7 @@ typedef struct TypeArrayElement
     struct FunctionType *functionInfo;               // points to the function type expression if Record/Union otherwise NULL
     struct TypeArrayElement *next;                   // used in the LinkedList in the hash table Implementation fo the type table
     int width;
+    boolean widthPopulated;
 
 } TypeArrayElement;
 

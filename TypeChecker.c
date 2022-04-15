@@ -15,6 +15,10 @@
  * uses preorder and linkedlist traversal of ast subtree
  */
 struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, SymbolTable* baseTable) {
+
+
+	astNode *trav ;
+	int error_flag;
 	
 	if (root == NULL){
 		// to remove
@@ -400,16 +404,26 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			 * is completely type checked
 			 */
 			if (root->isLinkedListNode) {
+
+				trav = root;
+				error_flag =0;
+				while(trav!= NULL){
 				// earlier root->next
-				if (root->data != NULL) {
-					if (findType(root->data, localTable, baseTable)->type == TypeErr)
-						return typeErrPtr;
+					if (trav->data != NULL) {
+						if (findType(trav->data, localTable, baseTable)->type == TypeErr)
+								{
+									error_flag++;
+								}
+						
+					}
+					trav = trav->next;
 				}
-				if (root->next == NULL){
-					return voidPtr;
-				}
-				return findType(root->next, localTable, baseTable);
-			} else {
+				
+				if(error_flag) return typeErrPtr;
+				else return voidPtr;
+			}
+				
+			else {
 				/* type check all the children */
 
 				int children = MAX_PROD_LEN;
