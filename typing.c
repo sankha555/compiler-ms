@@ -26,11 +26,14 @@ void printUnionOrRecordInfo(FILE* fp, UnionOrRecordInfo *info)
     }
     fprintf(fp, "identifier: %s, isUnion: %d, isRecord: %d, totalWidth: %d\n", info->identifier, info->isUnion, info->isRecord, info->totalWidth);
     Field *field = info->listOfFields;
+    printf("Fields:\n");
     while (field != NULL)
     {
         fprintf(fp, "identifier: %s, datatype: %s\n", field->identifier, field->datatype->identifier);
         field = field->next;
     }
+
+    printf("\n");
 }
 
 void printFunctionInfo(FILE *fp, FunctionType *info)
@@ -42,12 +45,14 @@ void printFunctionInfo(FILE *fp, FunctionType *info)
     }
     fprintf(fp, "identifier: %s\n", info->identifier);
     FunctionParameter *parameter = info->inputParameters;
+    printf("Input Parameters:\n");
     while (parameter != NULL)
     {
         fprintf(fp, "identifier: %s, datatype: %s\n", parameter->identifier, parameter->datatype->identifier);
         parameter = parameter->next;
     }
     parameter = info->outputParameters;
+    printf("Output Parameters:\n");
     while (parameter != NULL)
     {
         fprintf(fp, "identifier: %s, datatype: %s\n", parameter->identifier, parameter->datatype->identifier);
@@ -98,9 +103,27 @@ void printTypeArrayElement(FILE* fp, TypeArrayElement *t)
         printAliasInfo(fp, t->aliasTypeInfo);
         break;
     default:
-        fprintf(fp, "Unknown");
+        fprintf(fp, "Unknown\n");
         break;
     }
+}
+
+void printGlobalTypeTableRecordsAndUnions(FILE* fp)
+{
+    fprintf(fp, "================ Records and Unions ================\n");
+    for (int i = 0; i < K_MAP_SIZE; i++)
+    {
+        TypeArrayElement *head = globalTypeTable->tableEntries[i];
+        while (head != NULL)
+        {
+            if (head->type == UnionType || head->type == RecordType)
+            {
+                printTypeArrayElement(fp, head);
+            }
+            head = head->next;
+        }
+    }
+    fprintf(fp, "================================================\n\n\n");
 }
 
 void printGlobalTypeTable(FILE* fp)

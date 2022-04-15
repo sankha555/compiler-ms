@@ -97,6 +97,7 @@ typedef struct TypeTable
 } TypeTable;
 
 void printGlobalTypeTable(FILE *fp);
+void printGlobalTypeTableRecordsAndUnions(FILE *fp);
 void printTypeArrayElement(FILE* fp, TypeArrayElement *t);
 
 int getWidth(Type);
