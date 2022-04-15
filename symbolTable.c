@@ -106,6 +106,7 @@ int insertintoSymbolTable(SymbolTable *symbolTable, SymbolTableEntry *entry)
     {
         symbolTable->tableEntries[hashTableIndex] = entry;
         symbolTable->totalWidth += entry->width;
+        entry->parentTable = symbolTable;
 
         return 1;
     }
@@ -122,6 +123,7 @@ int insertintoSymbolTable(SymbolTable *symbolTable, SymbolTableEntry *entry)
     }
     pointer->next = entry;
     symbolTable->totalWidth += entry->width;
+    entry->parentTable = symbolTable;
 
     return 1;
 }
