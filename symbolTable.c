@@ -909,7 +909,7 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     parseGlobalDeclarations(mainFunction->children[0]->children[1], globalSymbolTable);
 
-    printASingleSymbolTable(globalSymbolTable, stdout);
+    //printASingleSymbolTable(globalSymbolTable, stdout);
 
     head = otherFunctions;
     while (head)
