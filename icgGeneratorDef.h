@@ -36,7 +36,22 @@ typedef enum ICGrule {
     WRITE_IMMEDIATE,
     WRITE_VAR,
     ASSIGN_IMMEDIATE_INT,
-    ASSIGN_IMMEDIATE_REAL
+    ASSIGN_IMMEDIATE_REAL,
+    BOOLEAN_NOT,
+    BOOLEAN_AND,
+    BOOLEAN_OR,
+    REL_EQ_INT,
+    REL_EQ_REAL,
+    REL_GEQ_INT,
+    REL_GEQ_REAL,
+    REL_GT_INT,
+    REL_GT_REAL,
+    REL_LEQ_INT,
+    REL_LEQ_REAL,
+    REL_LT_INT,
+    REL_LT_REAL,
+    REL_NEQ_INT,
+    REL_NEQ_REAL
 } ICGrule;
 
 typedef struct immediateOrSTE {
