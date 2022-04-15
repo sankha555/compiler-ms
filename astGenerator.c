@@ -614,11 +614,6 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         ptr->next = root->children[1]->ptr;
         root->ptr = ptr;
         freeChildren(root, 0, 1);
-
-        // if(aliasTemp == NULL){
-        //     aliasTemp = ptr;
-        //     printf("Alias ID: %s\n", aliasTemp->data->entry.lexeme);
-        // }
         
         return ptr;
     case 46:
@@ -836,7 +831,8 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         createAbstractSyntaxTree(root->children[1]);
         ptr = newASTnode(root->children[0]->ptr->type);
         ptr->children[0] = root->inhptr;
-        ptr->children[1] = root->children[1]->ptr;
+        ptr->children[1] = root->children[0]->ptr;
+        ptr->children[2] = root->children[1]->ptr;
         root->children[2]->inhptr = ptr;
         createAbstractSyntaxTree(root->children[2]);
         root->ptr = root->children[2]->ptr;
