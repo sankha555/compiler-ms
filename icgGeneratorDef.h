@@ -61,7 +61,6 @@ typedef struct immediateOrSTE {
 } immediateOrSTE;
 
 typedef struct pentuple {
-    char* label;
     ICGrule rule;
     SymbolTableEntry* result;
     SymbolTableEntry* argument[2];
