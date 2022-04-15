@@ -128,7 +128,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			}
 			if (t1->type == t2->type && (t1->type == Integer || t1->type == Real)){
 				return t1;
-			} else if (t1->type == Record && (t1 == t2)) {
+			} else if (t1->type == RecordType && (t1 == t2)) {
 				return t1;
 			} else {
 				printf("Line %d : Relational operator - incompatible operands.\n", root->children[0]->data->entry.linenumber);
@@ -181,7 +181,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[1], localTable, baseTable);
-			//printf("%d Hello! :%s %s\n",root->type,t1->identifier, t2->identifier);
+			//printf("%d", t1->type);
+			//printf("Hello! :%s %s\n", t1->identifier, t2->identifier);
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
@@ -189,7 +190,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return intPtr;
 			}else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
 				return realPtr;
-			} else if (t1->type == Record) {
+			} else if (t1->type == RecordType) {
+				//printf("entered here ...%s %s\n", t1->identifier, t2->identifier);
 				return checkTypeEquality(t1, t2);
 			} else {
 				printf("Line %d : Addition/Subtraction - real or integer operands required.\n", root->children[0]->data->entry.linenumber);
@@ -203,7 +205,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case arithOp_MUL:
 			//printf("Entered Arithmetic Multiply.\n");
 			t1 = findType(root->children[0], localTable, baseTable);
-			t2 = findType(root->children[1], localTable, baseTable);
+			t2 = findType(root->children[2], localTable, baseTable);
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
@@ -215,15 +217,17 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				(t1->type == Real && t2->type == Real)) {
 				return realPtr;
 			}
-			else if (t1->type == Record && t2->type == Integer) {
+			else if (t1->type == RecordType && t2->type == Integer) {
 				return t1;
 			}
-			else if (t2->type == Record && t1->type == Integer) {
+			else if (t2->type == RecordType && t1->type == Integer) {
 				return t2;
 			}
-			else if (t1->type == Record) {
+			/*
+			else if (t1->type == RecordType) {
 				return checkTypeEquality(t1, t2);
 			}
+			*/
 			else {
 				printf("Line %d : Multiplication - real or integer operands required.\n", root->children[0]->data->entry.linenumber);
 				return typeErrPtr;
@@ -242,7 +246,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			}
 			if ((t1->type == Integer || t1->type == Real) && (t2->type == Integer || t2->type == Real)){
 				return realPtr;
-				//else if (t1->type == Record)
+				//else if (t1->type == RecordType)
 				//	return checkTypeEquality(t1, t2);
 			} else {
 				printf("Line %d : Division - real or integer operands required.\n", root->children[0]->data->entry.linenumber);
@@ -274,7 +278,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				}	
 			else if (t1->type == Real && t2->type == Real)
 				return voidPtr;
-			else if (t1->type == Record) {
+			else if (t1->type == RecordType) {
 				return checkTypeEquality(t1, t2);
 			} else {
 				
@@ -420,7 +424,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				// }
 
 				// passing union parameters not allowed
-				if (t1->type == Union || t2->type == Union){
+				if (t1->type == UnionType || t2->type == UnionType){
 					printf("Line %d : Input parameter cannot be of type union\n", root->children[1]->entry.linenumber);
 					return typeErrPtr;
 				}
@@ -742,6 +746,8 @@ int findLengthFormal(FunctionParameter* head) {
 /* useful for checking record type equality */
 struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1, 
 		struct TypeArrayElement* t2) {
+	//printf("Entered type check equality.\n");
+	//printf("%s %s\n", t1->identifier, t2->identifier);
 	if (t1 == typeErrPtr || t2 == typeErrPtr)
 		return typeErrPtr;
 	if (t1 == t2) {
@@ -910,7 +916,7 @@ boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 			return FALSE;
 		
 		case If:
-			printf("here in if.\n");
+			//printf("here in if.\n");
 			if (markVariableChanges(root->children[1], toVisitLL) == TRUE) {
 				//printf("if first statement.\n");
 				return TRUE;
