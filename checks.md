@@ -12,7 +12,7 @@
 
 [] A variant record passed as a parameter must have a discriminator named as tagvalue
 
-[] The parameters being returned by a function must be assigned a value. If a parameter does not get a value assigned within the function definition, it should be reported as an error
+[Y] The parameters being returned by a function must be assigned a value. If a parameter does not get a value assigned within the function definition, it should be reported as an error
 
 [Y] The function that does not retum any value, must be invoked appropriately
 
@@ -30,4 +30,4 @@
 
 [N] A function definition for a function being used (say F1) by another (say F2) must precede the definition of the function using it(e. F2)
 
-[N] A while statement must redefine the variable that participates in the iterations.
+[Y] A while statement must redefine the variable that participates in the iterations.

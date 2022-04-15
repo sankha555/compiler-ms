@@ -5,7 +5,8 @@ _function1
         %type union #student d5;
         c2 <--- d2cd;
         b5d <--- d3;
-        %[c2, d2cd] <--- call _function2 with parameters [c2, d2cd];
+        write(d3);
+        call _function2 with parameters [c2, d2cd];
 
     return [b5d, 3]; 
 end
@@ -38,7 +39,9 @@ _main
     b5 <--- b4 + b5 - 1.56;
 	b5 <--- 4.67;
     while (b5 == b4)
-        write(c5);
+        while (b5 < 1)
+            b5 <--- 1;
+        endwhile
     endwhile
 
     %[b5, b4] <--- call _function1 with parameters [d5, b4];
