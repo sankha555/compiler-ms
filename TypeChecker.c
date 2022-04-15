@@ -178,7 +178,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		 */
 		case arithOp_PLUS:
 		case arithOp_MINUS:
-			//printf("Entered Arithmetic Plus/Minus.\n");
+			printf("Entered Arithmetic Plus/Minus.\n");
 
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[1], localTable, baseTable);
@@ -191,7 +191,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return intPtr;
 			}else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
 				return realPtr;
-			} else if (t1->type == RecordType) {
+			} else if (t1->type == RecordType || (t1->type == Alias && t1->aliasTypeInfo->type == RecordType)) {
 				//printf("entered here ...%s %s\n", t1->identifier, t2->identifier);
 				return checkTypeEquality(t1, t2);
 			} else {
@@ -789,7 +789,7 @@ int findLengthFormal(FunctionParameter* head) {
 struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1, 
 		struct TypeArrayElement* t2) {
 	//printf("Entered type check equality.\n");
-	//printf("%s %s\n", t1->identifier, t2->identifier);
+	printf("%s %s\n", t1->identifier, t2->identifier);
 	if (t1 == typeErrPtr || t2 == typeErrPtr)
 		return typeErrPtr;
 	if (t1 == t2) {

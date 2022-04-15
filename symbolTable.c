@@ -128,6 +128,10 @@ int insertintoSymbolTable(SymbolTable *symbolTable, SymbolTableEntry *entry)
     return 1;
 }
 
+
+
+
+
 SymbolTableEntry *createNewSymbolTableEntry(char *identifier, boolean isFunction, SymbolTable *tablePointer, TypeArrayElement *type, int width)
 {
     SymbolTableEntry *newEntry = (SymbolTableEntry *)malloc(sizeof(SymbolTableEntry));
@@ -244,8 +248,21 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
 
             addToInputParameters(identifier, typeidentifier, funcType);
             break;
-        default:
+        case TypeRecordUnionId: 
+            typeidentifier = root->data->children[0]->entry.lexeme;
+            lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
+            entry->usage = "input Parameter";
+
+            printf("DefineType input encountered...\n");
+
+            insertintoSymbolTable(symbolTable, entry);
+
+            addToInputParameters(identifier, typeidentifier, funcType);
             break;
+        default: 
+            break;
+
         }
 
         root = root->next;
@@ -312,10 +329,21 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
 
             addToOutputParameters(identifier, typeidentifier, funcType);
             break;
-        default:
+        case TypeRecordUnionId:
+            typeidentifier = root->data->children[0]->entry.lexeme;
+            lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
+            entry->usage = "output Parameter";
+            insertintoSymbolTable(symbolTable, entry);
+
+            addToOutputParameters(identifier, typeidentifier, funcType);
             break;
+        default: 
+            break;
+
         }
 
+        
         root = root->next;
     }
 }
@@ -383,8 +411,17 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
             entry->usage = "local Variable";
             insertintoSymbolTable(symbolTable, entry);
             break;
+        case TypeRecordUnionId:
+            typeidentifier = root->data->children[0]->entry.lexeme;
+            lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
+            entry->usage = "local Variable";
+            insertintoSymbolTable(symbolTable, entry);
+            break;
+        
 
         default:
+            printf("Default entered for %s %d\n",root->data->children[0]->entry.lexeme, dataType);
             break;
         }
 
