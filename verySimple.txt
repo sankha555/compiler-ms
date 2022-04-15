@@ -7,19 +7,19 @@ _function1
         b5d <--- d3;
         %[c2, d2cd] <--- call _function2 with parameters [c2, d2cd];
 
-    return [b5d, 3.56]; 
+    return [b5d, 3]; 
 end
 
 _function2
-    input parameter list [int c2, int d2cd]
-    output parameter list [int b5d, int d3];
+    input parameter list [int c2, int d2cd];
         type int: b4;
+		type int: b4;
         %type union #student d5;
-        c2 <--- d2cd;
-        b5d <--- d3;
+        %c2 <--- d2cd;
+        %b5d <--- d3;
         %[c2, d2cd] <--- call _function1 with parameters [c2, d2cd];
 
-    return [b5d, d3]; 
+    return;
 end
 
 _main
@@ -33,14 +33,16 @@ _main
     type int: b4: global;
     type real: c5;
     type real: c4;
-    type union #student d5;
+    type union #student: d5;
     
-    b5 <--- b4 + b5 - 1;
+    b5 <--- b4 + b5 - 1.56;
+	b5 <--- 4.67;
     while (b5 == b4)
         write(c5);
     endwhile
 
     %[b5, b4] <--- call _function1 with parameters [d5, b4];
+    call _function2 with parameters [b5, b4];
 
     return;
 end

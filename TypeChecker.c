@@ -331,7 +331,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
          * TK_PARAMETERS <inputParameters> TK_SEM
 		 */
 		case FuncCall:
-			printf("Entered FuncCall\n.");
+			//printf("Entered FuncCall\n.");
 			// function identifier should be present in the symbol table
 			entry = lookupSymbolTable(baseTable, root->children[1]->entry.lexeme);
 			SymbolTableEntry* callingFunctionEntry = lookupSymbolTable(baseTable, localTable->tableID);
@@ -689,7 +689,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 		// obtain the symbol table for the current function
 		printf("Entering Function: %s...\n", funcLexeme);
 		SymbolTableEntry* currFunc = lookupSymbolTable(baseTable, funcLexeme);
-		printf("%s\n", currFunc->identifier);
+		//printf("%s\n", currFunc->identifier);
 		localTable = currFunc->tablePointer;
 
 		Type elem = findType(funcNode->data, localTable, baseTable)->type;
@@ -942,11 +942,11 @@ boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 					children--;
 				}
 				// to remove
-				printf("%d\n", children);
+				//printf("%d\n", children);
 				for (int i = 0; i < children; i++){
 					// to remove
 					//printf("-%d-", root->children[i]->type);
-					printf("ASTNode var: %s\n", root->children[i]->entry.lexeme);
+					//printf("ASTNode var: %s\n", root->children[i]->entry.lexeme);
 					if (markVariableChanges(root->children[i], toVisitLL) == TRUE){
 						return TRUE;
 					}
