@@ -1,10 +1,11 @@
 _function1
     input parameter list [int c2, int d2cd]
     output parameter list [int b5d, int d3]; 
-        b5d<---c2+ 234- d2cd;
-        if(b5d<20)
+        b5d<---c2+ 234 - d2cd;
+        
+        if(b5d < 20)
         then
-            b5d<---2;
+            b5d <---2;
         endif
 
     return [b5d, d3]; 
@@ -25,14 +26,27 @@ end
 
 
 _main
+    
+
+    record #marks
+		type real : maths; 
+		type real: physics; 
+		type real: chemistry;
+	endrecord
+
+    type record #marks : d2;
     type real : b5;
 	type real: c5;
 	type real: d5;
 	type real: c2;
-    type real: c2;
+    %type real: c2;
+    %type int: a5;
+    % b5 <---  + 1;
 
-    b5 <--- 1;
 
+    
+    c2 <--- d2 + 1;
+    
     % while ((b5 == c5) &&& (d5 < c2))
     %    if (b5 > d5)
     %    then
