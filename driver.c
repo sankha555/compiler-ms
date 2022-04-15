@@ -13,7 +13,8 @@
 #include "symbolTableDef.h"
 #include "symbolTable.h"
 #include "TypeChecker.h"
-// #include "icgGenerator.h"
+#include "icgGeneratorDef.h"
+#include "icgGenerator.h"
 #include <time.h>
 #include <stdlib.h>
 
@@ -356,6 +357,16 @@ int main(int argc, char *argv[])
                 globalSymbolTable = initializeSymbolTableNew(astRoot);
                 
                 int typeCheckingResult = typeCheck(astRoot, globalSymbolTable);
+
+                break;
+
+            case 10:
+
+                globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
+
+                generateCompleteICGcode(astRoot,globalSymbolTable);
+
+                printICG(stdout);
 
                 break;
 
