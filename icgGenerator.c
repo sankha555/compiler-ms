@@ -215,6 +215,7 @@ SymbolTableEntry* createRecordItemAlias(astNode* root, SymbolTable* currentSymbo
         return retResult;
     }
 
+    // printf("weird as to why this is.\n");
     return retResult;
 
 }
@@ -299,6 +300,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
                 parseICGcode(root->next,currentSymbolTable,globalSymbolTable, areInputParams, functionCalledSte);
             }
 
+            // printf("hmm1.\n");
             break;
 
         case AssignmentOperation:
@@ -485,6 +487,8 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             pentupleCode[numberOfPentuples].jumpLabel = temp;
             numberOfPentuples++;
 
+            parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
             //add all the statements within the loop in the code
             parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
 
@@ -501,12 +505,20 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             //there is no else part to the if
             if(root->children[2] == NULL) {
                 
+                // printf("contains no else body.\n");
+
                 char* temp = generateNewLabel();
+
+                // printf("label created.\n");
+
+                parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+
                 pentupleCode[numberOfPentuples].rule = IF_FALSE_GOTO_L;
                 pentupleCode[numberOfPentuples].result = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
                 pentupleCode[numberOfPentuples].jumpLabel = temp;
                 numberOfPentuples++;
 
+                // printf("added ICG jump on false.\n");
                 parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
 
                 pentupleCode[numberOfPentuples].rule = INSERT_LABEL;
@@ -515,8 +527,12 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
                 
             } else {  //contains an else body
 
+                // printf("contains else body.\n");
+
                 char* temp1 = generateNewLabel();
                 char* temp2 = generateNewLabel();
+
+                parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
 
                 pentupleCode[numberOfPentuples].rule = IF_FALSE_GOTO_L;
                 pentupleCode[numberOfPentuples].result = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
@@ -984,6 +1000,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             pentupleCode[numberOfPentuples].result = boolResult;
             pentupleCode[numberOfPentuples].argument[0] = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
             pentupleCode[numberOfPentuples].argument[1] = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+            numberOfPentuples++;
 
             root->dataPlace = boolResult->identifier;
 
@@ -1000,6 +1017,7 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
             pentupleCode[numberOfPentuples].result = boolResult;
             pentupleCode[numberOfPentuples].argument[0] = findVariable(root->children[0]->dataPlace,currentSymbolTable,globalSymbolTable);
             pentupleCode[numberOfPentuples].argument[1] = findVariable(root->children[1]->dataPlace,currentSymbolTable,globalSymbolTable);
+            numberOfPentuples++;
 
             root->dataPlace = boolResult->identifier;
 
