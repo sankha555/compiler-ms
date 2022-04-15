@@ -327,6 +327,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 
 			// variable is a record or a union
 			if (entry->type->compositeVariableInfo != NULL) {
+				//printf("Entered field gate\n");
 				return findTypeField(root->next, entry->type->compositeVariableInfo->listOfFields);
 			} else {
 				printf("Empty composite!\n");
@@ -612,13 +613,17 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
  */
 
 struct TypeArrayElement* findTypeField(astNode* root, struct Field* fieldLL) {
+	//printf("Reaching in fields\n");
 	// control flow should not reach this point otherwise
 	if (root == NULL || fieldLL == NULL) {
 		printf("Field not found.\n");
 		return typeErrPtr;
 	}
+	
+	//printf("Reached in fields0%s\n", root->data->entry.lexeme);
 
-	struct Field* fieldSelected = searchInFieldLL(root->entry.lexeme, fieldLL);
+	struct Field* fieldSelected = searchInFieldLL(root->data->entry.lexeme, fieldLL);
+	//printf("Reached in fields1\n");
 
 	if (fieldSelected == NULL) {
 		printf("Field not found.\n");
@@ -652,7 +657,7 @@ struct TypeArrayElement* findTypeField(astNode* root, struct Field* fieldLL) {
 
 		/* replace the localTable here with the mini-table for record */
 		if (entryType->compositeVariableInfo != NULL) {
-			printf("Entered here.\n");
+			//printf("Entered here.\n");
 			return findTypeField(root->next, entryType->compositeVariableInfo->listOfFields);
 		} else {
 			printf("Empty record!\n");
