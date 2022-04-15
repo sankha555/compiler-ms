@@ -223,7 +223,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return checkTypeEquality(t1, t2);
 			}
 			else {
-				printf("Line %d : Multiplication - real or integer operands required.\n", root->children[0]->data->entry.linenumber);
+				printf("Line %d : Multiplication - real, integer or record operands required.\n", root->children[0]->data->entry.linenumber);
 				return typeErrPtr;
 			}
 
@@ -240,8 +240,6 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			}
 			if ((t1->type == Integer || t1->type == Real) && (t2->type == Integer || t2->type == Real)){
 				return realPtr;
-				//else if (t1->type == Record)
-				//	return checkTypeEquality(t1, t2);
 			} else {
 				printf("Line %d : Division - real or integer operands required.\n", root->children[0]->data->entry.linenumber);
 				return typeErrPtr;
@@ -266,18 +264,15 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			}
 			*/
 			if (t1->type == Integer && t2->type == Integer)
-				{
-					//printf("Hello!\n");
-					return voidPtr;
-				}	
+			{
+				return voidPtr;
+			}	
 			else if (t1->type == Real && t2->type == Real)
 				return voidPtr;
 			else if (t1->type == Record) {
 				return checkTypeEquality(t1, t2);
 			} else {
-				
-				printf("Assignment Error\n");
-				//printf("Line %d: Assignment error - incompatible types %s of type %s and %s of type %s.\n", root->children[0]->data->entry.linenumber, root->children[0]->data->entry.lexeme , t1->identifier, root->children[1]->data->entry.lexeme, t2->identifier);
+				printf("Line %d : Assignment Error - %s result cannot be assigned to %s of type %s \n", root->children[0]->data->entry.linenumber, t2->identifier, root->children[0]->data->entry.lexeme, t1->identifier);
 				return typeErrPtr;
 			}
 
@@ -331,7 +326,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
          * TK_PARAMETERS <inputParameters> TK_SEM
 		 */
 		case FuncCall:
-			printf("Entered FuncCall\n.");
+			//printf("Entered FuncCall\n");
 			// function identifier should be present in the symbol table
 			entry = lookupSymbolTable(baseTable, root->children[1]->entry.lexeme);
 			SymbolTableEntry* callingFunctionEntry = lookupSymbolTable(baseTable, localTable->tableID);
@@ -355,14 +350,14 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			// IMPORTANT: please ensure that this is not NULL for a function
 			struct FunctionType* funcInfo = entry->type->functionInfo;
 			struct FunctionType* callingFuncInfo = callingFunctionEntry->type->functionInfo;
-			/*
-			printf("%d %d \n", callingFuncInfo->declarationSeqNum, funcInfo->declarationSeqNum);
+			
+			//printf("%d %d \n", callingFuncInfo->declarationSeqNum, funcInfo->declarationSeqNum);
 			if(callingFuncInfo->declarationSeqNum < funcInfo->declarationSeqNum){
 
 				printf("Line %d : function %s should be defined before %s\n", root->children[1]->entry.linenumber, funcInfo->identifier, callingFuncInfo->identifier);
 				return typeErrPtr;
 			}
-			*/
+			
 
 			if (funcInfo == NULL) {
 				printf("Erroneous function entry in symbol table.\n");
@@ -687,9 +682,9 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 		char* funcLexeme = funcNode->data->children[0]->entry.lexeme;
 
 		// obtain the symbol table for the current function
-		printf("Entering Function: %s...\n", funcLexeme);
+		//printf("Entering Function: %s...\n", funcLexeme);
 		SymbolTableEntry* currFunc = lookupSymbolTable(baseTable, funcLexeme);
-		printf("%s\n", currFunc->identifier);
+		//printf("%s\n", currFunc->identifier);
 		localTable = currFunc->tablePointer;
 
 		Type elem = findType(funcNode->data, localTable, baseTable)->type;
@@ -704,7 +699,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 
 	/* traverse <mainFunction> */
 	char *mainLexeme = MAIN_NAME;
-	printf("Entering Function: %s...\n", mainLexeme);
+	//printf("Entering Function: %s...\n", mainLexeme);
 	localTable = (lookupSymbolTable(baseTable, mainLexeme))->tablePointer;
 	if (findType(root->children[1], localTable, baseTable)->type != Void) {
 		printf("TYPE ERROR DETECTED IN MAIN.\n");
@@ -942,7 +937,7 @@ boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 					children--;
 				}
 				// to remove
-				printf("%d\n", children);
+				//printf("%d\n", children);
 				for (int i = 0; i < children; i++){
 					// to remove
 					//printf("-%d-", root->children[i]->type);

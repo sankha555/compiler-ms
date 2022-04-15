@@ -820,17 +820,17 @@ void parseTypeDefinitionsPass2(astNode *root)
         {
 
             width = populateWidthandOffset(root->data->children[0]->entry.lexeme);
-            printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
+            //printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
         }
         else if(root->data->type == TypeUnionDefinition)
         {
             width = populateWidthandOffset(root->data->children[0]->entry.lexeme);
-            printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
+            //printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
         }
         else if(root->data->type == DefineType){
 
             width = populateWidthandOffset(root->data->children[2]->entry.lexeme);
-            printf("%s size : %d\n", root->data->children[2]->entry.lexeme, width);
+            //printf("%s size : %d\n", root->data->children[2]->entry.lexeme, width);
         }
         
         root = root->next;
@@ -853,7 +853,7 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     astNode *head = otherFunctions;
 
-    printf("Going to start Pass 1\n");
+    //printf("Going to start Pass 1\n");
     // go to otherFunc, it is a linked list of functions
     while (head)
     {
@@ -862,14 +862,14 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
         parseTypeDefinitionsPass1(stmts->children[0]);
         head = head->next;
     }
-    printf("Pass 1 for otherFunctions Completed\n");
+    //printf("Pass 1 for otherFunctions Completed\n");
 
     parseTypeDefinitionsPass1(mainFunction->children[0]->children[0]);
 
-    printf("Pass1 completed\n");
+    // printf("Pass1 completed\n");
     head = otherFunctions;
 
-    printf("Going to start Pass 2\n");
+    // printf("Going to start Pass 2\n");
     while (head)
     {
         astNode *current = head->data;
@@ -878,9 +878,9 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
         head = head->next;
     }
 
-    printf("Pass 2 for other functions completed\n");
+    // printf("Pass 2 for other functions completed\n");
     parseTypeDefinitionsPass2(mainFunction->children[0]->children[0]);
-    printf("Pass 2 completed\n");
+    // printf("Pass 2 completed\n");
     head = otherFunctions;
 
 
@@ -916,10 +916,6 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     return globalSymbolTable;
 }
-
-
-
-
 
 
 /**

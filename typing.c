@@ -274,6 +274,9 @@ struct FunctionType *createFunctionType(char *identifier)
     func->inputParameters = NULL;
     func->outputParameters = NULL;
 
+    funcSeqNum++;
+    func->declarationSeqNum = funcSeqNum;
+
     func->inputParamsWidth = 0;
     func->outputParamsWidth = 0;
     func->outputParamsOffset = 0;
