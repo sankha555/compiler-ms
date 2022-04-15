@@ -35,6 +35,9 @@ typedef struct SymbolTableEntry {
     int width;
     int offset;
 
+
+    struct SymbolTable* parentTable;
+
     char* usage; //stores the usage of the identifier, for example, if it is inparameter, outparameter, or variable
 
     struct SymbolTableEntry* next;
