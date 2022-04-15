@@ -294,42 +294,8 @@ int main(int argc, char *argv[])
             case 8:
                 globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
                 
-                printf("============ GLOBALLY VISIBLE RECORDS ============\n");
 
-                int f = 0;
-                for(int i = 0; i < K_MAP_SIZE; i++){
-                    SymbolTableEntry* tableEntry = globalSymbolTable->tableEntries[i];
-                    while(tableEntry != NULL){
-                        if(tableEntry->type != NULL && tableEntry->type->type == RecordType){
-                            f = 1;
-                            printf("%s \t\t<", tableEntry->type->identifier);
-                            // printing type expression
-                            UnionOrRecordInfo* info = tableEntry->type->compositeVariableInfo;
-                            Field* field = info->listOfFields;
-                            
-                            int first = 1;
-                            while(field != NULL){
-                                if(!first){
-                                    printf(", ");
-                                }else{
-                                    first = 0;
-                                }
-                                printf("%s", field->datatype->identifier);
-
-                                field = field->next;
-                            }
-                            // printing width
-                            printf("> %10d\n", tableEntry->width);
-
-                        }
-
-                        tableEntry = tableEntry->next;
-                    }
-                }
-
-                if(!f){
-                    printf("%40s", "No globally visible records yet\n");
-                }
+                
                 printf("==================================================\n");
                 break;
 

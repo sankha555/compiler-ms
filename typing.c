@@ -5,6 +5,24 @@
 #include "typing.h"
 #include "globalDef.h"
 
+void printGlobalTypeTableRecordsAndUnions(FILE* fp)
+{
+    fprintf(fp, "================ Records and Unions ================\n");
+    for (int i = 0; i < K_MAP_SIZE; i++)
+    {
+        TypeArrayElement *head = globalTypeTable->tableEntries[i];
+        while (head != NULL)
+        {
+            if (head->type == UnionType || head->type == RecordType)
+            {
+                printTypeArrayElement(fp, head);
+            }
+            head = head->next;
+        }
+    }
+    fprintf(fp, "================================================\n\n\n");
+}
+
 FunctionParameter* getFunctionParameters(char* identifier, boolean wantOutputParams) {
     TypeArrayElement* funcElement = lookupTypeTable(globalTypeTable,identifier);
     if(funcElement->type != Function) {
