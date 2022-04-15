@@ -21,10 +21,11 @@
 
 
 _main
-    type int : b5;
+    type real : b5;
 	type real: c5;
 	type real: d5;
 	type real: c2;
+    type real: c2;
 
     b5 <--- 1;
 

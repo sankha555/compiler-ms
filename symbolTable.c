@@ -498,15 +498,18 @@ void parseTypeDefinitions(astNode *root)
                 astNode *fieldTypeInfo = field->children[0];
                 switch (fieldTypeInfo->type)
                 {
-                case TypeInt:
-                    addToListofFieldsRecord(fieldName, "Int", record);
-                    break;
-                case TypeReal:
-                    addToListofFieldsRecord(fieldName, "Real", record);
-                    break;
-                case FieldTypeRUID:
-                    addToListofFieldsRecord(fieldName, fieldTypeInfo->entry.lexeme, record);
-                    break;
+                    case TypeInt:
+                        addToListofFieldsRecord(fieldName, "Int", record);
+                        break;
+                    case TypeReal:
+                        addToListofFieldsRecord(fieldName, "Real", record);
+                        break;
+                    case FieldTypeRUID:
+                        addToListofFieldsRecord(fieldName, fieldTypeInfo->entry.lexeme, record);
+                        break;
+
+                    default:
+                        break;
                 }
                 head = head->next;
             }
@@ -531,15 +534,17 @@ void parseTypeDefinitions(astNode *root)
                 astNode *fieldTypeInfo = field->children[0];
                 switch (fieldTypeInfo->type)
                 {
-                case TypeInt:
-                    addToListofFieldsUnion(fieldName, "Int", newUnion);
-                    break;
-                case TypeReal:
-                    addToListofFieldsUnion(fieldName, "Real", newUnion);
-                    break;
-                case FieldTypeRUID:
-                    addToListofFieldsUnion(fieldName, fieldTypeInfo->entry.lexeme, newUnion);
-                    break;
+                    case TypeInt:
+                        addToListofFieldsUnion(fieldName, "Int", newUnion);
+                        break;
+                    case TypeReal:
+                        addToListofFieldsUnion(fieldName, "Real", newUnion);
+                        break;
+                    case FieldTypeRUID:
+                        addToListofFieldsUnion(fieldName, fieldTypeInfo->entry.lexeme, newUnion);
+                        break;
+                    default:
+                        break;
                 }
                 head = head->next;
             }
@@ -660,17 +665,20 @@ void parseTypeDefinitionsPass1(astNode *root)
                 astNode *fieldTypeInfo = field->children[0];
                 switch (fieldTypeInfo->type)
                 {
-                case TypeInt:
-                    addToListofFieldsRecordOnlyName(fieldName, "Int", record);
-                    break;
+                    case TypeInt:
+                        addToListofFieldsRecordOnlyName(fieldName, "Int", record);
+                        break;
 
-                case TypeReal:
-                    addToListofFieldsRecordOnlyName(fieldName, "Real", record);
-                    break;
+                    case TypeReal:
+                        addToListofFieldsRecordOnlyName(fieldName, "Real", record);
+                        break;
 
-                case FieldTypeRUID:
-                    addToListofFieldsRecordOnlyName(fieldName, fieldTypeInfo->entry.lexeme, record);
-                    break;
+                    case FieldTypeRUID:
+                        addToListofFieldsRecordOnlyName(fieldName, fieldTypeInfo->entry.lexeme, record);
+                        break;
+
+                    default:
+                        break;
                 }
 
                 head = head->next;
@@ -699,17 +707,20 @@ void parseTypeDefinitionsPass1(astNode *root)
                 astNode *fieldTypeInfo = field->children[0];
                 switch (fieldTypeInfo->type)
                 {
-                case TypeInt:
-                    addToListofFieldsUnionOnlyName(fieldName, "Int", newUnion);
-                    break;
+                    case TypeInt:
+                        addToListofFieldsUnionOnlyName(fieldName, "Int", newUnion);
+                        break;
 
-                case TypeReal:
-                    addToListofFieldsUnionOnlyName(fieldName, "Real", newUnion);
-                    break;
+                    case TypeReal:
+                        addToListofFieldsUnionOnlyName(fieldName, "Real", newUnion);
+                        break;
 
-                case FieldTypeRUID:
-                    addToListofFieldsUnionOnlyName(fieldName, fieldTypeInfo->entry.lexeme, newUnion);
-                    break;
+                    case FieldTypeRUID:
+                        addToListofFieldsUnionOnlyName(fieldName, fieldTypeInfo->entry.lexeme, newUnion);
+                        break;
+                    
+                    default:
+                        break;
                 }
 
                 head = head->next;
@@ -792,8 +803,9 @@ int populateWidthandOffset(char *typeId){
         aliasInfo->widthPopulated = TRUE;
         return aliasInfo->width;
     }
-}
 
+    return 0;
+}
 
 
 
