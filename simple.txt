@@ -1,28 +1,23 @@
-_function1
-    input parameter list [int c2, int d2cd]
-    output parameter list [int b5d, int d3]; 
-        b5d<---c2+ 234 - d2cd;
-        
-        if(b5d < 20)
-        then
-            b5d <---2;
-        endif
+%_function1
+%    input parameter list [int c2, int d2cd]
+%    output parameter list [int b5d, int d3]; 
+%        b5d<---c2+234-d2cd;
+%        d3<---b5d+20;
+%    return [b5d, d3]; 
+%end
 
-    return [b5d, d3]; 
-end
-
-_function2
-    input parameter list [int c2, int d2cd]
-    output parameter list [int b5d, int d3];
-		[b5d, d3] <--- call _function1 with parameters [c2, d2cd];
-        %if (6 > 7 || 7.7 < 8)
-        %then
-        %    write(b5d);
-        %endif
-        b5d<---c2+234-d2cd;
-        d3<---b5d+20;
-    return [b5d, d3]; 
-end
+%_function2
+%    input parameter list [int c2, int d2cd]
+%    output parameter list [int b5d, int d3];
+%		[b5d, d3] <--- call _function1 with parameters [c2, d2cd];
+%        %if (6 > 7 || 7.7 < 8)
+%        %then
+%        %    write(b5d);
+%        %endif
+%        b5d<---c2+234-d2cd;
+%        d3<---b5d+20;
+%    return [b5d, d3]; 
+% end
 
 
 _main
@@ -39,15 +34,9 @@ _main
 	type real: c5;
 	type real: d5;
 	type real: c2;
-    %type real: c2;
-    %type int: a5;
-    % b5 <---  + 1;
 
 
-    
-    c2 <--- d2 + 1;
-    
-    % while ((b5 == c5) &&& (d5 < c2))
+    %while ((b5 == c5) &&& (d5 < c2))
     %    if (b5 > d5)
     %    then
     %        read(b5);

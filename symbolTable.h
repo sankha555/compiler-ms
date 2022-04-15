@@ -7,7 +7,7 @@ void printSymbolTables(FILE* fp);
 SymbolTable* addToListOfSymbolTables(SymbolTable* symbolTable);
 SymbolTableEntry* lookupSymbolTable(SymbolTable* symbolTable, char* identifier) ;
 int insertintoSymbolTable(SymbolTable* symbolTable, SymbolTableEntry* entry);
-SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTable* tablePointer, Type type);
+SymbolTableEntry* createNewSymbolTableEntry(char* identifier, boolean isFunction, SymbolTable* tablePointer, TypeArrayElement *type, int width);
 SymbolTable* createSymbolTable(char* tableID, SymbolTable* returnTable);
 SymbolTable* getSymbolTable(char* identifier);
 SymbolTable* initializeSymbolTable(astNode* root);

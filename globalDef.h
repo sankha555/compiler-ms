@@ -37,6 +37,9 @@ int numRules;
 
 #define KEYWORD_FILE "keywords.txt"
 
+#define INT_WIDTH 2
+#define REAL_WIDTH 4
+
 // the maximum number of productions in grammar
 # define MAX_RULES 100
 

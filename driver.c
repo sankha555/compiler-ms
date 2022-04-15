@@ -363,7 +363,29 @@ int main(int argc, char *argv[])
 
             case 10:
 
-                globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
+                funcSeqNum = 0;
+
+                buffer = init_lexer(argv[1]);
+                if (buffer == NULL)
+                {
+                    return 0;
+                }
+
+                FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+
+                populateRules();
+
+                createParseTable(FirstAndFollowAll, parseTable);
+
+                root = parseInputSourceCode(buffer);
+
+                astRoot = createAbstractSyntaxTree(root);
+
+                globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
+
+                globalSymbolTable = initializeSymbolTable(astRoot);
+
+                printf("Starting to generate ICG code ya all.\n");
 
                 generateCompleteICGcode(astRoot,globalSymbolTable);
 
