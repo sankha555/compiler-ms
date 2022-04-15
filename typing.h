@@ -56,6 +56,7 @@ typedef struct FunctionParameter
 typedef struct FunctionType
 {
     char *identifier;                           // name of the function
+    int declarationSeqNum;                      // order in which it was declared
     struct FunctionParameter *inputParameters;  // Parameter List of input parameters
     struct FunctionParameter *outputParameters; // Parameter List of output parameters
     int inputParamsOffset; 
@@ -116,5 +117,6 @@ struct TypeArrayElement* realPtr;
 struct TypeArrayElement* voidPtr;
 struct TypeArrayElement* typeErrPtr;
 struct TypeArrayElement* booleanPtr;
+int funcSeqNum;
 
 #endif

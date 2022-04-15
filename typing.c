@@ -172,12 +172,13 @@ struct TypeArrayElement *lookupTypeTable(TypeTable *typeTable, char *identifier)
     while (entry != NULL)
     {
         if (strcmp(entry->identifier, identifier) == 0)
-        {
+        {   
             // check if entry is alias
             if (entry->type == Alias)
             {
-                return lookupTypeTable(typeTable, entry->aliasTypeInfo->identifier);
+                return entry;
             }
+            
             return entry;
         }
         entry = entry->next;
@@ -262,6 +263,9 @@ struct FunctionType *createFunctionType(char *identifier)
     strcpy(func->identifier, identifier);
     func->inputParameters = NULL;
     func->outputParameters = NULL;
+    
+    funcSeqNum++;
+    func->declarationSeqNum = funcSeqNum;
 
     func->inputParamsWidth = 0;
     func->outputParamsWidth = 0;
@@ -301,8 +305,8 @@ struct FunctionParameter *createParameter(char *identifier, char *typeid)
 
 void addToListofFieldsRecord(char *identifier, char *typeid, UnionOrRecordInfo *info)
 {
-
     Field *field = createField(identifier, typeid);
+
     field->offset = info->totalWidth;
     Field *trav = info->listOfFields;
     if (trav == NULL)
