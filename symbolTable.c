@@ -240,6 +240,24 @@ SymbolTableEntry *lookupSymbolTable(SymbolTable *symbolTable, char *identifier)
     return NULL;
 }
 
+void calculateFunctionOffsets(SymbolTable *globalSymbolTable)
+{
+    // traverse the entire symbol table, and calculate the offset for each function
+    for (int i = 0; i < K_MAP_SIZE; i++)
+    {
+        SymbolTableEntry *head = globalSymbolTable->tableEntries[i];
+        while (head != NULL)
+        {
+            if (head->isFunction)
+            {
+                head->offset = globalSymbolTable->totalWidth;
+                globalSymbolTable->totalWidth += head->tablePointer->totalWidth;
+            }
+            head = head->next;
+        }
+    }
+}
+
 // 1: item added in the hash table
 // 0: item updated in the table
 int insertintoSymbolTable(SymbolTable *symbolTable, SymbolTableEntry *entry)
@@ -1083,6 +1101,8 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
     entry->usage = "main function";
 
     insertintoSymbolTable(globalSymbolTable, entry);
+
+    calculateFunctionOffsets(globalSymbolTable);
     // printSymbolTables(stdout);
 
     // printGlobalTypeTable(stdout);
