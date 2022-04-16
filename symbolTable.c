@@ -400,7 +400,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "input Parameter";
 
-            printf("Record input encountered...\n");
+            //printf("Record input encountered...\n");
 
             insertintoSymbolTable(symbolTable, entry);
 
@@ -412,7 +412,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "input Parameter";
 
-            printf("Union input encountered...\n");
+            //printf("Union input encountered...\n");
 
             insertintoSymbolTable(symbolTable, entry);
 
@@ -424,7 +424,7 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "input Parameter";
 
-            printf("DefineType input encountered...\n");
+            //printf("DefineType input encountered...\n");
 
             insertintoSymbolTable(symbolTable, entry);
 
@@ -575,11 +575,8 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
             break;
 
         case TypeUnion:
-            typeidentifier = root->data->children[0]->entry.lexeme;
-            lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
-            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
-            entry->usage = "local Variable";
-            insertintoSymbolTable(symbolTable, entry);
+            printf("Line %d : Unauthorised declaration. Union type variable : %s declared\n",root->data->children[0]->entry.linenumber,root->data->children[0]->entry.lexeme);
+            
             break;
         case TypeRecordUnionId:
             typeidentifier = root->data->children[0]->entry.lexeme;

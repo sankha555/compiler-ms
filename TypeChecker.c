@@ -19,7 +19,6 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 	astNode *trav ;
 	int error_flag;
 	
-	
 	if (root == NULL){
 		// to remove
 		//printf("Root is Null\n");
@@ -52,7 +51,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 	}
 
 	// for storing types of operands
-	struct TypeArrayElement *t1, *t2;
+	struct TypeArrayElement *t1, *t2, *t3;
 	
 	// to store the symbol table entry pointer for the identifier
 	SymbolTableEntry* entry;
@@ -178,27 +177,80 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		 */
 		case arithOp_PLUS:
 		case arithOp_MINUS:
-			//for(int i=-0;i<10;i++ )printf("Entered Arithmetic Plus/Minus.");
-			//printf("\n");
 
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[1], localTable, baseTable);
-			//printf("%d", t1->type);
-			//printf("Hello! :%s %s\n", t1->identifier, t2->identifier);
+
+			// if(t1->type == Alias){
+			// 	printf("T1 is alias %s\n", t1->aliasActualName);
+			// 	printf("Line %d : T1: %s, T2: %s\n", root->children[0]->data->entry.linenumber, t1->aliasActualName, t2->identifier);
+			// } 
+
+			// if(t2->type == Alias){
+			// 	printf("T2 is alias %s\n", t2->aliasActualName);
+			// 	printf("Line : T1: %s, T2: %s\n",t1->identifier, t2->aliasActualName);
+			// }
+
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
 			if (t1->type == Integer && t2->type == Integer){
 				return intPtr;
-			}else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
+			}else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) ){
+				
+				printf("Warning Line : Addition/Subtraction is unsafe between Real and Integer operands. Currently converting result to Real\n");
 				return realPtr;
-			} else if (t1->type == RecordType || (t1->type == Alias && t1->aliasTypeInfo->type == RecordType)) {
-				//printf("entered here ...%s %s\n", t1->identifier, t2->identifier);
-				return checkTypeEquality(t1, t2);
+			
+			}
+			else if(t1->type == Real && t2->type == Real){	
+				return realPtr;
+			}else if (t1->type == RecordType){
+
+				t3 =  checkTypeEquality(t1, t2);
+				if(t3->type== TypeErr)
+				{
+					
+					printf("Error: Addition/Subtraction - incompatible types %s and %s.\n",  t1->identifier, t2->identifier);
+				}
+				return t3;
+
+			}
+			else if(t1->type == Alias && t1->aliasTypeInfo->type == RecordType ) {
+				
+				t3 = checkTypeEquality(t1, t2);
+				if(t3->type== TypeErr)
+				{
+					
+					printf("Error: Addition/Subtraction - incompatible types %s and %s.\n",  t1->identifier, t2->identifier);
+				}
+				return t3;
+			}
+			 else if (t2->type == RecordType ){
+
+				t3 = checkTypeEquality(t1, t2);
+				if(t3->type== TypeErr)
+				{
+					
+					printf("Error: Addition/Subtraction - incompatible types %s and %s.\n",  t1->identifier, t2->identifier);				
+				}
+				return t3;
+			}
+			else if(t2->type == Alias && t2->aliasTypeInfo->type == RecordType ) {
+			
+				t3 = checkTypeEquality(t1, t2);
+				if(t3->type== TypeErr)
+				{
+					
+					printf("Error: Addition/Subtraction - incompatible types %s and %s.\n",  t1->identifier, t2->identifier);
+				
+				}
+				return t3;
+
 			} else {
-				printf("Line %d : Addition/Subtraction - real or integer operands required.\n", root->children[0]->data->entry.linenumber);
+				printf("Line %d : Addition/Subtraction - incompatible types %s and %s.\n", root->children[0]->data->entry.linenumber, t1->identifier, t2->identifier);
 				return typeErrPtr;
 			}
+			break;
 
 		/* MULTIPLICATION
 		 * <term> ===> <factor> <termPrime>
@@ -215,10 +267,12 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return intPtr;
 			}
 			else if ((t1->type == Integer && t2->type == Real) || 
-				(t1->type == Real && t2->type == Integer) || 
-				(t1->type == Real && t2->type == Real)) {
+				(t1->type == Real && t2->type == Integer)) {
+				printf("Warning : Multiplication is unsafe between Real and Integer operands. Currently converting result to Real\n");
 				return realPtr;
 			}
+			else if(t1->type == Real && t2->type == Real){	
+				return realPtr;}
 			else if (t1->type == RecordType && t2->type == Integer) {
 				return t1;
 			}
@@ -246,10 +300,16 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
-			if ((t1->type == Integer || t1->type == Real) && (t2->type == Integer || t2->type == Real)){
+
+			if (t1->type == Integer && t2->type == Integer){
 				return realPtr;
-				//else if (t1->type == RecordType)
-				//	return checkTypeEquality(t1, t2);
+			}
+			else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer)) {
+				printf("Warning : Division is unsafe between Real and Integer operands. Currently converting result to Real\n");
+				return realPtr;
+			}
+			else if(t1->type == Real && t2->type == Real){	
+				return realPtr;
 			} else {
 				printf("Line %d : Division - real or integer operands required.\n", root->children[0]->data->entry.linenumber);
 				return typeErrPtr;
@@ -267,24 +327,58 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
-			/*
-			if ((t1->type == Integer && t2->type == Integer) || (t1->type == Real && (t2->type == Integer || t2->type == Real))){
-				return voidPtr;
-				//TO DO: assignment for whole records?
-			}
-			*/
+
 			if (t1->type == Integer && t2->type == Integer)
 			{
 				return voidPtr;
 			}	
 			else if (t1->type == Real && t2->type == Real)
+			{
 				return voidPtr;
-			else if (t1->type == RecordType) {
-				return checkTypeEquality(t1, t2);
+			}
+			else if (t1->type == RecordType){
+
+				//printf("Line 1 : T1: %s, T2: %s\n", t1->identifier, t2->identifier);
+				t3 =  checkTypeEquality(t1, t2);
+				if(t3->type== TypeErr)
+				{
+					printf("Error: Assignment Error - type mismatch %s and %s.\n",  t1->identifier, t2->identifier);
+				}
+				return t3;
+
+			}
+			else if(t1->type == Alias && t1->aliasTypeInfo->type == RecordType ) {
+				
+				//printf("Line 1 : T1: %s, T2: %s\n", t1->aliasActualName, t2->identifier);
+				t3 = checkTypeEquality(t1, t2);
+				if(t3->type== TypeErr)
+				{
+					printf("Error: Assignment Error - type mismatch %s and %s.\n",  t1->identifier, t2->identifier);
+				}
+				return t3;
+			}
+			 else if (t2->type == RecordType ){
+
+				//printf("Line 1 : T1: %s, T2: %s\n", t1->aliasActualName, t2->identifier);
+				t3 = checkTypeEquality(t1, t2);
+				if(t3->type== TypeErr)
+				{
+					printf("Error: Assignment Error - type mismatch %s and %s.\n",  t1->identifier, t2->identifier);
+				}
+				return t3;
+			}
+			else if(t2->type == Alias && t2->aliasTypeInfo->type == RecordType ) {
+			
+				//printf("Line 2 : T1: %s, T2: %s\n", t1->identifier, t2->aliasActualName);
+				t3 = checkTypeEquality(t1, t2);
+				if(t3->type== TypeErr)
+				{
+					printf("Error: Assignment Error - type mismatch %s and %s.\n",  t1->identifier, t2->identifier);
+				}
+				return t3;
+
 			} else {
-				printf("Line %d: Assignment Error - type mismatch %s and %s.\n",
-					root->children[0]->data->entry.linenumber, t1->identifier, t2->identifier);
-				//printf("Line %d: Assignment error - incompatible types %s of type %s and %s of type %s.\n", root->children[0]->data->entry.linenumber, root->children[0]->data->entry.lexeme , t1->identifier, root->children[1]->data->entry.lexeme, t2->identifier);
+				printf("Line %d: Assignment Error - type mismatch %s and %s.\n", root->children[0]->data->entry.linenumber, t1->identifier, t2->identifier);
 				return typeErrPtr;
 			}
 
@@ -293,12 +387,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		 */
 		case SingleOrRecIdLinkedListNode:
 
-			//printf("Entered singleOrRecIdLinkedListNode.\n");
-			// lookup in the most local scope - scope of function
-			//printf("    %s  \n", root->data->entry.lexeme);
-
-			//printf("%s\n", localTable->tableID);
-
+			
 			entry = lookupSymbolTable(localTable, root->data->entry.lexeme);
 
 			//if(entry != NULL) printf("%s\n", entry->identifier);
@@ -327,10 +416,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 
 			// variable is a record or a union
 			if (entry->type->compositeVariableInfo != NULL) {
-				//printf("Entered field gate\n");
 				return findTypeField(root->next, entry->type->compositeVariableInfo->listOfFields);
 			} else {
-				printf("Empty composite!\n");
 				return typeErrPtr;
 			}
 
@@ -662,7 +749,7 @@ struct TypeArrayElement* findTypeField(astNode* root, struct Field* fieldLL) {
 			//printf("Entered here.\n");
 			return findTypeField(root->next, entryType->compositeVariableInfo->listOfFields);
 		} else {
-			printf("Empty record!\n");
+			
 			return typeErrPtr;
 		}
 	}
@@ -702,7 +789,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 		char* funcLexeme = funcNode->data->children[0]->entry.lexeme;
 
 		// obtain the symbol table for the current function
-		printf("Entering Function: %s...\n", funcLexeme);
+		printf("Entering Function: %s...\n\n\n", funcLexeme);
 		SymbolTableEntry* currFunc = lookupSymbolTable(baseTable, funcLexeme);
 		//printf("%s\n", currFunc->identifier);
 		localTable = currFunc->tablePointer;
@@ -710,7 +797,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 		Type elem = findType(funcNode->data->children[3], localTable, baseTable)->type;
 
 		if (elem != Void) {
-			printf("TYPE ERROR DETECTED IN %s.\n", funcLexeme);
+			printf("\nTYPE ERRORS DETECTED IN %s.\n\n\n", funcLexeme);
 			//return -1;
 		}
 
@@ -754,10 +841,10 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 
 	/* traverse <mainFunction> */
 	char *mainLexeme = MAIN_NAME;
-	printf("Entering Function: %s...\n", mainLexeme);
+	printf("Entering Function: %s...\n\n\n", mainLexeme);
 	localTable = (lookupSymbolTable(baseTable, mainLexeme))->tablePointer;
 	if (findType(root->children[1]->children[0], localTable, baseTable)->type != Void) {
-		printf("TYPE ERROR DETECTED IN MAIN.\n");
+		printf("\nTYPE ERROR DETECTED IN MAIN.\n\n\n");
 		return -1;
 	}
 
@@ -800,6 +887,7 @@ struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1,
 	else if (t1->aliasTypeInfo != NULL && t1->aliasTypeInfo == t2)
 		return t2;
 	else if (t2->aliasTypeInfo != NULL && t1 == t2->aliasTypeInfo)
+
 		return t1;
 	else if (t1->aliasTypeInfo != NULL && t1->aliasTypeInfo == t2->aliasTypeInfo)
 		return t1->aliasTypeInfo;
