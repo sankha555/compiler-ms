@@ -184,7 +184,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		 */
 		case arithOp_PLUS:
 		case arithOp_MINUS:
-			//printf("Entered Arithmetic Plus/Minus.\n");
+			//for(int i=-0;i<10;i++ )printf("Entered Arithmetic Plus/Minus.");
+			//printf("\n");
 
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[1], localTable, baseTable);
@@ -198,6 +199,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			}
 			else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
 				return realPtr;
+<<<<<<< HEAD
 			}
 			else if ((t1->type == VariantRecord && t2->type == VariantRecord)
 					|| (t1->type == VariantRecord && (t2->type == Integer || t2->type == Real))
@@ -205,6 +207,9 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return variantRecordPtr;
 			}
 			else if (t1->type == RecordType) {
+=======
+			} else if (t1->type == RecordType || (t1->type == Alias && t1->aliasTypeInfo->type == RecordType)) {
+>>>>>>> 8670500be5b95092eefc5dda3504b96acc6c8569
 				//printf("entered here ...%s %s\n", t1->identifier, t2->identifier);
 				return checkTypeEquality(t1, t2);
 			} else {
@@ -621,7 +626,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				/* type check all the children */
 
 				//if(root->type == Return) for(int i=0;i<10;i++)printf("Hello!\n");
-
+				error_flag =0;
 				int children = MAX_PROD_LEN;
 				while (children > 0 && root->children[children-1] == NULL){
 					children--;
@@ -746,7 +751,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 
 		if (elem != Void) {
 			printf("TYPE ERROR DETECTED IN %s.\n", funcLexeme);
-			return -1;
+			//return -1;
 		}
 
 		struct VariableVisitedNode* visitOutParLL = NULL;
@@ -838,6 +843,7 @@ struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1,
 		return t1;
 	else if (t1->aliasTypeInfo != NULL && t1->aliasTypeInfo == t2->aliasTypeInfo)
 		return t1->aliasTypeInfo;
+	//printf("%s %s\n", t1->identifier, t2->identifier);
 	return typeErrPtr;
 }
 
