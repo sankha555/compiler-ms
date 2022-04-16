@@ -85,15 +85,12 @@ int main(int argc, char *argv[])
     printf("\n\t5. Meenal Gupta (2019A7PS0243P)");
     printf("\n=====================================================\n");
     printf("\n\nProject Status:\n\n");
-    printf("1. \tBoth Lexical and Syntactic Analyser are implemented.\n");
-    printf("2. \tLexical Analyser is implemented using a finite state machine.\n");
-    printf("3. \tSyntactic Analyser is implemented using a non-recursive descent parser.\n");
-    printf("4. \tFirst and Follow sets automated.\n");
-    printf("5. \tParse Table construction automated\n");
-    printf("6. \tParse Tree generated successfully\n");
-    printf("7. \tError recovery done using Panic mode\n");
-    printf("8. \tAll modules compile successfully and work without segmentation fault.\n");
-    printf("9. \tModules work with all test cases provided (t1-t6).\n");
+    printf("1. \tLexical and Syntactic Analyser are implemented.\n");
+    printf("2. \tSymbol Table, Type Checker and Semantic Analyzer Implemented\n");
+    printf("3. \tLEVEL 3: Symbol table/ AST/ Semantic Rules modules work: only variant record related errors remain\n");
+    printf("4. \tAll modules compile and work without seg fault on semantic and type checking test cases\n");
+    printf("4. \tIntermediate Code Generation produces 5-tuples, Assembly implementation not fully working\n");
+    printf("8. \tICG can be generated on c1.txt and c2.txt\n");
     printf("10.\tTested with GCC 7.5.0 on Ubuntu 18.04 LTS\n");
     printf("=======================================================\n");
 
