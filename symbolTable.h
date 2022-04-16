@@ -4,6 +4,7 @@
 #include "astDef.h"
 
 void printSymbolTables(FILE* fp);
+void printASingleSymbolTable(SymbolTable *symbolTable, FILE *fp);
 SymbolTable* addToListOfSymbolTables(SymbolTable* symbolTable);
 SymbolTableEntry* lookupSymbolTable(SymbolTable* symbolTable, char* identifier) ;
 int insertintoSymbolTable(SymbolTable* symbolTable, SymbolTableEntry* entry);
@@ -21,5 +22,5 @@ void parseTypeDefinitionsPass2(char *typeId);
 void parseTypeDefinitionsPass1(char *typeId);
 char* getRecordOrUnionTypeExpression(UnionOrRecordInfo* info);
 char* getType(SymbolTableEntry* entry);
-
+void calculateFunctionOffsets(SymbolTable *globalSymbolTable);
 #endif

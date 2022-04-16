@@ -15,6 +15,8 @@
 #include "TypeChecker.h"
 #include "icgGeneratorDef.h"
 #include "icgGenerator.h"
+#include "codeGeneratorDef.h"
+#include "codeGenerator.h"
 #include <time.h>
 #include <stdlib.h>
 
@@ -97,7 +99,8 @@ int main(int argc, char *argv[])
         printf("7  - Find activation record sizes\n");
         printf("8  - Find record types and sizes\n");
         printf("9  - Type checking and semantic analysis\n");
-        printf("10 - Code generation and dynamic type checking\n");
+        printf("10 - Intermediate Code generation and dynamic type checking\n");
+        printf("11 - Assembly Code generation\n");
         printf("\nEnter a command: ");
 
         int option;
@@ -262,6 +265,8 @@ int main(int argc, char *argv[])
 
                 globalSymbolTable = initializeSymbolTableNew(astRoot);
 
+                calculateFunctionOffsets(globalSymbolTable);
+
                 //printGlobalTypeTable(stdout);
 
                 printSymbolTables(stdout);
@@ -270,7 +275,7 @@ int main(int argc, char *argv[])
 
             case 6:
                 globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
-            
+                calculateFunctionOffsets(globalSymbolTable);
                 printf("================== LIST OF GLOBAL VARIABLES ================\n\n");
                 printf("%10s%20s%20s\n", "NAME", "TYPE", "OFFSET");
                 printf("-----------------------------------------------------------\n");
@@ -368,6 +373,43 @@ int main(int argc, char *argv[])
                 printICG(stdout);
 
                 break;
+
+            case 11:
+
+                funcSeqNum = 0;
+
+                buffer = init_lexer(argv[1]);
+                if (buffer == NULL)
+                {
+                    return 0;
+                }
+
+                FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+
+                populateRules();
+
+                createParseTable(FirstAndFollowAll, parseTable);
+
+                root = parseInputSourceCode(buffer, 0);
+
+                astRoot = createAbstractSyntaxTree(root);
+
+                globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
+
+                globalSymbolTable = initializeSymbolTable(astRoot);
+
+                printf("Starting to generate ICG code ya all.\n");
+
+                generateCompleteICGcode(astRoot,globalSymbolTable);
+
+                printICG(stdout);
+
+                printf("\n\n\n\n");
+
+                calculateFunctionOffsets(globalSymbolTable);
+
+                printASingleSymbolTable(globalSymbolTable, stdout);
+                generateAssemblyCode(stdout,globalSymbolTable);
 
             default:
                 break;
