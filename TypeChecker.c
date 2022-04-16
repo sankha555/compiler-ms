@@ -178,7 +178,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		 */
 		case arithOp_PLUS:
 		case arithOp_MINUS:
-			printf("Entered Arithmetic Plus/Minus.\n");
+			//for(int i=-0;i<10;i++ )printf("Entered Arithmetic Plus/Minus.");
+			//printf("\n");
 
 			t1 = findType(root->children[0], localTable, baseTable);
 			t2 = findType(root->children[1], localTable, baseTable);
@@ -585,22 +586,24 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				/* type check all the children */
 
 				//if(root->type == Return) for(int i=0;i<10;i++)printf("Hello!\n");
-
+				error_flag =0;
 				int children = MAX_PROD_LEN;
 				while (children > 0 && root->children[children-1] == NULL){
 					children--;
 				}
 				// to remove
 				//printf("%d\n", children);
+				
 				for (int i = 0; i < children; i++){
 
 					// to remove
 					//printf("-%d-", root->children[i]->type);
 					if (findType(root->children[i], localTable, baseTable)->type == TypeErr){
-						return typeErrPtr;
+						error_flag++;
 					}
 				}
-				return voidPtr;
+				if(error_flag) return typeErrPtr;
+				else return voidPtr;
 			}
 	}
 }
@@ -699,7 +702,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 		char* funcLexeme = funcNode->data->children[0]->entry.lexeme;
 
 		// obtain the symbol table for the current function
-		//printf("Entering Function: %s...\n", funcLexeme);
+		printf("Entering Function: %s...\n", funcLexeme);
 		SymbolTableEntry* currFunc = lookupSymbolTable(baseTable, funcLexeme);
 		//printf("%s\n", currFunc->identifier);
 		localTable = currFunc->tablePointer;
@@ -708,7 +711,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 
 		if (elem != Void) {
 			printf("TYPE ERROR DETECTED IN %s.\n", funcLexeme);
-			return -1;
+			//return -1;
 		}
 
 		struct VariableVisitedNode* visitOutParLL = NULL;
@@ -751,7 +754,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 
 	/* traverse <mainFunction> */
 	char *mainLexeme = MAIN_NAME;
-	//printf("Entering Function: %s...\n", mainLexeme);
+	printf("Entering Function: %s...\n", mainLexeme);
 	localTable = (lookupSymbolTable(baseTable, mainLexeme))->tablePointer;
 	if (findType(root->children[1], localTable, baseTable)->type != Void) {
 		printf("TYPE ERROR DETECTED IN MAIN.\n");
@@ -788,7 +791,7 @@ int findLengthFormal(FunctionParameter* head) {
 struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1, 
 		struct TypeArrayElement* t2) {
 	//printf("Entered type check equality.\n");
-	printf("%s %s\n", t1->identifier, t2->identifier);
+	//printf("%s %s\n", t1->identifier, t2->identifier);
 	if (t1 == typeErrPtr || t2 == typeErrPtr)
 		return typeErrPtr;
 	if (t1 == t2) {
@@ -800,6 +803,7 @@ struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1,
 		return t1;
 	else if (t1->aliasTypeInfo != NULL && t1->aliasTypeInfo == t2->aliasTypeInfo)
 		return t1->aliasTypeInfo;
+	//printf("%s %s\n", t1->identifier, t2->identifier);
 	return typeErrPtr;
 }
 
