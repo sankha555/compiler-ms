@@ -20,6 +20,8 @@ char* getRecordOrUnionTypeExpression(UnionOrRecordInfo* info){
     int first = 1;
 
     char* typeExpr = (char*) malloc(1000*sizeof(char));
+    memset(typeExpr, '\0', 1000);
+    strcpy(typeExpr, "");
 
     strcat(typeExpr, "<");
     while(field != NULL){
@@ -40,6 +42,8 @@ char* getRecordOrUnionTypeExpression(UnionOrRecordInfo* info){
 
 char* getFunctionTypeExpression(FunctionType* funcInfo){
     char* typeExpr = (char*) malloc(2000*sizeof(char));
+    memset(typeExpr, '\0', 2000);
+    strcat(typeExpr, "");
 
     FunctionParameter* inputParamHead = funcInfo->inputParameters;
 
@@ -77,6 +81,8 @@ char* getFunctionTypeExpression(FunctionType* funcInfo){
 
 char* getAliasTypeExpr(TypeArrayElement* info){
     char* typeExpr = (char*) malloc(2000*sizeof(char));
+    memset(typeExpr, '\0', 2000);
+    strcat(typeExpr, "");
     strcat(typeExpr, "Alias of ");
     strcat(typeExpr, info->identifier);
 
@@ -115,6 +121,9 @@ char* getTypeExpression(SymbolTableEntry* entry){
 }
 
 char* getType(SymbolTableEntry* entry){
+    char* typeStr = (char*) malloc(500*sizeof(char));
+    memset(typeStr, '\0', 500);
+    strcat(typeStr, "");
     switch (entry->type->type)
     {
         case Integer:
@@ -126,16 +135,12 @@ char* getType(SymbolTableEntry* entry){
             break;
 
         case UnionType:
-            ;
-            char* typeStr = (char*) malloc(500*sizeof(char));
             strcat(typeStr, "union ");
             strcat(typeStr, entry->identifier);
             return typeStr;
             break;
 
         case RecordType:
-            ;
-            typeStr = (char*) malloc(500*sizeof(char));
             strcat(typeStr, "record ");
             strcat(typeStr, entry->identifier);
             return typeStr;
@@ -238,6 +243,24 @@ SymbolTableEntry *lookupSymbolTable(SymbolTable *symbolTable, char *identifier)
         entry = entry->next;
     }
     return NULL;
+}
+
+void calculateFunctionOffsets(SymbolTable *globalSymbolTable)
+{
+    // traverse the entire symbol table, and calculate the offset for each function
+    for (int i = 0; i < K_MAP_SIZE; i++)
+    {
+        SymbolTableEntry *head = globalSymbolTable->tableEntries[i];
+        while (head != NULL)
+        {
+            if (head->isFunction)
+            {
+                head->offset = globalSymbolTable->totalWidth;
+                globalSymbolTable->totalWidth += head->tablePointer->totalWidth;
+            }
+            head = head->next;
+        }
+    }
 }
 
 // 1: item added in the hash table
@@ -1083,6 +1106,8 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
     entry->usage = "main function";
 
     insertintoSymbolTable(globalSymbolTable, entry);
+
+    calculateFunctionOffsets(globalSymbolTable);
     // printSymbolTables(stdout);
 
     // printGlobalTypeTable(stdout);
