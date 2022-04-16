@@ -84,6 +84,8 @@ int main(int argc, char *argv[])
     printf("\n\t4. Yash Gupta (2019A7PS1138P)");
     printf("\n\t5. Meenal Gupta (2019A7PS0243P)");
     printf("\n=====================================================\n");
+
+    printf("\033[0;33m");
     printf("\n\nProject Status:\n\n");
     printf("1. \tLexical and Syntactic Analyser are implemented.\n");
     printf("2. \tSymbol Table, Type Checker and Semantic Analyzer Implemented\n");
@@ -93,9 +95,12 @@ int main(int argc, char *argv[])
     printf("8. \tICG can be generated on c1.txt and c2.txt\n");
     printf("10.\tTested with GCC 7.5.0 on Ubuntu 18.04 LTS\n");
     printf("=======================================================\n");
+    printf("\033[0m");
+
 
     while (1)
     {
+        printf("\033[0;36m");
         printf("\n\n\nTest a module\n\n");
         printf("0  - Quit\n");
         printf("1  - Print token list to console\n");
@@ -109,6 +114,8 @@ int main(int argc, char *argv[])
         printf("9  - Type checking and semantic analysis\n");
         printf("10 - Intermediate Code generation and dynamic type checking\n");
         printf("11 - Assembly Code generation\n");
+        printf("\033[0m");
+
         printf("\nEnter a command: ");
 
         int option;
