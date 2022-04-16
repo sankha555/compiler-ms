@@ -76,7 +76,13 @@ void generateAssemblyCode(FILE* fp, SymbolTable* globalSymbolTable) {
             case DEFINE_DS:
 
                 //traverse the global symbol table for all functions and add their functional offset labels
-                fprintf(fp,"\n\n\tsection\t.data\n");
+                fprintf(fp,"\n\nsection\t.data\n");
+
+                // add prinf and scanf formats for ints and reals
+                fprintf(fp,"\tformat_print_int: db \"%%d\", 10, 0\t; newline, nul terminator\n");
+                fprintf(fp,"\tformat_print_real: db \"%%f\", 10, 0\t; newline, nul terminator\n");
+                fprintf(fp,"\tformat_scan_int: db \"%%d\", 0\n");
+                fprintf(fp,"\tformat_scan_real: db \"%%f\", 0\n");
 
                 fprintf(fp,"readInt:\tdb\t\"Enter Integer Number: \", 0\n");
                 fprintf(fp,"readReal:\tdb\t\"Enter Real Number: \", 0\n");
@@ -120,7 +126,7 @@ void generateAssemblyCode(FILE* fp, SymbolTable* globalSymbolTable) {
 
             case FUNC_DEF_MAIN:
 
-                fprintf(fp,"\n\n_start:\tmov\tEBP, %s\n",generateFuncMemOffset(pentupleCode[i].result->identifier));
+                fprintf(fp,"\n\nmain:\n\tmov\tEBP, %s\n",generateFuncMemOffset(pentupleCode[i].result->identifier));
                 break;
 
             case ASSIGN_OP_INT:
@@ -154,8 +160,8 @@ void generateAssemblyCode(FILE* fp, SymbolTable* globalSymbolTable) {
                 if(pentupleCode[i].result->parentTable == globalSymbolTable) {
                     fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
                 }
-
-                fprintf(fp,"\tmov\t[ebp+%d], %s\n",pentupleCode[i].result->offset,pentupleCode[i].immVal.lexeme);
+                fprintf(fp,"\tmov\tbx, %s\n",pentupleCode[i].immVal.lexeme);
+                fprintf(fp,"\tmov\t[ebp+%d], bx\n",pentupleCode[i].result->offset);
 
                 if(pentupleCode[i].result->parentTable == globalSymbolTable) {
                     fprintf(fp,"\tpop\tebp\n");
@@ -196,10 +202,6 @@ void generateAssemblyCode(FILE* fp, SymbolTable* globalSymbolTable) {
                 fprintf(fp,"\tmov\tbx, ax\n");
                 
                 transactInMemory(FALSE,2,pentupleCode[i].result,globalSymbolTable,fp);
-
-                break;
-
-            case ADD_R:
 
                 break;
 
@@ -326,13 +328,76 @@ void generateAssemblyCode(FILE* fp, SymbolTable* globalSymbolTable) {
 
                 break;
 
-            case WRITE_IMMEDIATE:
+            case ADD_R:
+                /**
+                 * @brief To add real variables
+                 * 
+                 *  finit                        ;reset fpu stacks to default
+                    fld    dword [single_value1] ;push single_value1 to fpu stack
+                    fld    dword [single_value2] ;push single_value2 to fpu stack
+                    fadd                         ;st0 := st1 + st0
+                    fstp   dword [single_sum]    ;store the summation result into mem
+                 * 
+                 */
+                fprintf(fp,";-------Add Real variables--------\n");
+
+                fprintf(fp,"\tfinit\t\t\t;reset fpu stacks to default\n");
+
+                for(int j = 0; j < 2; j++) {
+
+                    if(pentupleCode[i].argument[j]->parentTable == globalSymbolTable) {
+                        fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
+                    }
+
+                    // push the value to the fpu stack
+                    fprintf(fp,"\tfld\tdword [ebp+%d]\n",pentupleCode[i].argument[j]->offset);
+
+                    if(pentupleCode[i].argument[j]->parentTable == globalSymbolTable) {
+                        fprintf(fp,"\tpop\tebp\n");
+                    }
+                }
+
+                // perform the addition operation
+                fprintf(fp,"\tfadd\t\t\t;st0 := st1 + st0\n");
+                
+                if(pentupleCode[i].result->parentTable == globalSymbolTable) {
+                    fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
+                }
+
+                // store the result in the memory location
+                fprintf(fp,"\tfstp\tdword [ebp+%d]\n",pentupleCode[i].result->offset);
+
+                if(pentupleCode[i].result->parentTable == globalSymbolTable) {
+                    fprintf(fp,"\tpop\tebp\n");
+                }
 
                 break;
 
             case WRITE_VAR:
+            /**
+             * @brief Use printf with appropriate format specifier depending on whether to write int or real
+             * 
+             */
+            fprintf(fp,";-------Write Variable-------\n");
+            
+            // push the variable to print on to the stack
+            if(pentupleCode[i].result->parentTable == globalSymbolTable) {
+                fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
+            }
+            
+            fprintf(fp,"\tmov\tbx, [ebp+%d]\n",pentupleCode[i].result->offset);
 
-                break;
+            if(pentupleCode[i].result->parentTable == globalSymbolTable) {
+                fprintf(fp,"\tpop\tebp\n");
+            }
+
+            // push the output format specifier to the stack
+            if (pentupleCode[i].result->type == Integer)
+                fprintf(fp,"\tpush\tformat_print_int\n");
+            else
+                fprintf(fp,"\tpush\tformat_print_real\n");
+            
+            fprintf(fp,"\tcall\tprintf\n");
 
             default: break;
         }
