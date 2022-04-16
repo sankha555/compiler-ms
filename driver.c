@@ -265,6 +265,8 @@ int main(int argc, char *argv[])
 
                 globalSymbolTable = initializeSymbolTableNew(astRoot);
 
+                calculateFunctionOffsets(globalSymbolTable);
+
                 //printGlobalTypeTable(stdout);
 
                 printSymbolTables(stdout);
@@ -273,7 +275,7 @@ int main(int argc, char *argv[])
 
             case 6:
                 globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
-            
+                calculateFunctionOffsets(globalSymbolTable);
                 printf("================== LIST OF GLOBAL VARIABLES ================\n\n");
                 printf("%10s%20s%20s\n", "NAME", "TYPE", "OFFSET");
                 printf("-----------------------------------------------------------\n");
@@ -404,6 +406,9 @@ int main(int argc, char *argv[])
 
                 printf("\n\n\n\n");
 
+                calculateFunctionOffsets(globalSymbolTable);
+
+                printASingleSymbolTable(globalSymbolTable, stdout);
                 generateAssemblyCode(stdout,globalSymbolTable);
 
             default:

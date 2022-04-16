@@ -4,6 +4,7 @@
 #include "astDef.h"
 
 void printSymbolTables(FILE* fp);
+void printASingleSymbolTable(SymbolTable *symbolTable, FILE *fp);
 SymbolTable* addToListOfSymbolTables(SymbolTable* symbolTable);
 SymbolTableEntry* lookupSymbolTable(SymbolTable* symbolTable, char* identifier) ;
 int insertintoSymbolTable(SymbolTable* symbolTable, SymbolTableEntry* entry);
