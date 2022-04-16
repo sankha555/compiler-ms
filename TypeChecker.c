@@ -424,7 +424,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				// 	return typeErrPtr;
 				// }
 
-				// passing union parameters not allowed
+				// passing union parameters not allowed1
 				if (t1->type == UnionType || t2->type == UnionType){
 					printf("Line %d : Input parameter cannot be of type union\n", root->children[1]->entry.linenumber);
 					return typeErrPtr;
