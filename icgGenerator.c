@@ -954,6 +954,8 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
 
         case Num:
 
+            // printf("ok.\n");
+
             holder = getNewTemporary(currentSymbolTable,Integer);
 
             // printf("returned from temporary.\n");
@@ -1119,7 +1121,9 @@ int parseICGcode(astNode* root, SymbolTable* currentSymbolTable, SymbolTable* gl
         case relOp_LE:
 
             parseICGcode(root->children[0],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            // printf("hmm.\n");
             parseICGcode(root->children[1],currentSymbolTable,globalSymbolTable,areInputParams,functionCalledSte);
+            // printf("hmm2.\n");
 
             boolResult = getNewTemporary(currentSymbolTable,Boolean);
 

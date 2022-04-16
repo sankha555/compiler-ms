@@ -9,22 +9,169 @@
 #include "typing.h"
 #include "globalDef.h"
 
+char* getRecordOrUnionTypeExpression(UnionOrRecordInfo* info){
+    if (info == NULL)
+    {
+        return "NULL";
+    }
+
+    Field *field = info->listOfFields;
+    // printing type expression
+    int first = 1;
+
+    char* typeExpr = (char*) malloc(1000*sizeof(char));
+
+    strcat(typeExpr, "<");
+    while(field != NULL){
+        if(!first){
+            char* delim = (info->isRecord) ? ", " : "| ";
+            strcat(typeExpr, delim);
+        }else{
+            first = 0;
+        }
+        strcat(typeExpr, field->datatype->identifier);
+
+        field = field->next;
+    }
+    strcat(typeExpr, ">");
+    
+    return typeExpr;
+}
+
+char* getFunctionTypeExpression(FunctionType* funcInfo){
+    char* typeExpr = (char*) malloc(2000*sizeof(char));
+
+    FunctionParameter* inputParamHead = funcInfo->inputParameters;
+
+    strcat(typeExpr, "<");
+
+    int first = 1;
+    while(inputParamHead != NULL){
+        if(!first){
+            strcat(typeExpr, ", ");
+        }else{
+            first = 0;
+        }
+        strcat(typeExpr, inputParamHead->datatype->identifier);
+
+        inputParamHead = inputParamHead->next;
+    }
+    strcat(typeExpr, "> ---> <");
+    
+    first = 1;
+    FunctionParameter* outputParamHead = funcInfo->outputParameters;
+    while(outputParamHead != NULL){
+        if(!first){
+            strcat(typeExpr, ", ");
+        }else{
+            first = 0;
+        }
+        strcat(typeExpr, outputParamHead->datatype->identifier);
+
+        outputParamHead = outputParamHead->next;
+    }
+    strcat(typeExpr, ">");
+
+    return typeExpr;
+}
+
+char* getAliasTypeExpr(TypeArrayElement* info){
+    char* typeExpr = (char*) malloc(2000*sizeof(char));
+    strcat(typeExpr, "Alias of ");
+    strcat(typeExpr, info->identifier);
+
+    return typeExpr;
+}
+
+char* getTypeExpression(SymbolTableEntry* entry){
+    switch (entry->type->type)
+    {
+        case Integer:
+            return "Integer";
+            break;
+
+        case Real:
+            return "Real";
+            break;
+
+        case UnionType:
+        case RecordType:
+            return getRecordOrUnionTypeExpression(entry->type->compositeVariableInfo);
+            break;
+
+        case Function:
+            return getFunctionTypeExpression(entry->type->functionInfo);
+            break;
+
+        case Alias:
+            return getAliasTypeExpr(entry->type->aliasTypeInfo);
+            break;
+
+        default:
+            break;
+    }
+
+    return "";
+}
+
+char* getType(SymbolTableEntry* entry){
+    switch (entry->type->type)
+    {
+        case Integer:
+            return "Integer";
+            break;
+
+        case Real:
+            return "Real";
+            break;
+
+        case UnionType:
+            ;
+            char* typeStr = (char*) malloc(500*sizeof(char));
+            strcat(typeStr, "union ");
+            strcat(typeStr, entry->identifier);
+            return typeStr;
+            break;
+
+        case RecordType:
+            ;
+            typeStr = (char*) malloc(500*sizeof(char));
+            strcat(typeStr, "record ");
+            strcat(typeStr, entry->identifier);
+            return typeStr;
+            break;
+
+        case Function:
+            return "Function";
+            break;
+
+        case Alias:
+            return "Type Definition";
+            break;
+
+        default:
+            break;
+    }
+
+    return "";
+}
+
 void printSymbolTableEntry(SymbolTable *symbolTable, SymbolTableEntry *entry, FILE *fp)
 {
-    fprintf(fp, "\t Name: %30s ; Scope: %30s ; Width: %d ; Offset: %d; Is Global: %3s\n", entry->identifier, symbolTable->tableID, entry->width, entry->offset, (!strcmp(symbolTable->tableID, "GLOBAL") ? "YES" : "NO"));
-    // printf("Entry Type: %d\n", entry->type);
-    // fprintf(fp, "\t Type Name: %s\n", entry->type->identifier);
-    fprintf(fp, "\t Type Expression:\n");
-    printTypeArrayElement(stdout, entry->type);
-    fprintf(fp, "\t Variable Usage: %s\n", entry->usage != NULL ? entry->usage : "undefined");
-    fprintf(fp, "------------------------------------------------------------------\n");
+    char* type = getType(entry);
+    char* typeExpression = getTypeExpression(entry);
+    char* isGlobal = (!strcmp(symbolTable->tableID, "GLOBAL") ? "YES" : "NO");
+
+    fprintf(fp, "%15s%15s%20s%40s%20d%10s%10d%20s\n", entry->identifier, symbolTable->tableID, type, typeExpression, entry->width, isGlobal, entry->offset, entry->usage);
+    fprintf(fp, "-------------------------------------------------------------------------------------------------------------------------------------------------------\n");
 }
 
 void printASingleSymbolTable(SymbolTable *symbolTable, FILE *fp)
 {
-    fprintf(fp, "================ SYMBOL TABLE : %s ================\n", symbolTable->tableID);
-    fprintf(fp, "Total Width: %d Bytes\n", symbolTable->totalWidth);
-    fprintf(fp, "*** Entries in Table: *** \n");
+    fprintf(fp, "================================================== SYMBOL TABLE : %s (Total Width: %d Bytes)========================================================\n\n", symbolTable->tableID, symbolTable->totalWidth);
+
+    fprintf(fp, "%15s%15s%20s%40s%20s%13s%10s%10s\n", "NAME", "SCOPE", "TYPE", "TYPE EXPRESSION", "WIDTH", "IS GLOBAL", "OFFSET", "USAGE");
+    fprintf(fp, "-------------------------------------------------------------------------------------------------------------------------------------------------------\n");   
     for (int i = 0; i < K_MAP_SIZE; i++)
     {
         SymbolTableEntry *head = symbolTable->tableEntries[i];
@@ -34,7 +181,7 @@ void printASingleSymbolTable(SymbolTable *symbolTable, FILE *fp)
             head = head->next;
         }
     }
-    fprintf(fp, "================================================\n\n\n");
+    fprintf(fp, "========================================================================================================================================================\n\n\n");
 }
 
 void printSymbolTables(FILE *fp)
@@ -91,6 +238,24 @@ SymbolTableEntry *lookupSymbolTable(SymbolTable *symbolTable, char *identifier)
         entry = entry->next;
     }
     return NULL;
+}
+
+void calculateFunctionOffsets(SymbolTable *globalSymbolTable)
+{
+    // traverse the entire symbol table, and calculate the offset for each function
+    for (int i = 0; i < K_MAP_SIZE; i++)
+    {
+        SymbolTableEntry *head = globalSymbolTable->tableEntries[i];
+        while (head != NULL)
+        {
+            if (head->isFunction)
+            {
+                head->offset = globalSymbolTable->totalWidth;
+                globalSymbolTable->totalWidth += head->tablePointer->totalWidth;
+            }
+            head = head->next;
+        }
+    }
 }
 
 // 1: item added in the hash table
@@ -738,10 +903,6 @@ void parseTypeDefinitionsPass1(astNode *root)
 
 
 int populateWidthandOffset(char *typeId){
-
-
-    printf("%s\n", typeId);
-
     struct TypeArrayElement* type = lookupTypeTable(globalTypeTable, typeId);
     if(type == NULL) {
         printf("Type not found \n");
@@ -813,17 +974,17 @@ void parseTypeDefinitionsPass2(astNode *root)
         {
 
             width = populateWidthandOffset(root->data->children[0]->entry.lexeme);
-            printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
+            //printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
         }
         else if(root->data->type == TypeUnionDefinition)
         {
             width = populateWidthandOffset(root->data->children[0]->entry.lexeme);
-            printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
+            //printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
         }
         else if(root->data->type == DefineType){
 
             width = populateWidthandOffset(root->data->children[2]->entry.lexeme);
-            printf("%s size : %d\n", root->data->children[2]->entry.lexeme, width);
+            //printf("%s size : %d\n", root->data->children[2]->entry.lexeme, width);
         }
         
         root = root->next;
@@ -909,7 +1070,7 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     astNode *head = otherFunctions;
 
-    printf("Going to start Pass 1\n");
+    //printf("Going to start Pass 1\n");
     // go to otherFunc, it is a linked list of functions
     while (head)
     {
@@ -918,14 +1079,14 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
         parseTypeDefinitionsPass1(stmts->children[0]);
         head = head->next;
     }
-    printf("Pass 1 for otherFunctions Completed\n");
+    //printf("Pass 1 for otherFunctions Completed\n");
 
     parseTypeDefinitionsPass1(mainFunction->children[0]->children[0]);
 
-    printf("Pass1 completed\n");
+    // printf("Pass1 completed\n");
     head = otherFunctions;
 
-    printf("Going to start Pass 2\n");
+    // printf("Going to start Pass 2\n");
     while (head)
     {
         astNode *current = head->data;
@@ -934,11 +1095,9 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
         head = head->next;
     }
 
-    printf("Pass 2 for other functions completed\n");
+    // printf("Pass 2 for other functions completed\n");
     parseTypeDefinitionsPass2(mainFunction->children[0]->children[0]);
-    printf("Pass 2 completed\n");
-
-    // now parse declarations for globals
+    // printf("Pass 2 completed\n");
     head = otherFunctions;
     while (head)
     {
@@ -950,7 +1109,7 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     parseGlobalDeclarations(mainFunction->children[0]->children[1], globalSymbolTable);
 
-    printASingleSymbolTable(globalSymbolTable, stdout);
+    //printASingleSymbolTable(globalSymbolTable, stdout);
 
     head = otherFunctions;
     while (head)
@@ -979,6 +1138,8 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
     entry->usage = "main function";
 
     insertintoSymbolTable(globalSymbolTable, entry);
+
+    calculateFunctionOffsets(globalSymbolTable);
     // printSymbolTables(stdout);
 
     // printGlobalTypeTable(stdout);

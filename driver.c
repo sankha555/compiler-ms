@@ -15,6 +15,8 @@
 #include "TypeChecker.h"
 #include "icgGeneratorDef.h"
 #include "icgGenerator.h"
+#include "codeGeneratorDef.h"
+#include "codeGenerator.h"
 #include <time.h>
 #include <stdlib.h>
 
@@ -31,7 +33,7 @@ SymbolTable* performPrelims(twinBuffer* buffer, char* testcaseFile, ParseTreeNod
 
     createParseTable(FirstAndFollowAll, parseTable);
 
-    root = parseInputSourceCode(buffer);
+    root = parseInputSourceCode(buffer, 0);
 
     astRoot = createAbstractSyntaxTree(root);
 
@@ -97,7 +99,8 @@ int main(int argc, char *argv[])
         printf("7  - Find activation record sizes\n");
         printf("8  - Find record types and sizes\n");
         printf("9  - Type checking and semantic analysis\n");
-        printf("10 - Code generation and dynamic type checking\n");
+        printf("10 - Intermediate Code generation and dynamic type checking\n");
+        printf("11 - Assembly Code generation\n");
         printf("\nEnter a command: ");
 
         int option;
@@ -119,7 +122,7 @@ int main(int argc, char *argv[])
 
                 token receivedToken = get_next_token(buffer);
 
-                printf("\n\n\n----------- List of Tokens -----------\n\n");
+                printf("\n\n\n========================== LIST OF TOKENS ============================\n\n");
 
                 while (receivedToken.type != TK_EOF)
                 {
@@ -127,7 +130,7 @@ int main(int argc, char *argv[])
                     receivedToken = get_next_token(buffer);
                 }
 
-                printf("\n\n\n------------------------------------\n\n");
+                printf("\n=========================================================================\n\n");
                 break;
 
             case 2:
@@ -153,7 +156,7 @@ int main(int argc, char *argv[])
                 // print and store the parse table in a .csv file
                 printParseTableToFile();
 
-                root = parseInputSourceCode(buffer);
+                root = parseInputSourceCode(buffer, 1);
 
                 if (printParseTree(root) == -1)
                 {
@@ -182,7 +185,7 @@ int main(int argc, char *argv[])
 
                 createParseTable(FirstAndFollowAll, parseTable);
 
-                root = parseInputSourceCode(buffer);
+                root = parseInputSourceCode(buffer, 0);
 
                 astRoot = createAbstractSyntaxTree(root);
 
@@ -209,18 +212,28 @@ int main(int argc, char *argv[])
 
                 createParseTable(FirstAndFollowAll, parseTable);
 
+
                 numParseTreeNodes = 0;
                 parseTreeMemory = 0;
-                root = parseInputSourceCode(buffer);
-                printf("Parse Tree: Number of nodes = %d, Allocated Memory = %d Bytes\n", numParseTreeNodes, parseTreeMemory);
+                root = parseInputSourceCode(buffer, 0);
                 
+                printf("================================================================================================\n");
+                printf("%20s%25s%30s\n", "\t\t", "NUMBER OF NODES", "MEMORY ALLOCATED");
+                printf("------------------------------------------------------------------------------------------------\n");
+
+                printf("%20s%30d%30d Bytes\n", "Parse Tree", numParseTreeNodes, parseTreeMemory);
+                printf("------------------------------------------------------------------------------------------------\n");
+
                 numASTNodes = 0;
                 ASTMemory = 0;
                 astRoot = createAbstractSyntaxTree(root);
-                printf("Abstract Syntax Tree: Number of nodes = %d, Allocated Memory = %d Bytes\n", numASTNodes, ASTMemory);
+
+                printf("%20s%30d%30d Bytes\n", "Abstract Syntax Tree", numASTNodes, ASTMemory);
+                printf("------------------------------------------------------------------------------------------------\n");
 
                 float compression = ((1.0*(numParseTreeNodes - numASTNodes))/numParseTreeNodes)*100;
-                printf("Compression = %f %%", compression);
+                printf("Compression = %f %%\n", compression);
+                printf("================================================================================================\n");
 
                 break;
 
@@ -243,7 +256,7 @@ int main(int argc, char *argv[])
 
                 createParseTable(FirstAndFollowAll, parseTable);
 
-                root = parseInputSourceCode(buffer);
+                root = parseInputSourceCode(buffer, 0);
 
                 //aliasTemp = NULL;
                 astRoot = createAbstractSyntaxTree(root);
@@ -252,7 +265,7 @@ int main(int argc, char *argv[])
 
                 globalSymbolTable = initializeSymbolTableNew(astRoot);
 
-                printGlobalTypeTable(stdout);
+                //printGlobalTypeTable(stdout);
 
                 printSymbolTables(stdout);
                 
@@ -261,28 +274,31 @@ int main(int argc, char *argv[])
             case 6:
                 globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
             
-                printf("============ LIST OF GLOBAL VARIABLES ============\n");
+                printf("================== LIST OF GLOBAL VARIABLES ================\n\n");
+                printf("%10s%20s%20s\n", "NAME", "TYPE", "OFFSET");
+                printf("-----------------------------------------------------------\n");
                 for(int i = 0; i < K_MAP_SIZE; i++){
                     SymbolTableEntry* tableEntry = globalSymbolTable->tableEntries[i];
                     while(tableEntry != NULL){
-                        printf("Name: %30s ; Type: %30s ; Offset: %30d \n", tableEntry->identifier, "TODO", tableEntry->offset);
-
+                        printf("%10s%20s%20d\n", tableEntry->identifier, getType(tableEntry), tableEntry->offset);
                         tableEntry = tableEntry->next;
                     }
                 }
-                printf("=================================================\n");
+                printf("==========================================================\n");
 
                 break;
 
             case 7:
                 globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
 
-                printf("============ FUNCTION ACTIVATION RECORD SIZES ============\n");
+                printf("============ FUNCTION ACTIVATION RECORD SIZES ============\n\n");
+                printf("%10s%35s\n", "NAME", "SIZE");
+                printf("---------------------------------------------------------\n");
 
                 SymbolTable* head = listOfSymbolTables;
                 while(head != NULL){
                     if(strcmp(head->tableID, "GLOBAL")){    // do not print the global symbol table details
-                        printf("%s %30d\n", head->tableID, head->totalWidth);
+                        printf("%10s%30d Bytes\n", head->tableID, head->totalWidth);
                     }
 
                     head = head->next;
@@ -293,44 +309,7 @@ int main(int argc, char *argv[])
 
             case 8:
                 globalSymbolTable = performPrelims(buffer, argv[1], root, astRoot, globalSymbolTable);
-                
-                printf("============ GLOBALLY VISIBLE RECORDS ============\n");
-
-                int f = 0;
-                for(int i = 0; i < K_MAP_SIZE; i++){
-                    SymbolTableEntry* tableEntry = globalSymbolTable->tableEntries[i];
-                    while(tableEntry != NULL){
-                        if(tableEntry->type != NULL && tableEntry->type->type == RecordType){
-                            f = 1;
-                            printf("%s \t\t<", tableEntry->type->identifier);
-                            // printing type expression
-                            UnionOrRecordInfo* info = tableEntry->type->compositeVariableInfo;
-                            Field* field = info->listOfFields;
-                            
-                            int first = 1;
-                            while(field != NULL){
-                                if(!first){
-                                    printf(", ");
-                                }else{
-                                    first = 0;
-                                }
-                                printf("%s", field->datatype->identifier);
-
-                                field = field->next;
-                            }
-                            // printing width
-                            printf("> %10d\n", tableEntry->width);
-
-                        }
-
-                        tableEntry = tableEntry->next;
-                    }
-                }
-
-                if(!f){
-                    printf("%40s", "No globally visible records yet\n");
-                }
-                printf("==================================================\n");
+                printGlobalTypeTableRecordsAndUnions(stdout);
                 break;
 
             case 9:
@@ -349,7 +328,7 @@ int main(int argc, char *argv[])
 
                 createParseTable(FirstAndFollowAll, parseTable);
 
-                root = parseInputSourceCode(buffer);
+                root = parseInputSourceCode(buffer, 0);
 
                 astRoot = createAbstractSyntaxTree(root);
 
@@ -377,7 +356,7 @@ int main(int argc, char *argv[])
 
                 createParseTable(FirstAndFollowAll, parseTable);
 
-                root = parseInputSourceCode(buffer);
+                root = parseInputSourceCode(buffer, 0);
 
                 astRoot = createAbstractSyntaxTree(root);
 
@@ -393,47 +372,39 @@ int main(int argc, char *argv[])
 
                 break;
 
-            // case 11:
-            //     buffer = init_lexer(argv[1]);
-            //     if (buffer == NULL)
-            //     {
-            //         return 0;
-            //     }
+            case 11:
 
-            //     FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
+                funcSeqNum = 0;
 
-            //     populateRules();
+                buffer = init_lexer(argv[1]);
+                if (buffer == NULL)
+                {
+                    return 0;
+                }
 
-            //     createParseTable(FirstAndFollowAll, parseTable);
+                FirstAndFollowAll = computeFirstAndFollowSets(GRAMMAR_FILE);
 
-            //     root = parseInputSourceCode(buffer);
+                populateRules();
 
-            //     aliasTemp = NULL;
-            //     astRoot = createAbstractSyntaxTree(root);
+                createParseTable(FirstAndFollowAll, parseTable);
 
-            //     globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
+                root = parseInputSourceCode(buffer, 0);
 
-            //     globalSymbolTable = initializeSymbolTable(astRoot);
+                astRoot = createAbstractSyntaxTree(root);
 
-            //     head = listOfSymbolTables;
-            //     while(head != NULL){
-            //         if(lookupSymbolTable(head, aliasTemp->data->entry.lexeme) != NULL){
-            //             break;
-            //         }
-            //         head = head->next;
-            //     }
+                globalTypeTable = createTypeTable("GLOBAL_TYPE_TABLE");
 
-            //     SymbolTableEntry* newAliasSymbolTableEntry = createRecordItemAlias(aliasTemp, head, globalSymbolTable);
-            //     if(newAliasSymbolTableEntry == NULL){
-            //         printf("Could not get a record alias\n");
-            //     }else{
-            //         printf("Alias Record Info....\n");
-            //         printf("Identifier: %s\n", newAliasSymbolTableEntry->identifier);
-            //         printf("Offset: %d\n", newAliasSymbolTableEntry->offset);
-            //         printf("Type: %d\n", newAliasSymbolTableEntry->type->type);
-            //     }
+                globalSymbolTable = initializeSymbolTable(astRoot);
 
-            //     break;
+                printf("Starting to generate ICG code ya all.\n");
+
+                generateCompleteICGcode(astRoot,globalSymbolTable);
+
+                printICG(stdout);
+
+                printf("\n\n\n\n");
+
+                generateAssemblyCode(stdout,globalSymbolTable);
 
             default:
                 break;

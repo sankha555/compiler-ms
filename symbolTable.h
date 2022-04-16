@@ -19,6 +19,7 @@ SymbolTable *initializeSymbolTableNew(astNode *root);
 int populateWidthandOffset(char *typeId);
 void parseTypeDefinitionsPass2(char *typeId);
 void parseTypeDefinitionsPass1(char *typeId);
-
-
+char* getRecordOrUnionTypeExpression(UnionOrRecordInfo* info);
+char* getType(SymbolTableEntry* entry);
+void calculateFunctionOffsets(SymbolTable *globalSymbolTable);
 #endif
