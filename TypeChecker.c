@@ -4,8 +4,7 @@
 /* inputs:
  * the ast node that will serve as root for the subtree to traverse
  * pointer to the local function's symbol table or record table
- * pointer to symbol table of global vars
- * pointer to the base symbol table (listOfSymbolTables)
+ * pointer to the base symbol table
  *
  * output:
  * the type of the expression
@@ -123,7 +122,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case relOp_GT:
 			//printf("Entered Relational Operators.\n");
 			t1 = findType(root->children[0], localTable, baseTable);
-			t2 = findType(root->children[2], localTable, baseTable);
+			t2 = findType(root->children[1], localTable, baseTable);
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
@@ -282,8 +281,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			else if (t1->type == RecordType) {
 				return checkTypeEquality(t1, t2);
 			} else {
-				
-				printf("Assignment Error: type mismatch.\n");
+				printf("Line %d: Assignment Error - type mismatch %s and %s.\n",
+					root->children[0]->data->entry.linenumber, t1->identifier, t2->identifier);
 				//printf("Line %d: Assignment error - incompatible types %s of type %s and %s of type %s.\n", root->children[0]->data->entry.linenumber, root->children[0]->data->entry.lexeme , t1->identifier, root->children[1]->data->entry.lexeme, t2->identifier);
 				return typeErrPtr;
 			}
@@ -593,15 +592,17 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				}
 				// to remove
 				//printf("%d\n", children);
+				boolean childErrFlag = FALSE;
 				for (int i = 0; i < children; i++){
 
 					// to remove
 					//printf("-%d-", root->children[i]->type);
+					boolean flag = FALSE;
 					if (findType(root->children[i], localTable, baseTable)->type == TypeErr){
-						return typeErrPtr;
+						childErrFlag = TRUE;
 					}
 				}
-				return voidPtr;
+				return (childErrFlag == TRUE) ? typeErrPtr : voidPtr;
 			}
 	}
 }
@@ -855,7 +856,7 @@ VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedN
 		case relOp_LE:
 		case relOp_LT:
 			toVisitLL = extractVariablesFromBoolean(root->children[0], toVisitLL);
-			toVisitLL = extractVariablesFromBoolean(root->children[2], toVisitLL);
+			toVisitLL = extractVariablesFromBoolean(root->children[1], toVisitLL);
 
 		case arithOp_DIV:
 		case arithOp_MINUS:
