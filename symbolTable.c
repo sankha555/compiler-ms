@@ -1107,7 +1107,6 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     insertintoSymbolTable(globalSymbolTable, entry);
 
-    calculateFunctionOffsets(globalSymbolTable);
     // printSymbolTables(stdout);
 
     // printGlobalTypeTable(stdout);
