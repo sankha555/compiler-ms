@@ -44,6 +44,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			head = head->next;
 		}
 		*/
+		
 
 		if (checkVariableChanges(root->children[1], toVisitLL) == FALSE) {
 			printf("Error: Looping variables in while not changed.\n");
@@ -122,7 +123,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		case relOp_GT:
 			//printf("Entered Relational Operators.\n");
 			t1 = findType(root->children[0], localTable, baseTable);
-			t2 = findType(root->children[1], localTable, baseTable);
+			t2 = findType(root->children[2], localTable, baseTable);
 			if (t1->type == TypeErr || t2->type == TypeErr) {
 				return typeErrPtr;
 			}
@@ -699,12 +700,12 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 		char* funcLexeme = funcNode->data->children[0]->entry.lexeme;
 
 		// obtain the symbol table for the current function
-		//printf("Entering Function: %s...\n", funcLexeme);
+		printf("Entering Function: %s...\n", funcLexeme);
 		SymbolTableEntry* currFunc = lookupSymbolTable(baseTable, funcLexeme);
 		//printf("%s\n", currFunc->identifier);
 		localTable = currFunc->tablePointer;
 
-		Type elem = findType(funcNode->data, localTable, baseTable)->type;
+		Type elem = findType(funcNode->data->children[3], localTable, baseTable)->type;
 
 		if (elem != Void) {
 			printf("TYPE ERROR DETECTED IN %s.\n", funcLexeme);
@@ -751,9 +752,9 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 
 	/* traverse <mainFunction> */
 	char *mainLexeme = MAIN_NAME;
-	//printf("Entering Function: %s...\n", mainLexeme);
+	printf("Entering Function: %s...\n", mainLexeme);
 	localTable = (lookupSymbolTable(baseTable, mainLexeme))->tablePointer;
-	if (findType(root->children[1], localTable, baseTable)->type != Void) {
+	if (findType(root->children[1]->children[0], localTable, baseTable)->type != Void) {
 		printf("TYPE ERROR DETECTED IN MAIN.\n");
 		return -1;
 	}
@@ -805,7 +806,7 @@ struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1,
 
 VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedNode* toVisitLL) {
 	if (root == NULL)
-		return NULL;
+		return toVisitLL;
 	switch(root->type) {
 		case SingleOrRecIdLinkedListNode:
 			toVisitLL = extractVariablesFromBoolean(root->data, toVisitLL);
@@ -823,7 +824,7 @@ VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedN
 
 				toVisitLL = newNode;
 
-				//printf("%s\n", newNode->lexeme);
+				//printf("%s\n", toVisitLL->lexeme);
 			}
 
 			else {
@@ -853,6 +854,9 @@ VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedN
 		case relOp_GT:
 		case relOp_LE:
 		case relOp_LT:
+			toVisitLL = extractVariablesFromBoolean(root->children[0], toVisitLL);
+			toVisitLL = extractVariablesFromBoolean(root->children[2], toVisitLL);
+
 		case arithOp_DIV:
 		case arithOp_MINUS:
 		case arithOp_PLUS:
@@ -887,7 +891,7 @@ boolean checkVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 		}
 		curr = curr->next;
 	}
-	 return FALSE;
+	return FALSE;
 }
 
 boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
@@ -948,15 +952,17 @@ boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 			return FALSE;
 		
 		case Read:
-			printf("Entered mark read.\n");
+			//printf("Entered mark read.\n");
 			readVariable = root->children[0];
 			if (readVariable->type == Num || readVariable->type == RealNum) {
 				printf("Can not read into a literal!\n");
 				return FALSE;
 			}
 			lhsName = readVariable->data->entry.lexeme;
+			
 			curr = toVisitLL;
 			while (curr != NULL) {
+				//printf("mark read %s-%s\n", lhsName, curr->lexeme);
 				if (strcmp(curr->lexeme, lhsName) == 0) {
 					curr->visited = TRUE;
 					return TRUE;
@@ -978,6 +984,13 @@ boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 			}
 			return flag;
 		}
+
+		/*
+		case logOp_AND:
+		case logOp_OR:
+			return markVariableChanges(root->children[0], toVisitLL) ||
+				markVariableChanges(root->children[1], toVisitLL);
+		*/
 
 		default:
 			if (root->isLinkedListNode) {
