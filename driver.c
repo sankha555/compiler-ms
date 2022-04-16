@@ -409,7 +409,12 @@ int main(int argc, char *argv[])
                 calculateFunctionOffsets(globalSymbolTable);
 
                 printASingleSymbolTable(globalSymbolTable, stdout);
-                generateAssemblyCode(stdout,globalSymbolTable);
+
+                FILE *asmFile = fopen("code.asm", "w");
+                generateAssemblyCode(asmFile,globalSymbolTable);
+                fclose(asmFile);
+                printf("Generated assembly code in code.asm\n");
+                printf("\n\n\n\n");
 
             default:
                 break;
