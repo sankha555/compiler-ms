@@ -546,12 +546,16 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
         if (lookupSymbolTable(symbolTable, identifier))
         {
             printf("Line %d: Error - %s already declared in this scope\n", variable->entry.linenumber, identifier);
+            root = root->next;
+            continue;
         }
 
         // check if the identifier is already in global symbol table
         if (lookupSymbolTable(globalSymbolTable, identifier))
         {
             printf("Line %d: Error - %s already declared in global scope\n", variable->entry.linenumber, identifier);
+            root = root->next;
+            continue;
         }
 
         TypeArrayElement *intTypeElement = lookupTypeTable(globalTypeTable, "Int");
@@ -1120,7 +1124,9 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
         // check if the function is already in the global table
         if (lookupSymbolTable(globalSymbolTable, functionName))
         {
-            printf("Error Line %d: Function %s already defined\n", current->children[0]->entry.linenumber, functionName);
+            printf("Error Line %d: Function %s already defined, overloading is not allowed\n", current->children[0]->entry.linenumber, functionName);
+            head = head->next;
+            continue;
         }
         SymbolTable *functionTable = createSymbolTable(functionName, globalSymbolTable);
         populateOtherFunctionTable(current, globalSymbolTable, functionTable);
