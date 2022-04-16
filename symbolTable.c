@@ -377,13 +377,17 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
         // check if the identifier is already in the symbol table
         if (lookupSymbolTable(symbolTable, identifier))
         {
+            printf("\033[0;31m");
             printf("Line %d: Error: Parameter %s already declared in function %s\n", root->data->children[1]->entry.linenumber, identifier, functionName);
+            printf("\033[0m");
         }
 
         // check if the identifier is already in the global symbol table
         if (lookupSymbolTable(globalSymbolTable, identifier))
         {
+            printf("\033[0;31m");
             printf("Line %d: Error: Parameter %s already declared in global scope\n", root->data->children[1]->entry.linenumber, identifier);
+            printf("\033[0m");
         }
 
         switch (dataType)
@@ -460,13 +464,18 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
         // check if the identifier is already in the symbol table
         if (lookupSymbolTable(symbolTable, identifier))
         {
+            printf("\033[0;31m");
             printf("Line %d: Error: Parameter %s already declared in function %s\n", root->data->children[1]->entry.linenumber, identifier, functionName);
+            printf("\033[0m");
         }
 
         // check if the identifier is already in the global symbol table
         if (lookupSymbolTable(globalSymbolTable, identifier))
         {
+            printf("\033[0;31m");
             printf("Line %d: Error: Parameter %s already declared in global scope\n", root->data->children[1]->entry.linenumber, identifier);
+            printf("\033[0m");
+
         }
 
         switch (dataType)
@@ -545,7 +554,10 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
         // check if the identifier is already in symbol table
         if (lookupSymbolTable(symbolTable, identifier))
         {
+            printf("\033[0;31m");
             printf("Line %d: Error - %s already declared in this scope\n", variable->entry.linenumber, identifier);
+            printf("\033[0m");
+            
             root = root->next;
             continue;
         }
@@ -553,7 +565,10 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
         // check if the identifier is already in global symbol table
         if (lookupSymbolTable(globalSymbolTable, identifier))
         {
+            printf("\033[0;31m");
             printf("Line %d: Error - %s already declared in global scope\n", variable->entry.linenumber, identifier);
+            printf("\033[0m");
+            
             root = root->next;
             continue;
         }
@@ -584,7 +599,9 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
             break;
 
         case TypeUnion:
-            printf("Line %d : Unauthorised declaration. Union type variable : %s declared\n",root->data->children[0]->entry.linenumber,root->data->children[0]->entry.lexeme);
+            printf("\033[0;31m");
+            printf("Declaration Error \nLine %d : Unauthorised declaration. Union type variable : %s declared\n",root->data->children[0]->entry.linenumber,root->data->children[0]->entry.lexeme);
+            printf("\033[0m");
             
             break;
         case TypeRecordUnionId:
@@ -780,7 +797,9 @@ SymbolTable *initializeSymbolTable(astNode *root)
         // check if the function is already in the global table
         if (lookupSymbolTable(globalSymbolTable, functionName))
         {
+            printf("\033[0;31m");
             printf("Line %d: Function %s already defined. Function overloading is not allowed!\n", current->children[0]->entry.linenumber, functionName);
+            printf("\033[0m");
         }
         SymbolTable *functionTable = createSymbolTable(functionName, globalSymbolTable);
         populateOtherFunctionTable(current, globalSymbolTable, functionTable);
@@ -916,7 +935,10 @@ void parseTypeDefinitionsPass1(astNode *root)
 int populateWidthandOffset(char *typeId){
     struct TypeArrayElement* type = lookupTypeTable(globalTypeTable, typeId);
     if(type == NULL) {
+        printf("\033[0;31m");
         printf("Type not found \n");
+        printf("\033[0m");
+
     }
 
     if(type->widthPopulated) return type->width;
@@ -1022,7 +1044,10 @@ void parseGlobalDeclarations(astNode *root, SymbolTable *globalSymbolTable)
         // check if the identifier is already in global symbol table
         if (lookupSymbolTable(globalSymbolTable, identifier))
         {
+            printf("\033[0;31m");
             printf("Line %d: Error - %s already declared in global scope\n", variable->entry.linenumber, identifier);
+            printf("\033[0m");
+
         }
 
         TypeArrayElement *intTypeElement = lookupTypeTable(globalTypeTable, "Int");
@@ -1124,7 +1149,10 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
         // check if the function is already in the global table
         if (lookupSymbolTable(globalSymbolTable, functionName))
         {
+            printf("\033[0;31m");
             printf("Error Line %d: Function %s already defined, overloading is not allowed\n", current->children[0]->entry.linenumber, functionName);
+            printf("\033[0m");
+        
             head = head->next;
             continue;
         }
