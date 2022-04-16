@@ -4,6 +4,30 @@
 
 #include "typing.h"
 #include "globalDef.h"
+#include "symbolTable.h"
+
+void printGlobalTypeTableRecordsAndUnions(FILE* fp)
+{
+    fprintf(fp, "========================================== RECORDS AND UNIONS ==========================================\n\n");
+    
+    printf("---------------------------------------------------------------------------------------------------\n");
+    fprintf(fp, "%25s%40s%30s\n", "TYPE", "TYPE EXPRESSION", "WIDTH");
+    printf("---------------------------------------------------------------------------------------------------\n");
+
+    for (int i = 0; i < K_MAP_SIZE; i++)
+    {
+        TypeArrayElement *head = globalTypeTable->tableEntries[i];
+        while (head != NULL)
+        {
+            if (head->type == UnionType || head->type == RecordType)
+            {
+                printTypeArrayElement(fp, head);
+            }
+            head = head->next;
+        }
+    }
+    fprintf(fp, "========================================================================================================\n\n\n");
+}
 
 FunctionParameter* getFunctionParameters(char* identifier, boolean wantOutputParams) {
     TypeArrayElement* funcElement = lookupTypeTable(globalTypeTable,identifier);
@@ -24,13 +48,18 @@ void printUnionOrRecordInfo(FILE* fp, UnionOrRecordInfo *info)
         fprintf(fp, "NULL\n");
         return;
     }
-    fprintf(fp, "identifier: %s, isUnion: %d, isRecord: %d, totalWidth: %d\n", info->identifier, info->isUnion, info->isRecord, info->totalWidth);
-    Field *field = info->listOfFields;
-    while (field != NULL)
-    {
-        fprintf(fp, "identifier: %s, datatype: %s\n", field->identifier, field->datatype->identifier);
-        field = field->next;
+
+    char* typeExpr = getRecordOrUnionTypeExpression(info);
+    
+    if(info->isRecord){
+        fprintf(fp, "record ");
+        fprintf(fp, "%20s%45s%20d\n", info->identifier, typeExpr, info->totalWidth);
+    }else if(info->isUnion){
+        fprintf(fp, " union ");
+        fprintf(fp, "%20s%45s%20d\n", info->identifier, typeExpr, info->totalWidth);
     }
+
+    printf("---------------------------------------------------------------------------------------------------\n");
 }
 
 void printFunctionInfo(FILE *fp, FunctionType *info)
@@ -75,26 +104,26 @@ void printTypeArrayElement(FILE* fp, TypeArrayElement *t)
     switch (t->type)
     {
     case Integer:
-        fprintf(fp, "Integer \t %s\n", t->identifier);
+        fprintf(fp, "Integer %s\n", t->identifier);
         break;
     case Real:
-        fprintf(fp, "Real \t %s\n", t->identifier);
+        fprintf(fp, "Real %s\n", t->identifier);
         break;
     case UnionType:
-        fprintf(fp, "Union \t %s\n", t->identifier);
+        //fprintf(fp, "Union %s \t\t\t\t", t->identifier);
         printUnionOrRecordInfo(fp, t->compositeVariableInfo);
         break;
     case RecordType:
-        fprintf(fp, "Record \t %s\n", t->identifier);
+        //fprintf(fp, "Record %s \t\t\t\t", t->identifier);
         printUnionOrRecordInfo(fp, t->compositeVariableInfo);
         break;
     case Function:
         printf("printing FunctionInfo\n");
-        fprintf(fp, "Function \t %s\n", t->identifier);
+        fprintf(fp, "Function %s\n", t->identifier);
         printFunctionInfo(fp, t->functionInfo);
         break;
     case Alias:
-        fprintf(fp, "Alias \t %s\n", t->identifier);
+        fprintf(fp, "Alias %s\n", t->identifier);
         printAliasInfo(fp, t->aliasTypeInfo);
         break;
     default:
@@ -273,6 +302,9 @@ struct FunctionType *createFunctionType(char *identifier)
     strcpy(func->identifier, identifier);
     func->inputParameters = NULL;
     func->outputParameters = NULL;
+
+    funcSeqNum++;
+    func->declarationSeqNum = funcSeqNum;
 
     func->inputParamsWidth = 0;
     func->outputParamsWidth = 0;

@@ -990,7 +990,7 @@ astNode *createAbstractSyntaxTree(ParseTreeNode *root)
         createAbstractSyntaxTree(root->children[2]);
         ptr = newASTnode(root->children[1]->ptr->type);
         ptr->children[0] = root->children[0]->ptr;
-        ptr->children[1] = root->children[2]->ptr;
+        ptr->children[2] = root->children[2]->ptr;
         root->ptr = ptr;
         freeChildren(root, 0, 2);
         return ptr;
@@ -1265,13 +1265,18 @@ int preOrderTraversal(astNode *root, FILE* fp, astNode* parent, astNode* prev)
         return 0;
 
     if (root->isLeafNode) {
-        fprintf(fp, "Leaf: %40s\t Parent: %30s\t\n", tagNames[root->type], tagNames[parent->type]);
+        fprintf(fp, "%20s%35s%35s%35s\n", "Leaf Node", tagNames[root->type], tagNames[parent->type], "------");
+        printf("-----------------------------------------------------------------------------------------------------------------------------------------\n");
     } else if (root->isLinkedListNode) {
-        fprintf(fp, "LinkedListNode: %30s\t Parent: %30s\t Prev:%30s\n", tagNames[root->type], parent ? tagNames[parent->type] : NULL, prev ? tagNames[prev->type] : "NULL");
+        fprintf(fp, "%20s%35s%35s%35s\n", "Linked List Node", tagNames[root->type], parent ? tagNames[parent->type] : NULL, prev ? tagNames[prev->type] : "NULL");
+        printf("-----------------------------------------------------------------------------------------------------------------------------------------\n");
+
         preOrderTraversal(root->data, fp, root, NULL);
         preOrderTraversal(root->next, fp, parent, root);
     } else {
-        fprintf(fp, "Node: %40s\t Parent: %30s\n", tagNames[root->type], parent ? tagNames[parent->type] : "NULL");
+        fprintf(fp, "%20s%35s%35s%35s\n", "Node", tagNames[root->type], parent ? tagNames[parent->type] : "NULL", "------");
+        printf("-----------------------------------------------------------------------------------------------------------------------------------------\n");
+
 
         // ignore NULLs at end of children list but not in middle or start
         int children = MAX_PROD_LEN;
@@ -1297,11 +1302,12 @@ int preOrderTraversal(astNode *root, FILE* fp, astNode* parent, astNode* prev)
  */
 int printAbstractSyntaxTree (astNode* root, FILE* fp) {
     // header
-    fprintf(fp, "Abstract Syntax Tree\n");
-    fprintf(fp, "===========================================================\n");
+    fprintf(fp, "=========================================================== ABSTRACT SYNTAX TREE ==========================================================\n\n");
+    fprintf(fp, "%20s%35s%35s%35s\n", "TYPE", "IDENTIFIER", "PARENT", "PREVIOUS");
+    printf("-----------------------------------------------------------------------------------------------------------------------------------------\n");
 
     preOrderTraversal(root, fp, NULL, NULL);
 
-    fprintf(fp, "\n========================================================\n\n\n");
+    fprintf(fp, "\n===========================================================================================================================================\n\n\n");
     return 0;
 }
