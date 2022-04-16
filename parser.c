@@ -512,12 +512,15 @@ ParseTreeNode* parseInputSourceCode(twinBuffer* buffer, int printStatus){
             }
         }
     }
-    if(currentInputToken.type == TK_EOF && topOfStack->terminal == TK_EOF && printStatus) {
-        printf("\nSource code is syntactically correct.\n");
-    } else if(currentInputToken.type != TK_EOF) {
-        printf("Line %4d Error: Invalid token %s encountered with value \"%s\", stack top -> $\n",currentInputToken.linenumber,tokenNames[currentInputToken.type],currentInputToken.lexeme);
-    } else {
-        printf("Line %4d Error: Invalid token %s encountered with value \"%s\", stack top -> %s\n",currentInputToken.linenumber,tokenNames[currentInputToken.type],currentInputToken.lexeme,FirstAndFollowList[topOfStack->nonTermIndex].symbol);
+
+    if (printStatus) {
+        if(currentInputToken.type == TK_EOF && topOfStack->terminal == TK_EOF && printStatus) {
+            printf("\nSource code is syntactically correct.\n");
+        } else if(currentInputToken.type != TK_EOF) {
+            printf("Line %4d Error: Invalid token %s encountered with value \"%s\", stack top -> $\n",currentInputToken.linenumber,tokenNames[currentInputToken.type],currentInputToken.lexeme);
+        } else {
+            printf("Line %4d Error: Invalid token %s encountered with value \"%s\", stack top -> %s\n",currentInputToken.linenumber,tokenNames[currentInputToken.type],currentInputToken.lexeme,FirstAndFollowList[topOfStack->nonTermIndex].symbol);
+        }
     }
     return root;
 }
