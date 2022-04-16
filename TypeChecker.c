@@ -4,8 +4,7 @@
 /* inputs:
  * the ast node that will serve as root for the subtree to traverse
  * pointer to the local function's symbol table or record table
- * pointer to symbol table of global vars
- * pointer to the base symbol table (listOfSymbolTables)
+ * pointer to the base symbol table
  *
  * output:
  * the type of the expression
@@ -44,6 +43,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			head = head->next;
 		}
 		*/
+		
 
 		if (checkVariableChanges(root->children[1], toVisitLL) == FALSE) {
 			printf("Error: Looping variables in while not changed.\n");
@@ -282,8 +282,8 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			else if (t1->type == RecordType) {
 				return checkTypeEquality(t1, t2);
 			} else {
-				
-				printf("Assignment Error: type mismatch.\n");
+				printf("Line %d: Assignment Error - type mismatch %s and %s.\n",
+					root->children[0]->data->entry.linenumber, t1->identifier, t2->identifier);
 				//printf("Line %d: Assignment error - incompatible types %s of type %s and %s of type %s.\n", root->children[0]->data->entry.linenumber, root->children[0]->data->entry.lexeme , t1->identifier, root->children[1]->data->entry.lexeme, t2->identifier);
 				return typeErrPtr;
 			}
@@ -593,17 +593,17 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				}
 				// to remove
 				//printf("%d\n", children);
-				
+				boolean childErrFlag = FALSE;
 				for (int i = 0; i < children; i++){
 
 					// to remove
 					//printf("-%d-", root->children[i]->type);
+					boolean flag = FALSE;
 					if (findType(root->children[i], localTable, baseTable)->type == TypeErr){
-						error_flag++;
+						childErrFlag = TRUE;
 					}
 				}
-				if(error_flag) return typeErrPtr;
-				else return voidPtr;
+				return (childErrFlag == TRUE) ? typeErrPtr : voidPtr;
 			}
 	}
 }
@@ -707,7 +707,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 		//printf("%s\n", currFunc->identifier);
 		localTable = currFunc->tablePointer;
 
-		Type elem = findType(funcNode->data, localTable, baseTable)->type;
+		Type elem = findType(funcNode->data->children[3], localTable, baseTable)->type;
 
 		if (elem != Void) {
 			printf("TYPE ERROR DETECTED IN %s.\n", funcLexeme);
@@ -756,7 +756,7 @@ int typeCheck(astNode* root, SymbolTable* baseTable) {
 	char *mainLexeme = MAIN_NAME;
 	printf("Entering Function: %s...\n", mainLexeme);
 	localTable = (lookupSymbolTable(baseTable, mainLexeme))->tablePointer;
-	if (findType(root->children[1], localTable, baseTable)->type != Void) {
+	if (findType(root->children[1]->children[0], localTable, baseTable)->type != Void) {
 		printf("TYPE ERROR DETECTED IN MAIN.\n");
 		return -1;
 	}
@@ -809,7 +809,7 @@ struct TypeArrayElement* checkTypeEquality(struct TypeArrayElement* t1,
 
 VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedNode* toVisitLL) {
 	if (root == NULL)
-		return NULL;
+		return toVisitLL;
 	switch(root->type) {
 		case SingleOrRecIdLinkedListNode:
 			toVisitLL = extractVariablesFromBoolean(root->data, toVisitLL);
@@ -827,7 +827,7 @@ VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedN
 
 				toVisitLL = newNode;
 
-				//printf("%s\n", newNode->lexeme);
+				//printf("%s\n", toVisitLL->lexeme);
 			}
 
 			else {
@@ -857,6 +857,9 @@ VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedN
 		case relOp_GT:
 		case relOp_LE:
 		case relOp_LT:
+			toVisitLL = extractVariablesFromBoolean(root->children[0], toVisitLL);
+			toVisitLL = extractVariablesFromBoolean(root->children[1], toVisitLL);
+
 		case arithOp_DIV:
 		case arithOp_MINUS:
 		case arithOp_PLUS:
@@ -891,7 +894,7 @@ boolean checkVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 		}
 		curr = curr->next;
 	}
-	 return FALSE;
+	return FALSE;
 }
 
 boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
@@ -952,15 +955,17 @@ boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 			return FALSE;
 		
 		case Read:
-			printf("Entered mark read.\n");
+			//printf("Entered mark read.\n");
 			readVariable = root->children[0];
 			if (readVariable->type == Num || readVariable->type == RealNum) {
 				printf("Can not read into a literal!\n");
 				return FALSE;
 			}
 			lhsName = readVariable->data->entry.lexeme;
+			
 			curr = toVisitLL;
 			while (curr != NULL) {
+				//printf("mark read %s-%s\n", lhsName, curr->lexeme);
 				if (strcmp(curr->lexeme, lhsName) == 0) {
 					curr->visited = TRUE;
 					return TRUE;
@@ -982,6 +987,13 @@ boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 			}
 			return flag;
 		}
+
+		/*
+		case logOp_AND:
+		case logOp_OR:
+			return markVariableChanges(root->children[0], toVisitLL) ||
+				markVariableChanges(root->children[1], toVisitLL);
+		*/
 
 		default:
 			if (root->isLinkedListNode) {
