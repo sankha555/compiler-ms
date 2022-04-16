@@ -258,6 +258,11 @@ struct TypeTable *createTypeTable(char *tableID)
 	typeErrPtr = entry;
 	insertintoTypeTable(newTable, typeErrPtr);
 
+    entry = createTypeArrayElement(VariantRecord, "VariantRecord");
+    entry->widthPopulated = TRUE;
+    variantRecordPtr = entry;
+    insertintoTypeTable(newTable, variantRecordPtr);
+
     return newTable;
 }
 

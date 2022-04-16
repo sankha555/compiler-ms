@@ -25,6 +25,9 @@ boolean checkVariableChanges(astNode* root, VariableVisitedNode* toVisitLL);
 boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL);
 
 VariableVisitedNode* extractVariablesFromBoolean(astNode* root, VariableVisitedNode* toVisitLL);
+
+boolean isVariantRecord(astNode* root, SymbolTableEntry* entry);
+
 struct TypeArrayElement* findType(astNode* root, 
 		SymbolTable* localTable, SymbolTable* baseTable);
 

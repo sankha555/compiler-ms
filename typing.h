@@ -15,7 +15,8 @@ typedef enum Type
 	Void,
 	Boolean,
 	TypeErr,
-    Alias
+    Alias,
+    VariantRecord
 
 } Type;
 
@@ -122,6 +123,7 @@ struct TypeArrayElement* realPtr;
 struct TypeArrayElement* voidPtr;
 struct TypeArrayElement* typeErrPtr;
 struct TypeArrayElement* booleanPtr;
+struct TypeArrayElement* variantRecordPtr;
 int funcSeqNum;
 
 

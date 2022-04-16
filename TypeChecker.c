@@ -128,7 +128,13 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			}
 			if (t1->type == t2->type && (t1->type == Integer || t1->type == Real)){
 				return booleanPtr;
-			} else if (t1->type == RecordType && (t1 == t2)) {
+			}
+			else if ((t1->type == VariantRecord && t2->type == VariantRecord)
+					|| (t1->type == VariantRecord && (t2->type == Integer || t2->type == Real))
+					|| (t2->type == VariantRecord && (t1->type == Integer || t1->type == Real))) {
+				return booleanPtr;
+			}
+			else if (t1->type == RecordType && (t1 == t2)) {
 				return booleanPtr;
 			} else {
 				printf("Line %d : Relational operator - incompatible operands.\n", root->children[0]->data->entry.linenumber);
@@ -190,9 +196,20 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			}
 			if (t1->type == Integer && t2->type == Integer){
 				return intPtr;
-			}else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
+			}
+			else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
 				return realPtr;
+//<<<<<<< HEAD
+			}
+			else if ((t1->type == VariantRecord && t2->type == VariantRecord)
+					|| (t1->type == VariantRecord && (t2->type == Integer || t2->type == Real))
+					|| (t2->type == VariantRecord && (t1->type == Integer || t1->type == Real))) {
+				return variantRecordPtr;
+			}
+			else if (t1->type == RecordType) {
+//=======
 			} else if (t1->type == RecordType || (t1->type == Alias && t1->aliasTypeInfo->type == RecordType)) {
+//>>>>>>> 8670500be5b95092eefc5dda3504b96acc6c8569
 				//printf("entered here ...%s %s\n", t1->identifier, t2->identifier);
 				return checkTypeEquality(t1, t2);
 			} else {
@@ -218,6 +235,11 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				(t1->type == Real && t2->type == Integer) || 
 				(t1->type == Real && t2->type == Real)) {
 				return realPtr;
+			}
+			else if ((t1->type == VariantRecord && t2->type == VariantRecord)
+					|| (t1->type == VariantRecord && (t2->type == Integer || t2->type == Real))
+					|| (t2->type == VariantRecord && (t1->type == Integer || t1->type == Real))) {
+				return variantRecordPtr;
 			}
 			else if (t1->type == RecordType && t2->type == Integer) {
 				return t1;
@@ -250,7 +272,13 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return realPtr;
 				//else if (t1->type == RecordType)
 				//	return checkTypeEquality(t1, t2);
-			} else {
+			}
+			else if ((t1->type == VariantRecord && t2->type == VariantRecord)
+					|| (t1->type == VariantRecord && (t2->type == Integer || t2->type == Real))
+					|| (t2->type == VariantRecord && (t1->type == Integer || t1->type == Real))) {
+				return variantRecordPtr;
+			}
+			else {
 				printf("Line %d : Division - real or integer operands required.\n", root->children[0]->data->entry.linenumber);
 				return typeErrPtr;
 			}
@@ -281,7 +309,13 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return voidPtr;
 			else if (t1->type == RecordType) {
 				return checkTypeEquality(t1, t2);
-			} else {
+			}
+			else if ((t1->type == VariantRecord && t2->type == VariantRecord)
+					|| (t1->type == VariantRecord && (t2->type == Integer || t2->type == Real))
+					|| (t2->type == VariantRecord && (t1->type == Integer || t1->type == Real))) {
+				return voidPtr;
+			}
+			else {
 				printf("Line %d: Assignment Error - type mismatch %s and %s.\n",
 					root->children[0]->data->entry.linenumber, t1->identifier, t2->identifier);
 				//printf("Line %d: Assignment error - incompatible types %s of type %s and %s of type %s.\n", root->children[0]->data->entry.linenumber, root->children[0]->data->entry.lexeme , t1->identifier, root->children[1]->data->entry.lexeme, t2->identifier);
@@ -323,6 +357,12 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 		
 			if (root->next == NULL){
 				return entry->type;
+			}
+
+			if (isVariantRecord(root, entry) == TRUE) {
+				printf("Line Number %d: Variant record %s detected - dynamic type checking to be handled at run time.\n", 
+					root->data->entry.linenumber, root->data->entry.lexeme);
+				return variantRecordPtr;
 			}
 
 			// variable is a record or a union
@@ -1035,4 +1075,69 @@ boolean markVariableChanges(astNode* root, VariableVisitedNode* toVisitLL) {
 			}
 			return FALSE;
 	}
+}
+
+boolean isVariantRecord(astNode* root, SymbolTableEntry* entry) {
+	if (entry == NULL || entry->type == NULL) {
+		return FALSE;
+	}
+
+	// should be a record first to qualify as a variant record
+	if (entry->type->type != RecordType) {
+		return FALSE;
+	}
+
+	if (root == NULL || root->next == NULL || root->next->next == NULL
+		|| root->data == NULL || root->next->data == NULL || root->next->next->data == NULL) {
+		return FALSE;
+	}
+
+	Field* fieldLL = entry->type->compositeVariableInfo->listOfFields;
+
+	Field *head = fieldLL;
+	Field* unionField = NULL;
+	boolean flagTag = FALSE, flagUnion = FALSE, flagDuplicate = FALSE;
+	while (head != NULL) {
+		if (strcmp(head->identifier, "tagvalue") == 0
+			&& (head->datatype->type == Real || head->datatype->type == Integer)) {
+			flagTag = TRUE;
+		}
+		if ((head->datatype->type == UnionType || 
+			(head->datatype->aliasTypeInfo != NULL && 
+			head->datatype->aliasTypeInfo->type == UnionType)) && flagUnion == FALSE) {
+			unionField = head;
+			flagUnion = TRUE;
+		}
+		else if (head->datatype->type == UnionType 
+			&& (head->datatype->aliasTypeInfo != NULL && head->datatype->aliasTypeInfo->type == UnionType) 
+			&& flagUnion == FALSE) {
+			flagDuplicate = TRUE;
+		}
+		head = head->next;
+	}
+
+	if (flagTag == FALSE || flagUnion == FALSE || flagDuplicate == TRUE) {
+		return FALSE;
+	}
+
+	
+	Field* unionFieldLL = NULL;
+	if(unionField->datatype->type == UnionType){
+		unionFieldLL = unionField->datatype->compositeVariableInfo->listOfFields;
+	}else if(unionField->datatype->type == Alias){
+		unionFieldLL = unionField->datatype->aliasTypeInfo->compositeVariableInfo->listOfFields;
+	}else{
+		return FALSE;
+	}
+
+	// Field* unionFieldLL = unionField->datatype->compositeVariableInfo->listOfFields;
+	head = unionFieldLL;
+	while (head != NULL) {
+		if (head->datatype != NULL && head->datatype->type != Integer && head->datatype->type != Real) {
+			return FALSE;
+		}
+		head = head->next;
+	}
+
+	return TRUE;
 }
