@@ -6,26 +6,26 @@
 #include "lexerDef.h"
 
 typedef enum ICGrule {
-    ADD_I,      // add two integers in memory
-    ADD_R,      // add two reals in memory
-    SUB_I,      // subtract two integers in memory
-    SUB_R,      // subtract two reals in memory
-    MUL_I,      // multiply two integers in memory
-    MUL_R,      // multiply two reals in memory
-    DIV_I,      // divide two integers in memory
-    DIV_R,      // divide two reals in memory
-    GOTO_L,     // unconditional jump to label
+    ADD_I,          // DONE   add two integers in memory
+    ADD_R,          //    add two reals in memory
+    SUB_I,          // DONE   subtract two integers in memory
+    SUB_R,          //    subtract two reals in memory
+    MUL_I,          // DONE   multiply two integers in memory
+    MUL_R,          //    multiply two reals in memory
+    DIV_I,          // DONE   divide two integers in memory
+    DIV_R,          //    divide two reals in memory
+    GOTO_L,         //    unconditional jump to label
     IF_TRUE_GOTO_L, 
     IF_FALSE_GOTO_L,
-    ASSIGN_OP_INT,  // copy from one memory location 2 bytes to another
-    ASSIGN_OP_REAL, // copy from one mem 4 bytes to another mem
-    DEFINE_DS,  // define data segment, in code generation, adds function offsets
-    DEFINE_CS,  // define code segment, add "global _start:" in code generation
-    EXIT_CODE,  // in the end of intermediate code generation, adds the exit syscall during code generation
-    FUNC_DEF,   // function label in the code segment, push EBP into stack, and move the function offset from constant DS into EBP
-    FUNC_DEF_END, // pop from stack into EBP, then return
-    FUNC_DEF_MAIN,
-    CONVERT_TO_REAL,
+    ASSIGN_OP_INT,  // DONE   copy from one memory location 2 bytes to another
+    ASSIGN_OP_REAL, // DONE   copy from one mem 4 bytes to another mem
+    DEFINE_DS,      // DONE       define data segment, in code generation, adds function offsets
+    DEFINE_CS,      // DONE       define code segment, add "global _start:" in code generation
+    EXIT_CODE,      // DONE       in the end of intermediate code generation, adds the exit syscall during code generation
+    FUNC_DEF,       // DONE       function label in the code segment, push EBP into stack, and move the function offset from constant DS into EBP
+    FUNC_DEF_END,   // DONE     pop from stack into EBP, then return
+    FUNC_DEF_MAIN,  // DONE
+    CONVERT_TO_REAL, 
     SETUP_CALL_TRANS,
     PUSH_INPUT_VAR,
     PUSH_INPUT_IMMEDIATE,
@@ -35,7 +35,7 @@ typedef enum ICGrule {
     READ,
     WRITE_IMMEDIATE,
     WRITE_VAR,
-    ASSIGN_IMMEDIATE_INT,
+    ASSIGN_IMMEDIATE_INT,   //DONE
     ASSIGN_IMMEDIATE_REAL,
     BOOLEAN_NOT,
     BOOLEAN_AND,
