@@ -1,3 +1,14 @@
+/*
+    Group 18
+
+    Team Members:
+    1. Madhav Gupta (2019A7PS0063P)
+    2. Meenal Gupta (2019A7PS0243P)
+    3. Pratham Gupta (2019A7PS0051P)
+    4. Sankha Das (2019A7PS0029P)
+    5. Yash Gupta (2019A7PS1138P)
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include "parserDef.h"
@@ -99,16 +110,13 @@ void populateRules(){
         while(token != NULL) {
             //if it is a terminal
             int nonTermTailIndex = whichNonTerminal(token);
-            // printf("\t\tnonTerminalIndex: %d string: %s\n",nonTermTailIndex,token);
             if(strcmp(epsilon,token) == 0) {
-                //printf("\t\tepsilon pushed.\n");
                 grammarRules[grammarRulesIndex].body[tailLength].isEpsilon = TRUE;
                 grammarRules[grammarRulesIndex].body[tailLength].isTerminal = FALSE;
                 grammarRules[grammarRulesIndex].body[tailLength].terminal = -1;
                 grammarRules[grammarRulesIndex].body[tailLength].nonTermIndex = -1;
             }
             else if(nonTermTailIndex < 0) {
-                //printf("\t\tToken number for string : %s\n",token);
                 grammarRules[grammarRulesIndex].body[tailLength].isEpsilon = FALSE;
                 grammarRules[grammarRulesIndex].body[tailLength].isTerminal = TRUE;
                 grammarRules[grammarRulesIndex].body[tailLength].terminal = tokstrToToken(token);
@@ -140,13 +148,9 @@ void createParseTable(FirstAndFollow FirstAndFollowList){
     for(int ruleIndex = 0; ruleIndex < numRules; ruleIndex++){
         // GrammarRule* prodRule = &grammarRules[ruleIndex];
 
-        //printf("Body Length: %d\n", prodRule->bodyLength);
-
         int nonTerminalIndex = grammarRules[ruleIndex].head;
-        //printf("%d. ", nonTerminalIndex);
 
         FirstAndFollowElement fnf = FirstAndFollowList[nonTerminalIndex];
-        //printf("%s ===> ", fnf.symbol);
 
         // tnt* alpha = prodRule->body;
         

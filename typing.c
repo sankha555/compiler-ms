@@ -1,3 +1,14 @@
+/*
+    Group 18
+
+    Team Members:
+    1. Madhav Gupta (2019A7PS0063P)
+    2. Meenal Gupta (2019A7PS0243P)
+    3. Pratham Gupta (2019A7PS0051P)
+    4. Sankha Das (2019A7PS0029P)
+    5. Yash Gupta (2019A7PS1138P)
+*/
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -110,11 +121,9 @@ void printTypeArrayElement(FILE* fp, TypeArrayElement *t)
         fprintf(fp, "Real %s\n", t->identifier);
         break;
     case UnionType:
-        //fprintf(fp, "Union %s \t\t\t\t", t->identifier);
         printUnionOrRecordInfo(fp, t->compositeVariableInfo);
         break;
     case RecordType:
-        //fprintf(fp, "Record %s \t\t\t\t", t->identifier);
         printUnionOrRecordInfo(fp, t->compositeVariableInfo);
         break;
     case Function:
@@ -165,7 +174,7 @@ int getWidth(Type type)
 }
 
 // the TypeArray will be implemented as a HashTable
-//  basically, identifier of the type will be used to index into the Hash Table where each entry will be a linkedList(in order to deal with collisions)
+// basically, identifier of the type will be used to index into the Hash Table where each entry will be a linkedList(in order to deal with collisions)
 
 // inserts the type element into the given type table, returns 1 when entered, 0 if the entry already exists
 int insertintoTypeTable(TypeTable *typeTable, TypeArrayElement *entry)
@@ -195,7 +204,6 @@ int insertintoTypeTable(TypeTable *typeTable, TypeArrayElement *entry)
 // returns the entry is found in the symbol table, else returns NULL
 struct TypeArrayElement *lookupTypeTable(TypeTable *typeTable, char *identifier)
 {
-    //printf("Entered lookupTypeTable\n");
     int hashTableIndex = hashFunctionSymbolTable(identifier);
 
     TypeArrayElement *entry = typeTable->tableEntries[hashTableIndex];
@@ -203,15 +211,7 @@ struct TypeArrayElement *lookupTypeTable(TypeTable *typeTable, char *identifier)
     {
         if (strcmp(entry->identifier, identifier) == 0)
         {
-            // check if entry is alias
-            // if (entry->type == Alias)
-            // {
-            //     return lookupTypeTable(typeTable, entry->aliasTypeInfo->identifier);
-            // }
-            //printf("Exited LookupTypeTable normally\n");
-
             return entry;
-        
         }
         entry = entry->next;
     }
@@ -432,20 +432,10 @@ void addToOutputParameters(char *identifier, char *typeid, FunctionType *info)
     }
 }
 
-
-
-
-
-
-
-
-
-
 void addToListofFieldsRecordOnlyName(char *identifier, char *typeid, UnionOrRecordInfo *info)
 {
 
     Field *field = createFieldOnlyName(identifier, typeid);
-    //field->offset = info->totalWidth;
     Field *trav = info->listOfFields;
     if (trav == NULL)
     {
@@ -459,15 +449,12 @@ void addToListofFieldsRecordOnlyName(char *identifier, char *typeid, UnionOrReco
         }
         trav->next = field;
     }
-
-    //info->totalWidth += field->width;
 }
 
 void addToListofFieldsUnionOnlyName(char *identifier, char *typeid, UnionOrRecordInfo *info)
 {
 
     Field *field = createFieldOnlyName(identifier, typeid);
-    //field->offset = info->totalWidth;
     Field *trav = info->listOfFields;
     if (trav == NULL)
     {
@@ -481,8 +468,6 @@ void addToListofFieldsUnionOnlyName(char *identifier, char *typeid, UnionOrRecor
         }
         trav->next = field;
     }
-
-    //info->totalWidth += field->width;
 }
 
 struct Field *createFieldOnlyName(char *identifier, char *typeid)
@@ -496,7 +481,7 @@ struct Field *createFieldOnlyName(char *identifier, char *typeid)
     strcpy(field->tempTypeName, typeid);
 
     field->datatype = NULL; //for now as we are only populating fields right now, the width and offset calculation will be done in the next pass
-    //lookupTypeTable(globalTypeTable, typeid);
+
     field->width = 0;
     field->offset = 0;
     field->next = NULL;

@@ -1,3 +1,14 @@
+/*
+    Group 18
+
+    Team Members:
+    1. Madhav Gupta (2019A7PS0063P)
+    2. Meenal Gupta (2019A7PS0243P)
+    3. Pratham Gupta (2019A7PS0051P)
+    4. Sankha Das (2019A7PS0029P)
+    5. Yash Gupta (2019A7PS1138P)
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include "globalDef.h"
@@ -18,9 +29,39 @@ char* generateFuncMemOffset(char* identifier) {
     return result;
 }
 
-void transactInMemory(int fromMemory, int width, SymbolTableEntry* ptr, SymbolTable* globalSymbolTable) {
+void transactInMemory(boolean fromMemory, int width, SymbolTableEntry* ptr, SymbolTable* globalSymbolTable, FILE* fp) {
 
-    
+    char bp[5];
+
+    if(width == 1) {
+        sprintf(bp,"bl");
+    } else if (width == 2) {
+        sprintf(bp,"bx");
+    } else if (width == 4) {
+        sprintf(bp,"ebx");
+    } else {
+        sprintf(bp,"rbx");
+    }
+
+    if(ptr->parentTable == globalSymbolTable) {
+        fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
+    }
+
+    if(fromMemory == TRUE) {
+
+        fprintf(fp,"\tmov\t%s, [ebp+%d]\n",bp,ptr->offset);
+
+    } else {
+
+        fprintf(fp,"\tmov\t[ebp+%d], %s\n",ptr->offset,bp); 
+
+    }
+
+    if(ptr->parentTable == globalSymbolTable) {
+        fprintf(fp,"\tpop\tebp\n");
+    }
+
+    return;
 
 }
 
@@ -39,13 +80,22 @@ void generateAssemblyCode(FILE* fp, SymbolTable* globalSymbolTable) {
 
             case DEFINE_CS:
 
-                fprintf(fp,"; ----------------------------------------------------------------------------------------\n; Auto generated assembly code from intermediate quadruple code.\n; Runs on 64-bit Linux only, with NASM version 2.15.05.\n; To assemble and run:\n;\n;     nasm -felf64 hello.asm && ld hello.o && ./a.out\n; ----------------------------------------------------------------------------------------\n\n\tglobal\t_start\n\n\tsection\t.text\n");
+                fprintf(fp,"; ----------------------------------------------------------------------------------------\n; Auto generated assembly code from intermediate quadruple code.\n; Runs on 64-bit Linux only, with NASM version 2.15.05.\n; To assemble and run:\n;\n;     nasm -felf64 hello.asm && ld hello.o && ./a.out\n; ----------------------------------------------------------------------------------------\n\n");
+                fprintf(fp,"\tglobal\t_start\n\n\textern\tprintf\n\textern\tscanf\tsection\t.text\n");
                 break;
 
             case DEFINE_DS:
 
                 //traverse the global symbol table for all functions and add their functional offset labels
                 fprintf(fp,"\n\n\tsection\t.data\n");
+
+                fprintf(fp,"readInt:\tdb\t\"Enter Integer Number: \", 0\n");
+                fprintf(fp,"readReal:\tdb\t\"Enter Real Number: \", 0\n");
+                fprintf(fp,"writeRes:\tdb\t\"The number is: \", 0\n");
+                fprintf(fp,"formatInt:\tdb\t\"%%hi\", 0\n");
+                fprintf(fp,"formatReal:\tdb\t\"%%f\", 0\n");
+                fprintf(fp,"integer1:\ttimes 2 db 0\n");
+                fprintf(fp,"float1:\ttimes 4 db 0\n");
 
                 for(int i = 0; i < K_MAP_SIZE; i++) {
                     SymbolTableEntry* temp = globalSymbolTable->tableEntries[i];
@@ -90,66 +140,22 @@ void generateAssemblyCode(FILE* fp, SymbolTable* globalSymbolTable) {
                 
                 fprintf(fp,";-------Assign integer operation-------\n");
 
-                //check if location to be copied from is a global variable
-                if(pentupleCode[i].argument[0]->parentTable == globalSymbolTable) {
-                    fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
-                }
-
-                //step 1: from the copying location, move 2 bytes into ebx
-
-                fprintf(fp,"\tmov\tbx, [ebp+%d]\n",pentupleCode[i].argument[0]->offset);
-
-                if(pentupleCode[i].argument[0]->parentTable == globalSymbolTable) {
-                    fprintf(fp,"\tpop\tebp\n");
-                }
+                transactInMemory(TRUE,2,pentupleCode[i].argument[0],globalSymbolTable,fp);
                 
-                //check if location to be copied to is a global variable
-                if(pentupleCode[i].result->parentTable == globalSymbolTable) {
-                    fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
-                }
-
-                //step 2: from the bx register, move 2 bytes into destination
-
-                fprintf(fp,"\tmov\t[ebp+%d], bx\n",pentupleCode[i].result->offset);
-            
-                if(pentupleCode[i].result->parentTable == globalSymbolTable) {
-                    fprintf(fp,"\tpop\tebp\n");
-                }
+                transactInMemory(FALSE,2,pentupleCode[i].result,globalSymbolTable,fp);
                 
                 break;
 
             case ASSIGN_OP_REAL:
 
-                //copy from one memory location, four bytes to another
+                // //copy from one memory location, four bytes to another
                 
                 fprintf(fp,";-------Assign real operation-------\n");
 
-                //check if location to be copied from is a global variable
-                if(pentupleCode[i].argument[0]->parentTable == globalSymbolTable) {
-                    fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
-                }
-
-                //step 1: from the copying location, move 2 bytes into ebx
-
-                fprintf(fp,"\tmov\tebx, [ebp+%d]\n",pentupleCode[i].argument[0]->offset);
-
-                if(pentupleCode[i].argument[0]->parentTable == globalSymbolTable) {
-                    fprintf(fp,"\tpop\tebp\n");
-                }
+                transactInMemory(TRUE,4,pentupleCode[i].argument[0],globalSymbolTable,fp);
                 
-                //check if location to be copied to is a global variable
-                if(pentupleCode[i].result->parentTable == globalSymbolTable) {
-                    fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
-                }
-
-                //step 2: from the bx register, move 2 bytes into destination
-
-                fprintf(fp,"\tmov\t[ebp+%d], ebx\n",pentupleCode[i].result->offset);
-            
-                if(pentupleCode[i].result->parentTable == globalSymbolTable) {
-                    fprintf(fp,"\tpop\tebp\n");
-                }
-
+                transactInMemory(FALSE,4,pentupleCode[i].result,globalSymbolTable,fp);
+                
                 break;
 
             case ASSIGN_IMMEDIATE_INT:
@@ -165,6 +171,7 @@ void generateAssemblyCode(FILE* fp, SymbolTable* globalSymbolTable) {
                 if(pentupleCode[i].result->parentTable == globalSymbolTable) {
                     fprintf(fp,"\tpop\tebp\n");
                 }
+
 
                 break;
 
@@ -192,31 +199,151 @@ void generateAssemblyCode(FILE* fp, SymbolTable* globalSymbolTable) {
 
                 for(int j = 0; j < 2; j++) {
 
-                    if(pentupleCode[i].argument[j]->parentTable == globalSymbolTable) {
-                        fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
-                    }
+                    transactInMemory(TRUE,2,pentupleCode[i].argument[j],globalSymbolTable,fp);
 
-                    //transfer in bx and accumulate in ax
-                    fprintf(fp,"\tmov\tbx, [ebp+%d]\n",pentupleCode[i].argument[j]->offset);
                     fprintf(fp,"\tadd\tax, bx\n");
-
-                    if(pentupleCode[i].argument[j]->parentTable == globalSymbolTable) {
-                        fprintf(fp,"\tpop\tebp\n");
-                    }
                 }
+
+                fprintf(fp,"\tmov\tbx, ax\n");
                 
+                transactInMemory(FALSE,2,pentupleCode[i].result,globalSymbolTable,fp);
+
+                break;
+
+            case ADD_R:
+
+                break;
+
+            case SUB_I:
+
+                fprintf(fp,";-------Subtract Integer variables--------\n");
+
+                fprintf(fp,"\txor\tax, ax\n");
+
+                for(int j = 0; j < 2; j++) {
+
+                    transactInMemory(TRUE,2,pentupleCode[i].argument[j],globalSymbolTable,fp);
+
+                    if(j==0)
+                        fprintf(fp,"\tadd\tax, bx\n");
+                    else
+                        fprintf(fp,"\tsub\tax, bx\n");
+                }
+
+                fprintf(fp,"\tmov\tbx, ax\n");
+                
+                transactInMemory(FALSE,2,pentupleCode[i].result,globalSymbolTable,fp);
+
+                break;
+
+            case SUB_R:
+
+                break;
+
+            case MUL_I:
+
+                fprintf(fp,";-------Multiply Integer variables--------\n");
+
+                fprintf(fp,"\txor\teax, eax\n");
+
+                for(int j = 0; j < 2; j++) {
+
+                    transactInMemory(TRUE,2,pentupleCode[i].argument[j],globalSymbolTable,fp);
+
+                    if(j==0)
+                        fprintf(fp,"\tadd\tax, bx\n");
+                    else
+                        fprintf(fp,"\tmul\tbx\n");
+                }
+
+                fprintf(fp,"\tmov\tbx, ax\n");
+                
+                transactInMemory(FALSE,2,pentupleCode[i].result,globalSymbolTable,fp);
+
+                break;
+
+            case MUL_R:
+
+                break;
+            
+            case DIV_I:
+
+                fprintf(fp,";-------Divide Integer variables--------\n");
+
+                fprintf(fp,"\txor\teax, eax\n");
+
+                for(int j = 0; j < 2; j++) {
+
+                    transactInMemory(TRUE,2,pentupleCode[i].argument[j],globalSymbolTable,fp);
+
+                    if(j==0)
+                        fprintf(fp,"\tadd\tax, bx\n");
+                    else
+                        fprintf(fp,"\tcwd\n\tidiv\tbx\n");
+                }
+
+                fprintf(fp,"\tshr\teax, 16\n\tmov\tbx, ax\n");
+                
+                transactInMemory(FALSE,2,pentupleCode[i].result,globalSymbolTable,fp);
+
+                break;
+
+            case DIV_R:
+
+                
+
+                break;
+
+            case READ:
+
                 if(pentupleCode[i].result->parentTable == globalSymbolTable) {
                     fprintf(fp,"\tpush\tebp\n\tmov\tebp, %d\n",globalSymbolTable->currentOffset);
                 }
 
-                fprintf(fp,"\tmov\tbx, ax\n\tmov\t[ebp+%d], bx\n",pentupleCode[i].result->offset);
+                //figure out the type of var you wish to read, int or real
+                if(pentupleCode[i].result->type->type == Integer) {
+                    
+                    fprintf(fp,"\tpush\treadInt\n");
+                    fprintf(fp,"\tcall\tprintf\n");
+                    fprintf(fp,"\tadd\tesp, 4\n");
+
+                    fprintf(fp,"\tpush\tinteger1\n");
+                    fprintf(fp,"\tpush\tformatInt\n");
+                    fprintf(fp,"\tcall\tscanf\n");
+                    fprintf(fp,"\tadd\tesp, 8\n");
+
+                    fprintf(fp,"\tmov\tbx, integer1\n");
+                    fprintf(fp,"\tmov\t[ebp+%d], bx\n",pentupleCode[i].result->offset);
+
+                } else if(pentupleCode[i].result->type->type == Real) {
+                    
+                    fprintf(fp,"\tpush\treadReal\n");
+                    fprintf(fp,"\tcall\tprintf\n");
+                    fprintf(fp,"\tadd\tesp, 4\n");
+
+                    fprintf(fp,"\tpush\tfloat1\n");
+                    fprintf(fp,"\tpush\tformatReal\n");
+                    fprintf(fp,"\tcall\tscanf\n");
+                    fprintf(fp,"\tadd\tesp, 8\n");
+                    
+                    fprintf(fp,"\tmov\tebx, float1\n");
+                    fprintf(fp,"\tmov\t[ebp+%d], ebx\n",pentupleCode[i].result->offset);
+
+                }
 
                 if(pentupleCode[i].result->parentTable == globalSymbolTable) {
                     fprintf(fp,"\tpop\tebp\n");
-                }
+                }                
 
                 break;
 
+            case WRITE_IMMEDIATE:
+
+                break;
+
+            case WRITE_VAR:
+
+                break;
 
             default: break;
         }

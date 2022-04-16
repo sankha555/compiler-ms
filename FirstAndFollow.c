@@ -1,4 +1,15 @@
-# include "FirstAndFollow.h"
+/*
+    Group 18
+
+    Team Members:
+    1. Madhav Gupta (2019A7PS0063P)
+    2. Meenal Gupta (2019A7PS0243P)
+    3. Pratham Gupta (2019A7PS0051P)
+    4. Sankha Das (2019A7PS0029P)
+    5. Yash Gupta (2019A7PS1138P)
+*/
+
+#include "FirstAndFollow.h"
 #include "lexerDef.h"
 #include "lexer.h"
 
@@ -28,9 +39,7 @@ FirstAndFollowElement* computeFirstAndFollowSets(grammar G) {
 	
 	/* compute the follow sets for all non-terminals */
 	computeFollowAll();
-	
-	//printTest();
-	
+		
 	/* populate the prescribed FirstAndFollow data structure */
 	populateFirstAndFollow();
 
@@ -69,7 +78,6 @@ void populateGrammar(grammar G) {
 			NonTerms[numNonTerminals].firstComputed = FALSE;
 			NonTerms[numNonTerminals].nullable = FALSE;
 			numNonTerminals++;
-			//printf("Symbol: %s, num NTs: %d\n", NonTerms[numNonTerminals-1].symbol, numNonTerminals);
 		}
 
 		// store the rule

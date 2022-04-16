@@ -1,3 +1,14 @@
+/*
+    Group 18
+
+    Team Members:
+    1. Madhav Gupta (2019A7PS0063P)
+    2. Meenal Gupta (2019A7PS0243P)
+    3. Pratham Gupta (2019A7PS0051P)
+    4. Sankha Das (2019A7PS0029P)
+    5. Yash Gupta (2019A7PS1138P)
+*/
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -298,6 +309,10 @@ int insertintoSymbolTable(SymbolTable *symbolTable, SymbolTableEntry *entry)
     return 1;
 }
 
+
+
+
+
 SymbolTableEntry *createNewSymbolTableEntry(char *identifier, boolean isFunction, SymbolTable *tablePointer, TypeArrayElement *type, int width)
 {
     SymbolTableEntry *newEntry = (SymbolTableEntry *)malloc(sizeof(SymbolTableEntry));
@@ -396,8 +411,6 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "input Parameter";
 
-            printf("Record input encountered...\n");
-
             insertintoSymbolTable(symbolTable, entry);
 
             addToInputParameters(identifier, typeidentifier, funcType);
@@ -408,14 +421,23 @@ void parseInputParams(char *functionName, astNode *root, SymbolTable *globalSymb
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "input Parameter";
 
-            printf("Union input encountered...\n");
+            insertintoSymbolTable(symbolTable, entry);
+
+            addToInputParameters(identifier, typeidentifier, funcType);
+            break;
+        case TypeRecordUnionId: 
+            typeidentifier = root->data->children[0]->entry.lexeme;
+            lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
+            entry->usage = "input Parameter";
 
             insertintoSymbolTable(symbolTable, entry);
 
             addToInputParameters(identifier, typeidentifier, funcType);
             break;
-        default:
+        default: 
             break;
+
         }
 
         root = root->next;
@@ -482,10 +504,21 @@ void parseOutputParams(char *functionName, astNode *root, SymbolTable *globalSym
 
             addToOutputParameters(identifier, typeidentifier, funcType);
             break;
-        default:
+        case TypeRecordUnionId:
+            typeidentifier = root->data->children[0]->entry.lexeme;
+            lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
+            entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
+            entry->usage = "output Parameter";
+            insertintoSymbolTable(symbolTable, entry);
+
+            addToOutputParameters(identifier, typeidentifier, funcType);
             break;
+        default: 
+            break;
+
         }
 
+        
         root = root->next;
     }
 }
@@ -547,14 +580,20 @@ void parseDeclarations(astNode *root, SymbolTable *globalSymbolTable, SymbolTabl
             break;
 
         case TypeUnion:
+            printf("Line %d : Unauthorised declaration. Union type variable : %s declared\n",root->data->children[0]->entry.linenumber,root->data->children[0]->entry.lexeme);
+            
+            break;
+        case TypeRecordUnionId:
             typeidentifier = root->data->children[0]->entry.lexeme;
             lookupResult = lookupTypeTable(globalTypeTable, typeidentifier);
             entry = createNewSymbolTableEntry(identifier, false, NULL, lookupResult, lookupResult->width);
             entry->usage = "local Variable";
             insertintoSymbolTable(symbolTable, entry);
             break;
+        
 
         default:
+            printf("Default entered for %s %d\n",root->data->children[0]->entry.lexeme, dataType);
             break;
         }
 
@@ -942,17 +981,14 @@ void parseTypeDefinitionsPass2(astNode *root)
         {
 
             width = populateWidthandOffset(root->data->children[0]->entry.lexeme);
-            //printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
         }
         else if(root->data->type == TypeUnionDefinition)
         {
             width = populateWidthandOffset(root->data->children[0]->entry.lexeme);
-            //printf("%s size : %d\n", root->data->children[0]->entry.lexeme, width);
         }
         else if(root->data->type == DefineType){
 
             width = populateWidthandOffset(root->data->children[2]->entry.lexeme);
-            //printf("%s size : %d\n", root->data->children[2]->entry.lexeme, width);
         }
         
         root = root->next;
@@ -1038,7 +1074,6 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
 
     astNode *head = otherFunctions;
 
-    //printf("Going to start Pass 1\n");
     // go to otherFunc, it is a linked list of functions
     while (head)
     {
@@ -1047,7 +1082,6 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
         parseTypeDefinitionsPass1(stmts->children[0]);
         head = head->next;
     }
-    //printf("Pass 1 for otherFunctions Completed\n");
 
     parseTypeDefinitionsPass1(mainFunction->children[0]->children[0]);
 
@@ -1076,8 +1110,6 @@ SymbolTable *initializeSymbolTableNew(astNode *root)
     }
 
     parseGlobalDeclarations(mainFunction->children[0]->children[1], globalSymbolTable);
-
-    //printASingleSymbolTable(globalSymbolTable, stdout);
 
     head = otherFunctions;
     while (head)
