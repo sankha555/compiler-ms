@@ -199,7 +199,7 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 			}
 			else if ((t1->type == Integer && t2->type == Real) || (t1->type == Real && t2->type == Integer) || (t1->type == Real && t2->type == Real)){
 				return realPtr;
-<<<<<<< HEAD
+//<<<<<<< HEAD
 			}
 			else if ((t1->type == VariantRecord && t2->type == VariantRecord)
 					|| (t1->type == VariantRecord && (t2->type == Integer || t2->type == Real))
@@ -207,9 +207,9 @@ struct TypeArrayElement* findType(astNode* root, SymbolTable* localTable, Symbol
 				return variantRecordPtr;
 			}
 			else if (t1->type == RecordType) {
-=======
+//=======
 			} else if (t1->type == RecordType || (t1->type == Alias && t1->aliasTypeInfo->type == RecordType)) {
->>>>>>> 8670500be5b95092eefc5dda3504b96acc6c8569
+//>>>>>>> 8670500be5b95092eefc5dda3504b96acc6c8569
 				//printf("entered here ...%s %s\n", t1->identifier, t2->identifier);
 				return checkTypeEquality(t1, t2);
 			} else {
